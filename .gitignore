@@ -1,0 +1,34 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+node_modules/
+dist/
+*.db
+.DS_Store
+*.egg-info/
+.pytest_cache/
+htmlcov/
+.coverage
+*.log
+Thumbs.db
+build/
+.mypy_cache/
+.vscode/
+.idea/
+
+# User data (scenarios, events, debug)
+scenarios.db
+events.db
+backend/scenarios.db
+backend/events.db
+backend/tmp-debug-events.db
+backend/server.out
+backend/server.err
+
+# Temp / tool dirs
+.inference_venv/
+.playwright-mcp/
+test-results/

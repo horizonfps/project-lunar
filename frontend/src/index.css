@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+      @apply bg-black text-[#d1d1d1] antialiased selection:bg-white/20 selection:text-white;
+  }}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+  
+  .glass-card {
+    @apply bg-lunar-900/50 backdrop-blur-md border border-lunar-700 hover:border-lunar-400 transition-all duration-300;
+  }
+  
+  .neon-button {
+    @apply relative overflow-hidden bg-indigo-600 text-white font-medium rounded-lg 
+           transition-all duration-300 hover:bg-indigo-500 
+           hover:shadow-[0_0_20px_rgba(99,102,241,0.6)] 
+           active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100;
+  }
+
+  /* Custom Scrollbar for game feed */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-lunar-700 rounded-full;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-lunar-400;
+  }
+}
