@@ -240,10 +240,20 @@ export default function WorldMapModal({ open, onClose, campaignId }) {
     }
   }, [])
 
+  const searchTimeoutRef = useRef(null)
+
   const handleSearch = async () => {
     if (!searchQuery.trim() || !campaignId) return
     const data = await searchWorldGraph(campaignId, searchQuery)
     setSearchResults(data.facts || [])
+  }
+
+  const handleSearchInputChange = (e) => {
+    setSearchQuery(e.target.value)
+    clearTimeout(searchTimeoutRef.current)
+    if (e.target.value.trim()) {
+      searchTimeoutRef.current = setTimeout(handleSearch, 400)
+    }
   }
 
   const handleBackgroundClick = useCallback(() => {
@@ -261,8 +271,8 @@ export default function WorldMapModal({ open, onClose, campaignId }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
       <div
         ref={containerRef}
-        className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[2rem] w-full max-w-4xl mx-4 overflow-hidden flex flex-col"
-        style={{ height: '80vh' }}
+        className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-2xl sm:rounded-[2rem] w-full max-w-4xl mx-2 sm:mx-4 overflow-hidden flex flex-col"
+        style={{ height: 'min(80vh, 100dvh - 2rem)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 flex-none">
@@ -279,12 +289,13 @@ export default function WorldMapModal({ open, onClose, campaignId }) {
             <button
               onClick={loadGraph}
               disabled={loading}
-              className="text-white/40 hover:text-white transition-colors p-1"
+              className="text-white/40 hover:text-white transition-colors p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
               title="Refresh"
+              aria-label="Refresh world map"
             >
               <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             </button>
-            <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+            <button onClick={onClose} className="text-white/40 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50" aria-label="Close world map">
               <X size={18} />
             </button>
           </div>
@@ -306,7 +317,7 @@ export default function WorldMapModal({ open, onClose, campaignId }) {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchInputChange}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Search world facts..."
               className="flex-1 bg-white/[0.03] text-gray-200 text-sm rounded-lg px-3 py-1.5 border border-white/10 focus:outline-none focus:border-white/40 focus:bg-white/[0.05] placeholder-white/20"

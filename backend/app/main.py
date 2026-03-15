@@ -1,8 +1,8 @@
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from app.config import settings
 from app.api.routes_scenarios import router as scenarios_router
 from app.api.routes_game import router as game_router, _llm
 from app.engines.llm_router import LLMConfig, LLMProvider
@@ -31,9 +31,9 @@ def health():
 
 @app.get("/api/health/neo4j")
 async def health_neo4j():
-    uri = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
-    user = os.environ.get("NEO4J_USER", "neo4j")
-    password = os.environ.get("NEO4J_PASSWORD", "lunar_password")
+    uri = settings.neo4j_uri
+    user = settings.neo4j_user
+    password = settings.neo4j_password
     try:
         from neo4j import AsyncGraphDatabase
         driver = AsyncGraphDatabase.driver(uri, auth=(user, password))

@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.db.scenario_store import ScenarioStore, StoryCardType
 
@@ -16,17 +16,17 @@ def _get_store() -> ScenarioStore:
 
 
 class CreateScenarioRequest(BaseModel):
-    title: str
-    description: str = ""
-    tone_instructions: str = ""
-    opening_narrative: str = ""
-    language: str = "en"
-    lore_text: str = ""
+    title: str = Field(..., min_length=1, max_length=200)
+    description: str = Field(default="", max_length=2000)
+    tone_instructions: str = Field(default="", max_length=5000)
+    opening_narrative: str = Field(default="", max_length=10000)
+    language: str = Field(default="en", max_length=10)
+    lore_text: str = Field(default="", max_length=50000)
 
 
 class AddStoryCardRequest(BaseModel):
     card_type: StoryCardType
-    name: str
+    name: str = Field(..., min_length=1, max_length=200)
     content: dict = {}
 
 

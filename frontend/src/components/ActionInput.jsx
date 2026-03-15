@@ -54,7 +54,7 @@ export default function ActionInput({ onSubmit, disabled }) {
               if (t.id === 'CONTINUE') setText('')
             }}
             title={t.description}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-200
+            className={`px-4 py-2.5 sm:py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-200 min-h-[44px] sm:min-h-0
               ${type === t.id
                 ? 'bg-white/10 text-white border border-white/20 shadow-[0_0_10px_rgba(99,102,241,0.2)]'
                 : 'bg-transparent text-white/20 hover:text-white/60 hover:bg-white/5 border border-transparent'

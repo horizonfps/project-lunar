@@ -46,39 +46,68 @@ class Campaign:
 
 
 class ScenarioStore:
+    SCHEMA_VERSION = 1
+
+    _MIGRATIONS = {
+        1: [
+            """CREATE TABLE IF NOT EXISTS scenarios (
+                id TEXT PRIMARY KEY,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL DEFAULT '',
+                tone_instructions TEXT NOT NULL DEFAULT '',
+                opening_narrative TEXT NOT NULL DEFAULT '',
+                language TEXT NOT NULL DEFAULT 'en',
+                lore_text TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL
+            )""",
+            """CREATE TABLE IF NOT EXISTS story_cards (
+                id TEXT PRIMARY KEY,
+                scenario_id TEXT NOT NULL REFERENCES scenarios(id),
+                card_type TEXT NOT NULL,
+                name TEXT NOT NULL,
+                content TEXT NOT NULL DEFAULT '{}',
+                created_at TEXT NOT NULL
+            )""",
+            """CREATE TABLE IF NOT EXISTS campaigns (
+                id TEXT PRIMARY KEY,
+                scenario_id TEXT NOT NULL REFERENCES scenarios(id),
+                player_name TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )""",
+        ],
+        # Future migrations go here:
+        # 2: ["ALTER TABLE scenarios ADD COLUMN ..."],
+    }
+
     def __init__(self, db_path: str = "scenarios.db"):
         self._conn = sqlite3.connect(db_path, check_same_thread=False)
         self._lock = Lock()
-        self._create_tables()
+        self._migrate()
 
-    def _create_tables(self):
+    def _get_schema_version(self) -> int:
+        try:
+            row = self._conn.execute(
+                "SELECT version FROM schema_version ORDER BY version DESC LIMIT 1"
+            ).fetchone()
+            return row[0] if row else 0
+        except sqlite3.OperationalError:
+            return 0
+
+    def _migrate(self):
         with self._lock:
-            self._conn.executescript("""
-                CREATE TABLE IF NOT EXISTS scenarios (
-                    id TEXT PRIMARY KEY,
-                    title TEXT NOT NULL,
-                    description TEXT NOT NULL DEFAULT '',
-                    tone_instructions TEXT NOT NULL DEFAULT '',
-                    opening_narrative TEXT NOT NULL DEFAULT '',
-                    language TEXT NOT NULL DEFAULT 'en',
-                    lore_text TEXT NOT NULL DEFAULT '',
-                    created_at TEXT NOT NULL
-                );
-                CREATE TABLE IF NOT EXISTS story_cards (
-                    id TEXT PRIMARY KEY,
-                    scenario_id TEXT NOT NULL REFERENCES scenarios(id),
-                    card_type TEXT NOT NULL,
-                    name TEXT NOT NULL,
-                    content TEXT NOT NULL DEFAULT '{}',
-                    created_at TEXT NOT NULL
-                );
-                CREATE TABLE IF NOT EXISTS campaigns (
-                    id TEXT PRIMARY KEY,
-                    scenario_id TEXT NOT NULL REFERENCES scenarios(id),
-                    player_name TEXT NOT NULL,
-                    created_at TEXT NOT NULL
-                );
-            """)
+            self._conn.execute(
+                "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)"
+            )
+            current = self._get_schema_version()
+            for version in sorted(self._MIGRATIONS.keys()):
+                if version <= current:
+                    continue
+                for sql in self._MIGRATIONS[version]:
+                    self._conn.execute(sql)
+                self._conn.execute(
+                    "INSERT INTO schema_version VALUES (?, ?)",
+                    (version, datetime.utcnow().isoformat()),
+                )
             self._conn.commit()
 
     def create_scenario(

@@ -8,8 +8,8 @@ class Settings(BaseSettings):
     deepseek_api_key: str = ""
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_user: str = "neo4j"
-    neo4j_password: str = "lunar_password"
-    debug: bool = True
+    neo4j_password: str = ""
+    debug: bool = False
 
     model_config = {"env_file": ".env"}
 

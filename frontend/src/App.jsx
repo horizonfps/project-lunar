@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-do
 import { useEffect, useState } from 'react'
 import { useGameStore } from './store'
 import { fetchScenarios, exportScenario, fetchCampaigns, createCampaign, checkNeo4j } from './api'
+import ErrorBoundary from './components/ErrorBoundary'
 import GameCanvas from './components/GameCanvas'
 import ScenarioBuilder from './components/ScenarioBuilder'
 
@@ -84,7 +85,7 @@ function Home() {
       {/* Dark Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/90 pointer-events-none"></div>
 
-      <div className="w-full max-w-4xl px-8 relative z-10 flex flex-col items-center">
+      <div className="w-full max-w-4xl px-4 sm:px-8 relative z-10 flex flex-col items-center">
         
         {/* Main Interface Header */}
         <header className="mb-16 flex flex-col items-center text-center">
@@ -95,11 +96,11 @@ function Home() {
               className="w-64 h-64 md:w-80 md:h-80 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"            />
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-bold text-white mb-6 tracking-tighter drop-shadow-2xl">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold text-white mb-6 tracking-tighter drop-shadow-2xl">
             Lunar Project
           </h1>
           
-          <p className="text-gray-400 max-w-2xl text-lg md:text-xl font-light leading-relaxed mb-12 drop-shadow-md">
+          <p className="text-gray-400 max-w-2xl text-base sm:text-lg md:text-xl font-light leading-relaxed mb-8 sm:mb-12 drop-shadow-md px-2">
             Localized storytelling core. Multi-agent narrative orchestration with persistent world state and creativity-based resolution.
           </p>
           
@@ -133,11 +134,11 @@ function Home() {
           ) : (
             <div className="flex flex-col gap-6 w-full">
               {scenarios.map((s) => (
-                <div key={s.id} className="bg-white/[0.03] backdrop-blur-xl p-8 rounded-[2rem] border border-white/5 transition-all hover:bg-white/[0.06] hover:border-white/20 group">
+                <div key={s.id} className="bg-white/[0.03] backdrop-blur-xl p-5 sm:p-8 rounded-[2rem] border border-white/5 transition-all hover:bg-white/[0.06] hover:border-white/20 group">
                   <div className="flex flex-col md:flex-row items-center gap-8">
                     <div className="flex-1 text-center md:text-left">
                       <div className="text-[10px] text-white/20 tracking-widest uppercase mb-2 font-mono">NODE_HASH: {s.id.split('-')[0]}</div>
-                      <h3 className="text-3xl font-bold text-white mb-3 group-hover:text-white transition-colors">
+                      <h3 className="text-xl sm:text-3xl font-bold text-white mb-3 group-hover:text-white transition-colors">
                         {s.title}
                       </h3>
                       <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed italic">
@@ -191,12 +192,14 @@ function Home() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/create" element={<ScenarioBuilder onCreated={() => window.location.href = '/'} />} />
-        <Route path="/play" element={<GameCanvas />} />
-      </Routes>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/create" element={<ScenarioBuilder onCreated={() => window.location.href = '/'} />} />
+          <Route path="/play" element={<GameCanvas />} />
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

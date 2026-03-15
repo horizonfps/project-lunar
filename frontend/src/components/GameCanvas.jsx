@@ -19,7 +19,7 @@ function NarratorSkeleton() {
     <div className="max-w-3xl pr-4 animate-pulse">
       <div className="flex items-center gap-2 mb-2 ml-1 opacity-60">
         <div className="w-1.5 h-1.5 rounded-full bg-white/[0.03]" />
-        <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-white/40 text-white/60">Narrator Core</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-white/60">Narrator Core</span>
       </div>
       <div className="space-y-3">
         <div className="h-3 bg-white/[0.03] rounded w-[85%]" />
@@ -165,7 +165,8 @@ export default function GameCanvas() {
       onDone: () => {
         setStreaming(false)
         // Clear combat mode after response completes
-        setTimeout(() => setCombatMode(false), 3000)
+        const COMBAT_CLEAR_DELAY_MS = 3000
+        setTimeout(() => setCombatMode(false), COMBAT_CLEAR_DELAY_MS)
       },
       onError: () => setStreaming(false),
     })
@@ -185,7 +186,7 @@ export default function GameCanvas() {
         <CombatOverlay active={combatMode} />
 
         {/* Header */}
-        <header className="flex-none flex items-center justify-between px-6 py-4 bg-black/80 backdrop-blur-xl border-b border-white/5 z-10 shadow-lg">
+        <header className="flex-none flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-black/80 backdrop-blur-xl border-b border-white/5 z-10 shadow-lg gap-2">
           <div className="flex items-center gap-4">
             <div className={`w-2 h-2 rounded-full animate-pulse ${combatMode ? 'bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.8)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'}`} />
             <div>
@@ -197,61 +198,69 @@ export default function GameCanvas() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end">
             {/* Tool buttons */}
             <button
               onClick={() => setInventoryOpen(true)}
               title="Inventory"
-              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-orange-400 transition-colors"
+              aria-label="Open inventory"
+              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-orange-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <Backpack size={14} />
             </button>
             <button
               onClick={() => setMapOpen(true)}
               title="World Map"
-              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-emerald-400 transition-colors"
+              aria-label="Open world map"
+              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-emerald-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <Map size={14} />
             </button>
             <button
               onClick={() => setPlotGenOpen(true)}
               title="Plot Generator"
-              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-amber-400 transition-colors"
+              aria-label="Open plot generator"
+              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-amber-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <Sparkles size={14} />
             </button>
             <button
               onClick={() => setTimeskipOpen(true)}
               title="Time Skip"
-              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-white transition-colors"
+              aria-label="Open time skip"
+              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <Clock size={14} />
             </button>
             <button
               onClick={() => setNpcOpen(true)}
               title="NPC Minds"
-              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-white transition-colors"
+              aria-label="Open NPC minds"
+              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <Brain size={14} />
             </button>
             <button
               onClick={() => setMemoryOpen(true)}
               title="Memory Crystals"
-              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-white transition-colors"
+              aria-label="Open memory crystals"
+              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <Gem size={14} />
             </button>
             <button
               onClick={openJournal}
               title="Mission Log"
-              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-yellow-400 transition-colors"
+              aria-label="Open mission log"
+              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-yellow-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <BookOpen size={14} />
             </button>
             <button
               onClick={() => setSettingsOpen(true)}
               title="Settings"
-              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-white transition-colors"
+              aria-label="Open settings"
+              className="p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <Settings size={14} />
             </button>
@@ -283,9 +292,9 @@ export default function GameCanvas() {
               {messages.map((msg, i) => {
                 const isUser = msg.role === 'user';
                 const displayContent = isUser ? msg.content : msg.content
-                  .replace(/\[ITEM_ADD:[^\]]*\]/g, '')
-                  .replace(/\[ITEM_USE:[^\]]*\]/g, '')
-                  .replace(/\[ITEM_LOSE:[^\]]*\]/g, '');
+                  .replace(/\[ITEM_ADD:[^\]]+\]/g, '')
+                  .replace(/\[ITEM_USE:[^\]]+\]/g, '')
+                  .replace(/\[ITEM_LOSE:[^\]]+\]/g, '');
                 return (
                   <div key={i} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                     {isUser ? (
@@ -306,7 +315,7 @@ export default function GameCanvas() {
                         {/* System/Narrator indicator */}
                         <div className="flex items-center gap-2 mb-2 ml-1 opacity-60">
                            <div className={`w-1.5 h-1.5 rounded-full ${combatMode ? 'bg-rose-400' : 'bg-white/[0.03]'}`} />
-                           <span className={`text-[10px] font-bold uppercase tracking-widest font-mono text-white/40 font-mono text-white/40 ${combatMode ? 'text-rose-300' : 'text-white/60'}`}>
+                           <span className={`text-[10px] font-bold uppercase tracking-widest font-mono ${combatMode ? 'text-rose-300' : 'text-white/60'}`}>
                              {combatMode ? 'Combat Narrator' : 'Narrator Core'}
                            </span>
                         </div>

@@ -47,6 +47,11 @@ class MemoryEngine:
         self._crystallizing: set[str] = set()  # prevent concurrent auto-crystallize
         self._last_crystal_cursor: dict[str, str] = {}
 
+    def set_graphiti(self, graphiti_engine) -> None:
+        """Set the Graphiti engine for temporal knowledge graph integration."""
+        if self._graphiti is None:
+            self._graphiti = graphiti_engine
+
     def get_raw_context(self, campaign_id: str, limit: int = RAW_LIMIT) -> list[Event]:
         return self._store.get_recent(campaign_id, limit=limit)
 

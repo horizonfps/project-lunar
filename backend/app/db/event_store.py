@@ -40,14 +40,13 @@ class Event(_EventBase):
 
 
 class EventStore:
-    def __init__(self, db_path: str = "events.db"):
-        self._conn = sqlite3.connect(db_path, check_same_thread=False)
-        self._lock = threading.Lock()
-        self._create_table()
+    SCHEMA_VERSION = 1
 
-    def _create_table(self):
-        self._conn.execute("""
-            CREATE TABLE IF NOT EXISTS events (
+    # Each migration is a list of SQL statements to run for that version.
+    # Key = target version, value = list of SQL to apply.
+    _MIGRATIONS = {
+        1: [
+            """CREATE TABLE IF NOT EXISTS events (
                 id TEXT PRIMARY KEY,
                 campaign_id TEXT NOT NULL,
                 event_type TEXT NOT NULL,
@@ -56,12 +55,43 @@ class EventStore:
                 location TEXT NOT NULL DEFAULT '',
                 entities TEXT NOT NULL DEFAULT '[]',
                 created_at TEXT NOT NULL
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_campaign ON events(campaign_id, created_at)",
+        ],
+        # Future migrations go here:
+        # 2: ["ALTER TABLE events ADD COLUMN ..."],
+    }
+
+    def __init__(self, db_path: str = "events.db"):
+        self._conn = sqlite3.connect(db_path, check_same_thread=False)
+        self._lock = threading.Lock()
+        self._migrate()
+
+    def _get_schema_version(self) -> int:
+        try:
+            row = self._conn.execute(
+                "SELECT version FROM schema_version ORDER BY version DESC LIMIT 1"
+            ).fetchone()
+            return row[0] if row else 0
+        except sqlite3.OperationalError:
+            return 0
+
+    def _migrate(self):
+        with self._lock:
+            self._conn.execute(
+                "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)"
             )
-        """)
-        self._conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_campaign ON events(campaign_id, created_at)"
-        )
-        self._conn.commit()
+            current = self._get_schema_version()
+            for version in sorted(self._MIGRATIONS.keys()):
+                if version <= current:
+                    continue
+                for sql in self._MIGRATIONS[version]:
+                    self._conn.execute(sql)
+                self._conn.execute(
+                    "INSERT INTO schema_version VALUES (?, ?)",
+                    (version, datetime.utcnow().isoformat()),
+                )
+            self._conn.commit()
 
     def append(
         self,

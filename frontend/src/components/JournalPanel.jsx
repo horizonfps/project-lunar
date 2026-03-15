@@ -29,7 +29,7 @@ export default function JournalPanel({ open, onClose, entries, onRefresh }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="bg-white/[0.03] border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(255,255,255,0.15)] w-full max-w-[33rem] max-h-[70vh] flex flex-col">
+      <div className="bg-white/[0.03] border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(255,255,255,0.15)] w-full max-w-[33rem] mx-2 sm:mx-4 max-h-[85vh] sm:max-h-[70vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
           <div className="flex items-center gap-3">
@@ -45,11 +45,12 @@ export default function JournalPanel({ open, onClose, entries, onRefresh }) {
             <button
               onClick={onRefresh}
               title="Refresh"
-              className="text-white/40 hover:text-white transition-colors"
+              aria-label="Refresh journal"
+              className="text-white/40 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <RefreshCw size={14} />
             </button>
-            <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+            <button onClick={onClose} aria-label="Close journal" className="text-white/40 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50">
               <X size={18} />
             </button>
           </div>
@@ -75,7 +76,7 @@ export default function JournalPanel({ open, onClose, entries, onRefresh }) {
         {/* Entries */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
           {filtered.length === 0 ? (
-            <p className="text-white/20 text-sm font-light text-center py-8">No entries recorded.</p>
+            <p className="text-white/40 text-sm font-light text-center py-8">No entries recorded.</p>
           ) : (
             [...filtered].reverse().map((entry, i) => (
               <div key={i} className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5">

@@ -114,16 +114,7 @@ class GameSession:
                     location="world",
                     entities=[],
                 )
-                # Ingest world tick into temporal graph
-                if self._graphiti:
-                    try:
-                        await self._graphiti.ingest_episode(
-                            campaign_id=self.campaign_id,
-                            text=world_changes,
-                            description="world_tick",
-                        )
-                    except Exception:
-                        logger.warning("Graphiti world_tick ingestion failed", exc_info=True)
+                await self._ingest_to_graphiti(world_changes, "world_tick")
 
             try:
                 async for chunk in self._maybe_trigger_auto_plot(world_ctx):
@@ -149,6 +140,8 @@ class GameSession:
                 language=self.language,
                 inventory_context=inventory_ctx,
             )
+
+        # Stream narrative from LLM
         full_response = ""
         async for chunk in self._narrator.stream_narrative(
             player_input, system_prompt, self._history
@@ -156,22 +149,17 @@ class GameSession:
             full_response += chunk
             yield chunk
 
-        # Extract and process inventory tags
+        # Process inventory tags from response
         clean_response = full_response
         if self._inventory:
             clean_response, inv_events = self._extract_inventory_tags(full_response)
             for inv_event in inv_events:
-                if inv_event["action"] == "add":
-                    self._inventory.add_item(self.campaign_id, inv_event["name"], inv_event.get("category", "misc"), inv_event.get("source", "unknown"))
-                elif inv_event["action"] == "use":
-                    self._inventory.use_item(self.campaign_id, inv_event["name"])
-                elif inv_event["action"] == "lose":
-                    self._inventory.lose_item(self.campaign_id, inv_event["name"])
+                self._apply_inventory_event(inv_event)
                 yield f"[INVENTORY]{json.dumps(inv_event)}"
 
+        # Record in history and event store
         self._history.append({"role": "user", "content": player_input})
         self._history.append({"role": "assistant", "content": clean_response})
-
         self._event_store.append(
             campaign_id=self.campaign_id,
             event_type=EventType.NARRATOR_RESPONSE,
@@ -180,51 +168,83 @@ class GameSession:
             location="current",
             entities=[],
         )
+
+        # Journal evaluation
         entry = await self._journal.evaluate_and_log(self.campaign_id, clean_response)
         if self._is_journal_entry(entry):
             yield f"[JOURNAL]{json.dumps({'category': entry.category.value, 'summary': entry.summary, 'created_at': entry.created_at})}"
 
-        if mode != NarrativeMode.META:
-            # Update NPC minds based on narrative
-            if self._npc_minds and clean_response:
-                try:
-                    if self._graphiti:
-                        world_ctx = await self._memory.build_context_window_async(self.campaign_id)
-                    else:
-                        world_ctx = self._memory.build_context_window(self.campaign_id)
-                    await self._npc_minds.update_npc_thoughts(
-                        campaign_id=self.campaign_id,
-                        narrative_text=clean_response,
-                        world_context=world_ctx,
-                    )
-                except Exception:
-                    logger.warning("NPC mind update failed", exc_info=True)
+        # Post-narrative side effects (only for non-META actions)
+        if mode != NarrativeMode.META and clean_response:
+            async for chunk in self._post_narrative_pipeline(clean_response):
+                yield chunk
 
-            # Extract entities into world graph (Neo4j)
-            if self._graph and clean_response:
-                try:
-                    await self._extract_entities_to_graph(clean_response)
-                except Exception:
-                    logger.warning("Graph entity extraction failed", exc_info=True)
+    def _apply_inventory_event(self, inv_event: dict) -> None:
+        """Apply a single inventory event (add/use/lose)."""
+        action = inv_event["action"]
+        if action == "add":
+            self._inventory.add_item(
+                self.campaign_id, inv_event["name"],
+                inv_event.get("category", "misc"), inv_event.get("source", "unknown"),
+            )
+        elif action == "use":
+            self._inventory.use_item(self.campaign_id, inv_event["name"])
+        elif action == "lose":
+            self._inventory.lose_item(self.campaign_id, inv_event["name"])
 
-            # Auto-crystallize memory if raw events exceed threshold
-            try:
-                crystal = await self._memory.auto_crystallize_if_needed(self.campaign_id)
-                if crystal:
-                    yield f"[CRYSTAL]{json.dumps({'tier': crystal.tier.value, 'event_count': crystal.event_count})}"
-            except Exception:
-                logger.warning("Auto-crystallization failed", exc_info=True)
+    async def _post_narrative_pipeline(self, clean_response: str) -> AsyncIterator[str]:
+        """Run all post-narrative side effects: NPC minds, graph, memory, graphiti."""
+        await self._update_npc_minds(clean_response)
+        await self._extract_to_graph(clean_response)
 
-            # Ingest narrative into temporal knowledge graph
-            if self._graphiti and clean_response:
-                try:
-                    await self._graphiti.ingest_episode(
-                        campaign_id=self.campaign_id,
-                        text=clean_response,
-                        description="narrator_response",
-                    )
-                except Exception:
-                    logger.warning("Graphiti narrator ingestion failed", exc_info=True)
+        crystal = await self._try_auto_crystallize()
+        if crystal:
+            yield f"[CRYSTAL]{json.dumps({'tier': crystal.tier.value, 'event_count': crystal.event_count})}"
+
+        await self._ingest_to_graphiti(clean_response, "narrator_response")
+
+    async def _update_npc_minds(self, narrative_text: str) -> None:
+        if not self._npc_minds or not narrative_text:
+            return
+        try:
+            if self._graphiti:
+                world_ctx = await self._memory.build_context_window_async(self.campaign_id)
+            else:
+                world_ctx = self._memory.build_context_window(self.campaign_id)
+            await self._npc_minds.update_npc_thoughts(
+                campaign_id=self.campaign_id,
+                narrative_text=narrative_text,
+                world_context=world_ctx,
+            )
+        except Exception:
+            logger.warning("NPC mind update failed", exc_info=True)
+
+    async def _extract_to_graph(self, narrative_text: str) -> None:
+        if not self._graph or not narrative_text:
+            return
+        try:
+            await self._extract_entities_to_graph(narrative_text)
+        except Exception:
+            logger.warning("Graph entity extraction failed", exc_info=True)
+
+    async def _try_auto_crystallize(self):
+        try:
+            return await self._memory.auto_crystallize_if_needed(self.campaign_id)
+        except Exception:
+            logger.warning("Auto-crystallization failed", exc_info=True)
+            return None
+
+    async def _ingest_to_graphiti(self, text: str, description: str) -> None:
+        if not self._graphiti or not text:
+            return
+        try:
+            await self._graphiti.ingest_episode(
+                campaign_id=self.campaign_id,
+                text=text,
+                description=description,
+            )
+        except Exception:
+            logger.warning("Graphiti %s ingestion failed", description, exc_info=True)
 
     def _build_meta_system_prompt(self) -> str:
         inventory_ctx = ""

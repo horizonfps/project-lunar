@@ -1,9 +1,11 @@
 import logging
 import os
 from dataclasses import asdict
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from app.config import settings
 
 from app.services.game_session import GameSession
 from app.engines.narrator_engine import NarratorEngine
@@ -45,10 +47,7 @@ def _get_graphiti_engine():
         return _graphiti_engine
     try:
         from app.engines.graphiti_engine import GraphitiEngine
-        neo4j_uri = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
-        neo4j_user = os.environ.get("NEO4J_USER", "neo4j")
-        neo4j_password = os.environ.get("NEO4J_PASSWORD", "lunar_password")
-        _graphiti_engine = GraphitiEngine(neo4j_uri, neo4j_user, neo4j_password)
+        _graphiti_engine = GraphitiEngine(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password)
         return _graphiti_engine
     except Exception:
         logger.info("Graphiti not available, running without temporal graph")
@@ -122,10 +121,10 @@ async def _fallback_graph_search(campaign_id: str, query: str, limit: int = 10) 
 
 
 class PlayerActionRequest(BaseModel):
-    campaign_id: str
-    scenario_tone: str = ""
-    language: str = "en"
-    action: str
+    campaign_id: str = Field(..., min_length=1, max_length=64)
+    scenario_tone: str = Field(default="", max_length=2000)
+    language: str = Field(default="en", max_length=10)
+    action: str = Field(..., min_length=1, max_length=10000)
 
 
 class SettingsRequest(BaseModel):
@@ -152,12 +151,9 @@ def _get_graph_engine(campaign_id: str):
     """Get or create a GraphEngine for the given campaign."""
     if campaign_id in _graph_engines:
         return _graph_engines[campaign_id]
-    neo4j_uri = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
-    neo4j_user = os.environ.get("NEO4J_USER", "neo4j")
-    neo4j_password = os.environ.get("NEO4J_PASSWORD", "lunar_password")
     try:
         from app.engines.graph_engine import GraphEngine
-        engine = GraphEngine(neo4j_uri, neo4j_user, neo4j_password, campaign_id)
+        engine = GraphEngine(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password, campaign_id)
         _graph_engines[campaign_id] = engine
         return engine
     except Exception:
@@ -169,8 +165,8 @@ def _get_graph_engine(campaign_id: str):
 async def player_action(req: PlayerActionRequest):
     if req.campaign_id not in _sessions:
         graphiti = _get_graphiti_engine()
-        if graphiti and _memory._graphiti is None:
-            _memory._graphiti = graphiti
+        if graphiti:
+            _memory.set_graphiti(graphiti)
         graph = _get_graph_engine(req.campaign_id)
         if graph:
             try:
@@ -232,7 +228,7 @@ async def get_journal(campaign_id: str, category: str | None = None):
         try:
             cat = JournalCategory(category)
         except ValueError:
-            return []
+            raise HTTPException(status_code=400, detail=f"Invalid journal category: {category}")
         entries = _journal.get_by_category(campaign_id, cat)
     else:
         entries = _journal.get_journal(campaign_id)
