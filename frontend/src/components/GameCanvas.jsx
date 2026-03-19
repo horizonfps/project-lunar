@@ -50,6 +50,7 @@ export default function GameCanvas() {
     updateInventoryItem: updateInventoryStore,
     restoreSession,
     clearSession,
+    maxTokens,
   } = useGameStore()
   const bottomRef = useRef(null)
   const [journalOpen, setJournalOpen] = useState(false)
@@ -149,6 +150,7 @@ export default function GameCanvas() {
       language: activeScenario?.language ?? 'en',
       action,
       openingNarrative: activeScenario?.opening_narrative ?? '',
+      maxTokens: maxTokens || 2000,
       onChunk: appendToLastMessage,
       onJournal: addJournalEntry,
       onMode: (mode) => {

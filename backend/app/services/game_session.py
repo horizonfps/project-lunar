@@ -113,7 +113,8 @@ class GameSession:
             len(latest_per_npc), self.campaign_id,
         )
 
-    async def process_action(self, player_input: str) -> AsyncIterator[str]:
+    async def process_action(self, player_input: str, max_tokens: int = 2000) -> AsyncIterator[str]:
+        self._max_tokens = max_tokens
         mode, meta = await self._narrator.detect_mode(player_input)
         mode = self._coerce_mode(mode)
         narrative_time = meta.get("narrative_time_seconds", 60)
@@ -199,6 +200,7 @@ class GameSession:
                 memory_context=memory_ctx,
                 language=self.language,
                 inventory_context=inventory_ctx,
+                max_tokens=getattr(self, '_max_tokens', 2000),
             )
 
         # Stream narrative from LLM
@@ -208,6 +210,10 @@ class GameSession:
         ):
             full_response += chunk
             yield chunk
+
+        # Clean truncation: if the response was cut mid-sentence by token limit,
+        # trim to the last complete sentence so there's no dangling text.
+        full_response = self._clean_truncated_response(full_response)
 
         # Process inventory tags from response
         clean_response = full_response
@@ -553,6 +559,30 @@ class GameSession:
             target_id = self._find_existing_node_id(target_name, name_to_id)
             if source_id and target_id and source_id != target_id:
                 await self._graph.add_relationship(source_id, target_id, rel_type)
+
+    @staticmethod
+    def _clean_truncated_response(text: str) -> str:
+        """If the response was cut mid-sentence by token limit, trim to the last complete sentence."""
+        if not text:
+            return text
+        stripped = text.rstrip()
+        # If it already ends with sentence-ending punctuation, it's fine
+        if stripped and stripped[-1] in '.!?…"»)\u201d':
+            return text
+        # Find the last sentence-ending punctuation
+        last_end = -1
+        for i in range(len(stripped) - 1, -1, -1):
+            if stripped[i] in '.!?…':
+                last_end = i
+                break
+            # Also check for closing quote after punctuation (e.g. '."' or '!"')
+            if stripped[i] in '"\u201d»)' and i > 0 and stripped[i - 1] in '.!?…':
+                last_end = i
+                break
+        if last_end > 0 and last_end > len(stripped) * 0.5:
+            # Only trim if we keep at least 50% of the text
+            return stripped[:last_end + 1]
+        return text
 
     @staticmethod
     def _extract_inventory_tags(text: str) -> tuple[str, list[dict]]:

@@ -71,6 +71,7 @@ export function streamAction({
   language,
   action,
   openingNarrative,
+  maxTokens,
   onChunk,
   onJournal,
   onMode,
@@ -89,6 +90,7 @@ export function streamAction({
       language,
       action,
       opening_narrative: openingNarrative || '',
+      max_tokens: maxTokens || 2000,
     }),
   })
     .then(async (res) => {

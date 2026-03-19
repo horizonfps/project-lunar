@@ -66,12 +66,33 @@ class NarratorEngine:
             "narrative_time_seconds": seconds,
         }
 
+    @staticmethod
+    def _length_instruction(max_tokens: int) -> str:
+        """Return a length constraint instruction scaled to the token budget."""
+        if max_tokens <= 512:
+            return (
+                "LENGTH CONSTRAINT: Keep your response very short — 1-2 paragraphs maximum. "
+                "Be concise but complete. Always end at a natural stopping point."
+            )
+        if max_tokens <= 1000:
+            return (
+                "LENGTH CONSTRAINT: Keep your response short — 2-4 paragraphs maximum. "
+                "Focus on the most important narrative beats. Always end at a natural stopping point."
+            )
+        if max_tokens <= 1500:
+            return (
+                "LENGTH CONSTRAINT: Keep your response moderate — 4-6 paragraphs maximum. "
+                "Always end at a natural stopping point with a clear prompt for the player."
+            )
+        return ""
+
     def build_system_prompt(
         self,
         tone_instructions: str,
         memory_context: str,
         language: str,
         inventory_context: str = "",
+        max_tokens: int = 2000,
     ) -> str:
         lang_instruction = _LANGUAGE_INSTRUCTIONS.get(
             language,
@@ -86,6 +107,9 @@ class NarratorEngine:
             sections.append(f"\nWORLD MEMORY:\n{memory_context}")
         if inventory_context:
             sections.append(f"\nPLAYER INVENTORY:\n{inventory_context}")
+
+        length_instruction = self._length_instruction(max_tokens)
+
         sections.append(
             "\nNARRATOR RULES:\n"
             "- Write immersive, evocative prose. Never break character.\n"
@@ -94,7 +118,9 @@ class NarratorEngine:
             "- Stay consistent with the established tone.\n"
             "- Do NOT summarize. Narrate in present tense.\n"
             "- End each response at a natural pause, not mid-action.\n"
-            "- When the player ACQUIRES an item, emit: [ITEM_ADD:item_name|category|source_description]\n"
+            "- ALWAYS finish your response with a complete sentence. Never stop mid-word or mid-sentence.\n"
+            + (f"- {length_instruction}\n" if length_instruction else "")
+            + "- When the player ACQUIRES an item, emit: [ITEM_ADD:item_name|category|source_description]\n"
             "- When an item is CONSUMED or EXPENDED, emit: [ITEM_USE:item_name]\n"
             "- When an item is LOST, STOLEN, or DESTROYED, emit: [ITEM_LOSE:item_name]\n"
             "- Categories: weapon, armor, consumable, quest, tool, misc\n"

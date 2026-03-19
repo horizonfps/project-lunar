@@ -126,6 +126,7 @@ class PlayerActionRequest(BaseModel):
     language: str = Field(default="en", max_length=10)
     action: str = Field(..., min_length=1, max_length=10000)
     opening_narrative: str = Field(default="", max_length=20000)
+    max_tokens: int = Field(default=2000, ge=256, le=8192)
 
 
 class SettingsRequest(BaseModel):
@@ -194,9 +195,11 @@ async def player_action(req: PlayerActionRequest):
         )
 
     session = _sessions[req.campaign_id]
+    # Apply user's max_tokens setting to the LLM router
+    _llm.config.max_tokens = req.max_tokens
 
     async def event_stream():
-        async for chunk in session.process_action(req.action):
+        async for chunk in session.process_action(req.action, max_tokens=req.max_tokens):
             # SSE requires each data line to be prefixed with "data:".
             # This preserves paragraph breaks/newlines in streamed prose.
             text = str(chunk).replace("\r\n", "\n").replace("\r", "\n")
