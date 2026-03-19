@@ -51,6 +51,7 @@ export default function GameCanvas() {
     restoreSession,
     clearSession,
     maxTokens,
+    replaceLastAssistantMessage,
   } = useGameStore()
   const bottomRef = useRef(null)
   const [journalOpen, setJournalOpen] = useState(false)
@@ -164,6 +165,9 @@ export default function GameCanvas() {
       },
       onPlotAuto: (plot) => {
         appendMessage({ role: 'assistant', content: formatAutoPlotMessage(plot) })
+      },
+      onTruncateClean: (cleanText) => {
+        replaceLastAssistantMessage(cleanText)
       },
       onDone: () => {
         setStreaming(false)

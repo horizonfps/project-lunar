@@ -78,6 +78,7 @@ export function streamAction({
   onCrystal,
   onPlotAuto,
   onInventory,
+  onTruncateClean,
   onDone,
   onError,
 }) {
@@ -135,6 +136,11 @@ export function streamAction({
             const item = JSON.parse(control.slice(11))
             onInventory?.(item)
           } catch {}
+          return false
+        }
+        if (control.startsWith('[TRUNCATE_CLEAN]')) {
+          const cleanText = control.slice(16)
+          onTruncateClean?.(cleanText)
           return false
         }
         // Strip inventory tags from narrative display

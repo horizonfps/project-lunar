@@ -56,6 +56,19 @@ export const useGameStore = create((set) => ({
       return { messages }
     }),
 
+  replaceLastAssistantMessage: (content) =>
+    set((s) => {
+      const messages = [...s.messages]
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].role === 'assistant') {
+          messages[i] = { ...messages[i], content }
+          break
+        }
+      }
+      try { localStorage.setItem('lunar_messages', JSON.stringify(messages)) } catch {}
+      return { messages }
+    }),
+
   clearMessages: () => {
     try { localStorage.removeItem('lunar_messages') } catch {}
     return set({ messages: [] })

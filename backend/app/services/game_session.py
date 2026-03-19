@@ -214,7 +214,11 @@ class GameSession:
 
         # Clean truncation: if the response was cut mid-sentence by token limit,
         # trim to the last complete sentence so there's no dangling text.
-        full_response = self._clean_truncated_response(full_response)
+        cleaned = self._clean_truncated_response(full_response)
+        if cleaned != full_response:
+            # Tell the frontend to replace the displayed text with the clean version
+            yield f"[TRUNCATE_CLEAN]{cleaned}"
+        full_response = cleaned
 
         # Process inventory tags from response
         clean_response = full_response
