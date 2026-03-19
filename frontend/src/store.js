@@ -76,7 +76,14 @@ export const useGameStore = create((set) => ({
       ),
     })),
 
-  updateSettings: (settings) => set(settings),
+  updateSettings: (settings) => {
+    try {
+      const current = JSON.parse(localStorage.getItem('lunar_settings') || '{}')
+      const merged = { ...current, ...settings }
+      localStorage.setItem('lunar_settings', JSON.stringify(merged))
+    } catch {}
+    return set(settings)
+  },
 
   // Session persistence
   restoreSession: () => {
@@ -84,10 +91,18 @@ export const useGameStore = create((set) => ({
       const scenarioJson = localStorage.getItem('lunar_activeScenario')
       const campaignId = localStorage.getItem('lunar_activeCampaignId')
       const messagesJson = localStorage.getItem('lunar_messages')
+      const settingsJson = localStorage.getItem('lunar_settings')
       const restored = {}
       if (scenarioJson) restored.activeScenario = JSON.parse(scenarioJson)
       if (campaignId) restored.activeCampaignId = campaignId
       if (messagesJson) restored.messages = JSON.parse(messagesJson)
+      if (settingsJson) {
+        const s = JSON.parse(settingsJson)
+        if (s.llmProvider) restored.llmProvider = s.llmProvider
+        if (s.llmModel) restored.llmModel = s.llmModel
+        if (s.temperature != null) restored.temperature = s.temperature
+        if (s.maxTokens != null) restored.maxTokens = s.maxTokens
+      }
       if (Object.keys(restored).length > 0) set(restored)
       return Object.keys(restored).length > 0
     } catch {
@@ -102,5 +117,21 @@ export const useGameStore = create((set) => ({
       localStorage.removeItem('lunar_messages')
     } catch {}
     set({ activeScenario: null, activeCampaignId: null, messages: [], journal: [], inventory: [] })
+  },
+
+  // Restore settings on app load (called independently of restoreSession)
+  restoreSettings: () => {
+    try {
+      const settingsJson = localStorage.getItem('lunar_settings')
+      if (settingsJson) {
+        const s = JSON.parse(settingsJson)
+        const restored = {}
+        if (s.llmProvider) restored.llmProvider = s.llmProvider
+        if (s.llmModel) restored.llmModel = s.llmModel
+        if (s.temperature != null) restored.temperature = s.temperature
+        if (s.maxTokens != null) restored.maxTokens = s.maxTokens
+        if (Object.keys(restored).length > 0) set(restored)
+      }
+    } catch {}
   },
 }))

@@ -230,6 +230,10 @@ function Home() {
 }
 
 export default function App() {
+  useEffect(() => {
+    useGameStore.getState().restoreSettings()
+  }, [])
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
