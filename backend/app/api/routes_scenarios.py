@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.db.scenario_store import ScenarioStore, StoryCardType
+from app.db.event_store import EventStore
 
 router = APIRouter()
 
@@ -13,6 +14,11 @@ _BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 def _get_store() -> ScenarioStore:
     db_path = os.environ.get("SCENARIO_DB_PATH", os.path.join(_BACKEND_DIR, "scenarios.db"))
     return ScenarioStore(db_path)
+
+
+def _get_event_store() -> EventStore:
+    db_path = os.environ.get("EVENT_DB_PATH", os.path.join(_BACKEND_DIR, "events.db"))
+    return EventStore(db_path)
 
 
 class CreateScenarioRequest(BaseModel):
@@ -150,3 +156,34 @@ def export_scenario(scenario_id: str):
             for c in campaigns
         ],
     }
+
+
+@router.delete("/{scenario_id}/campaigns/{campaign_id}", status_code=200)
+def delete_campaign(scenario_id: str, campaign_id: str):
+    with _get_store() as store:
+        deleted = store.delete_campaign(campaign_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    event_store = _get_event_store()
+    try:
+        event_store.delete_by_campaign(campaign_id)
+    finally:
+        event_store.close()
+    return {"status": "ok"}
+
+
+@router.delete("/{scenario_id}", status_code=200)
+def delete_scenario(scenario_id: str):
+    with _get_store() as store:
+        # Get all campaigns to clean up their events
+        campaigns = store.get_campaigns(scenario_id)
+        deleted = store.delete_scenario(scenario_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Scenario not found")
+    event_store = _get_event_store()
+    try:
+        for c in campaigns:
+            event_store.delete_by_campaign(c.id)
+    finally:
+        event_store.close()
+    return {"status": "ok"}

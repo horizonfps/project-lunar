@@ -148,6 +148,7 @@ export default function GameCanvas() {
       scenarioTone: activeScenario?.tone_instructions ?? '',
       language: activeScenario?.language ?? 'en',
       action,
+      openingNarrative: activeScenario?.opening_narrative ?? '',
       onChunk: appendToLastMessage,
       onJournal: addJournalEntry,
       onMode: (mode) => {

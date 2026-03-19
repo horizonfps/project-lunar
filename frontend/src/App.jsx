@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useGameStore } from './store'
-import { fetchScenarios, exportScenario, fetchCampaigns, createCampaign, checkNeo4j } from './api'
+import { fetchScenarios, exportScenario, fetchCampaigns, createCampaign, checkNeo4j, deleteCampaign, deleteScenario } from './api'
 import ErrorBoundary from './components/ErrorBoundary'
 import GameCanvas from './components/GameCanvas'
 import ScenarioBuilder from './components/ScenarioBuilder'
@@ -71,6 +71,29 @@ function Home() {
     setActiveScenario(scenario)
     setActiveCampaignId(campaignId)
     navigate('/play')
+  }
+
+  const handleDeleteCampaign = async (scenarioId, campaignId) => {
+    if (!confirm('Delete this adventure? All progress will be lost.')) return
+    try {
+      await deleteCampaign(scenarioId, campaignId)
+      setCampaignsMap((prev) => ({
+        ...prev,
+        [scenarioId]: (prev[scenarioId] || []).filter((c) => c.id !== campaignId),
+      }))
+    } catch {
+      alert('Failed to delete adventure.')
+    }
+  }
+
+  const handleDeleteScenario = async (scenarioId) => {
+    if (!confirm('Delete this scenario and ALL its adventures? This cannot be undone.')) return
+    try {
+      await deleteScenario(scenarioId)
+      setScenarios(scenarios.filter((s) => s.id !== scenarioId))
+    } catch {
+      alert('Failed to delete scenario.')
+    }
   }
 
   return (
@@ -149,6 +172,14 @@ function Home() {
                     <div className="flex flex-col gap-3 items-end">
                       <div className="flex gap-4">
                         <button
+                          onClick={(e) => { e.stopPropagation(); handleDeleteScenario(s.id) }}
+                          className="p-4 rounded-2xl border border-white/5 hover:border-rose-500/40 text-white/20 hover:text-rose-400 transition-all"
+                          title="Delete Scenario"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+
+                        <button
                           onClick={(e) => { e.stopPropagation(); exportScenario(s.id, s.title).catch(() => alert('Export failed.')) }}
                           className="p-4 rounded-2xl border border-white/5 hover:border-white/20 text-white/20 hover:text-white transition-all"
                           title="Export Node"
@@ -167,14 +198,22 @@ function Home() {
                       {(campaignsMap[s.id] || []).length > 0 && (
                         <div className="flex flex-wrap gap-2">
                           {campaignsMap[s.id].map((c) => (
-                            <button
-                              key={c.id}
-                              onClick={() => resumeCampaign(s, c.id)}
-                              className="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/30 text-emerald-400 hover:text-emerald-300 transition-all text-[10px] font-bold tracking-widest uppercase border border-emerald-500/20"
-                              title={`Created: ${new Date(c.created_at).toLocaleString()}`}
-                            >
-                              Resume {c.id.slice(0, 8)}
-                            </button>
+                            <div key={c.id} className="flex items-center gap-1">
+                              <button
+                                onClick={() => resumeCampaign(s, c.id)}
+                                className="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/30 text-emerald-400 hover:text-emerald-300 transition-all text-[10px] font-bold tracking-widest uppercase border border-emerald-500/20"
+                                title={`Created: ${new Date(c.created_at).toLocaleString()}`}
+                              >
+                                Resume {c.id.slice(0, 8)}
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleDeleteCampaign(s.id, c.id) }}
+                                className="p-1.5 rounded-lg text-white/20 hover:text-rose-400 transition-colors"
+                                title="Delete adventure"
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                              </button>
+                            </div>
                           ))}
                         </div>
                       )}

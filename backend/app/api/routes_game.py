@@ -125,6 +125,7 @@ class PlayerActionRequest(BaseModel):
     scenario_tone: str = Field(default="", max_length=10000)
     language: str = Field(default="en", max_length=10)
     action: str = Field(..., min_length=1, max_length=10000)
+    opening_narrative: str = Field(default="", max_length=20000)
 
 
 class SettingsRequest(BaseModel):
@@ -189,6 +190,7 @@ async def player_action(req: PlayerActionRequest):
             graphiti_engine=graphiti,
             plot_generator=_plot_generator,
             inventory_engine=_inventory,
+            opening_narrative=req.opening_narrative,
         )
 
     session = _sessions[req.campaign_id]

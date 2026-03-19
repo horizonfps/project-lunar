@@ -192,6 +192,15 @@ class EventStore:
             created_at=row[7],
         )
 
+    def delete_by_campaign(self, campaign_id: str) -> int:
+        """Delete all events for a campaign. Returns the number of deleted rows."""
+        with self._lock:
+            cursor = self._conn.execute(
+                "DELETE FROM events WHERE campaign_id=?", (campaign_id,)
+            )
+            self._conn.commit()
+            return cursor.rowcount
+
     def __enter__(self):
         return self
 

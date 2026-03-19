@@ -209,6 +209,30 @@ class ScenarioStore:
         ).fetchall()
         return [Campaign(*r) for r in rows]
 
+    def delete_campaign(self, campaign_id: str) -> bool:
+        """Delete a campaign by id. Returns True if a row was deleted."""
+        with self._lock:
+            cursor = self._conn.execute(
+                "DELETE FROM campaigns WHERE id=?", (campaign_id,)
+            )
+            self._conn.commit()
+            return cursor.rowcount > 0
+
+    def delete_scenario(self, scenario_id: str) -> bool:
+        """Delete a scenario and all its story cards and campaigns."""
+        with self._lock:
+            self._conn.execute(
+                "DELETE FROM story_cards WHERE scenario_id=?", (scenario_id,)
+            )
+            self._conn.execute(
+                "DELETE FROM campaigns WHERE scenario_id=?", (scenario_id,)
+            )
+            cursor = self._conn.execute(
+                "DELETE FROM scenarios WHERE id=?", (scenario_id,)
+            )
+            self._conn.commit()
+            return cursor.rowcount > 0
+
     def close(self):
         self._conn.close()
 

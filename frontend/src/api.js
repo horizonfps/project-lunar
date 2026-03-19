@@ -70,6 +70,7 @@ export function streamAction({
   scenarioTone,
   language,
   action,
+  openingNarrative,
   onChunk,
   onJournal,
   onMode,
@@ -87,6 +88,7 @@ export function streamAction({
       scenario_tone: scenarioTone,
       language,
       action,
+      opening_narrative: openingNarrative || '',
     }),
   })
     .then(async (res) => {
@@ -226,6 +228,22 @@ export async function updateInventoryItem(campaignId, name, action) {
     body: JSON.stringify({ name, action }),
   })
   if (!r.ok) throw new Error('Failed to update inventory')
+  return r.json()
+}
+
+export async function deleteCampaign(scenarioId, campaignId) {
+  const r = await fetch(`${BASE}/scenarios/${scenarioId}/campaigns/${campaignId}`, {
+    method: 'DELETE',
+  })
+  if (!r.ok) throw new Error('Failed to delete campaign')
+  return r.json()
+}
+
+export async function deleteScenario(scenarioId) {
+  const r = await fetch(`${BASE}/scenarios/${scenarioId}`, {
+    method: 'DELETE',
+  })
+  if (!r.ok) throw new Error('Failed to delete scenario')
   return r.json()
 }
 

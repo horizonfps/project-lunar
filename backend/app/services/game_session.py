@@ -30,6 +30,7 @@ class GameSession:
         plot_generator=None,
         inventory_engine=None,
         auto_plot_rules=None,
+        opening_narrative: str = "",
     ):
         self.campaign_id = campaign_id
         self.scenario_tone = scenario_tone
@@ -52,6 +53,35 @@ class GameSession:
             kind: {"last_turn": 0, "last_narrative_time": 0, "trigger_count": 0}
             for kind in self._auto_plot_rules.keys()
         }
+
+        # Rebuild conversation history from persisted events so the AI
+        # has full context even after a server restart or new session.
+        self._rebuild_history_from_events()
+
+        # If this is a brand-new campaign (no history) and we have an
+        # opening narrative, seed the history so the AI knows the story setup.
+        if not self._history and opening_narrative:
+            self._history.append({"role": "assistant", "content": opening_narrative})
+
+    def _rebuild_history_from_events(self) -> None:
+        """Rebuild _history from persisted events so the AI retains context."""
+        player_events = self._event_store.get_by_type(
+            self.campaign_id, EventType.PLAYER_ACTION,
+        )
+        narrator_events = self._event_store.get_by_type(
+            self.campaign_id, EventType.NARRATOR_RESPONSE,
+        )
+        all_events = player_events + narrator_events
+        all_events.sort(key=lambda e: e.created_at)
+        for ev in all_events:
+            text = ev.payload.get("text", "")
+            if not text:
+                continue
+            if ev.event_type == EventType.PLAYER_ACTION:
+                self._history.append({"role": "user", "content": text})
+            else:
+                self._history.append({"role": "assistant", "content": text})
+        self._turn_count = len(player_events)
 
     async def process_action(self, player_input: str) -> AsyncIterator[str]:
         mode, meta = await self._narrator.detect_mode(player_input)
