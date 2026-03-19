@@ -122,7 +122,7 @@ async def _fallback_graph_search(campaign_id: str, query: str, limit: int = 10) 
 
 class PlayerActionRequest(BaseModel):
     campaign_id: str = Field(..., min_length=1, max_length=64)
-    scenario_tone: str = Field(default="", max_length=2000)
+    scenario_tone: str = Field(default="", max_length=10000)
     language: str = Field(default="en", max_length=10)
     action: str = Field(..., min_length=1, max_length=10000)
 

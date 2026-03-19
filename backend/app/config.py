@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     neo4j_password: str = ""
     debug: bool = False
 
-    model_config = {"env_file": ".env"}
+    model_config = {"env_file": [".env", "../.env"]}
 
 
 settings = Settings()
