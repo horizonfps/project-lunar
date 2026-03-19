@@ -408,6 +408,13 @@ class GameSession:
         safe_context = world_context or "(no context yet)"
         total_narrative_time = self._event_store.get_total_narrative_time(self.campaign_id)
 
+        # Get the last narrator response to give plot generators scene context
+        recent_narrative = ""
+        for msg in reversed(self._history):
+            if msg["role"] == "assistant":
+                recent_narrative = msg["content"][:500]
+                break
+
         # Only one auto-trigger per turn to avoid noisy output.
         for kind in ("plot_arc", "npc", "event"):
             rule = self._auto_plot_rules.get(kind)
@@ -432,7 +439,7 @@ class GameSession:
 
             payload: dict
             if kind == "npc":
-                npc = await self._plot_generator.generate_npc(safe_context, language=self.language)
+                npc = await self._plot_generator.generate_npc(safe_context, language=self.language, recent_narrative=recent_narrative)
                 payload = {"kind": kind, "source": "auto", "data": asdict(npc)}
             elif kind == "event":
                 event = await self._plot_generator.generate_random_event(
@@ -440,10 +447,11 @@ class GameSession:
                     world_context=safe_context,
                     narrative_time=total_narrative_time,
                     language=self.language,
+                    recent_narrative=recent_narrative,
                 )
                 payload = {"kind": kind, "source": "auto", "data": asdict(event)}
             else:
-                arc = await self._plot_generator.generate_plot_arc(safe_context, language=self.language)
+                arc = await self._plot_generator.generate_plot_arc(safe_context, language=self.language, recent_narrative=recent_narrative)
                 payload = {"kind": kind, "source": "auto", "data": {"text": arc}}
 
             self._event_store.append(

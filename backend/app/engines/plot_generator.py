@@ -97,19 +97,21 @@ class PlotGenerator:
             and narrative_seconds_since_last >= rule.cooldown_narrative_seconds
         )
 
-    async def generate_npc(self, world_context: str, language: str = "en") -> GeneratedNPC:
+    async def generate_npc(self, world_context: str, language: str = "en", recent_narrative: str = "") -> GeneratedNPC:
         lang_hint = f" Write all text values in {language}." if language and language != "en" else ""
+        recent_hint = f"\n\nRecent narrative (the NPC must fit naturally into this scene):\n{recent_narrative}" if recent_narrative else ""
         messages = [
             {
                 "role": "system",
                 "content": (
                     "Generate a compelling NPC for this RPG world. "
+                    "The NPC must be contextually relevant to the current scene and situation. "
                     "Return ONLY valid JSON (no markdown): "
                     '{"name": str, "personality": str, "power_level": int (1-10), '
                     f'"secret": str, "goal": str, "appearance": str}}.{lang_hint}'
                 ),
             },
-            {"role": "user", "content": f"World context:\n{world_context}"},
+            {"role": "user", "content": f"World context:\n{world_context}{recent_hint}"},
         ]
         try:
             raw = await self._llm.complete(messages=messages)
@@ -138,6 +140,7 @@ class PlotGenerator:
         world_context: str,
         narrative_time: int,
         language: str = "en",
+        recent_narrative: str = "",
     ) -> RandomEvent:
         time_desc = (
             f"{narrative_time // 86400} days"
@@ -147,11 +150,13 @@ class PlotGenerator:
             else f"{narrative_time // 60} minutes"
         )
         lang_hint = f" Write all text values in {language}." if language and language != "en" else ""
+        recent_hint = f"\nRecent narrative (the event must connect to this scene):\n{recent_narrative}" if recent_narrative else ""
         messages = [
             {
                 "role": "system",
                 "content": (
                     "Generate a contextually appropriate random encounter or event. "
+                    "The event must make sense given what is currently happening in the story. "
                     "Return ONLY valid JSON: "
                     f'{{"title": str, "description": str, "choices": [str, str, str]}}.{lang_hint}'
                 ),
@@ -162,6 +167,7 @@ class PlotGenerator:
                     f"Location: {location}\n"
                     f"World context: {world_context}\n"
                     f"Time elapsed: {time_desc}"
+                    f"{recent_hint}"
                 ),
             },
         ]
@@ -187,17 +193,21 @@ class PlotGenerator:
                 choices=["Investigate", "Ignore", "Leave"],
             )
 
-    async def generate_plot_arc(self, world_context: str, language: str = "en") -> str:
+    async def generate_plot_arc(self, world_context: str, language: str = "en", recent_narrative: str = "") -> str:
         lang_hint = f" Write in {language}." if language and language != "en" else ""
+        recent_hint = f"\n\nRecent narrative (the plot hook must connect naturally to this scene):\n{recent_narrative}" if recent_narrative else ""
         messages = [
             {
                 "role": "system",
                 "content": (
                     "Generate a compelling plot hook for a new quest or story branch. "
+                    "The hook must be a FUTURE seed — something that could naturally emerge "
+                    "from the current scene, not something that contradicts or interrupts it. "
+                    "It should feel like a foreshadowing or a consequence of recent events. "
                     f"Write 2-3 sentences of narrative prose. No lists or headers.{lang_hint}"
                 ),
             },
-            {"role": "user", "content": f"World context:\n{world_context}"},
+            {"role": "user", "content": f"World context:\n{world_context}{recent_hint}"},
         ]
         try:
             return await self._llm.complete(messages=messages)
