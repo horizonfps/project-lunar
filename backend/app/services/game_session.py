@@ -238,6 +238,23 @@ class GameSession:
             except Exception:
                 logger.warning("Auto plot generation failed", exc_info=True)
 
+    def _resolve_canonical_name(self, short_name: str, all_names: list[str]) -> str:
+        """Resolve a potentially short name to its full canonical form.
+
+        E.g. 'Megumi' -> 'Megumi Fushiguro', 'Gojo' -> 'Satoru Gojo'.
+        Returns the original name if no better match is found.
+        """
+        lower = short_name.lower()
+        # Already a long name or exact match? Return as-is.
+        for full in all_names:
+            if full.lower() == lower:
+                return full
+        # Check if short_name is a substring of a longer known name
+        for full in all_names:
+            if lower in full.lower() and len(full) > len(short_name):
+                return full
+        return short_name
+
     async def get_graph_relationship_summary(self) -> str:
         """Query the graph engine for entity relationships and format as a concise string.
 
@@ -256,11 +273,20 @@ class GameSession:
             # Build node_id -> name lookup
             id_to_name: dict[str, str] = {n.id: n.name for n in nodes}
 
+            # Collect all known names for canonical resolution
+            all_names = [n.name for n in nodes]
+            if self._npc_minds:
+                for mind in self._npc_minds.get_all_minds(self.campaign_id):
+                    if mind.name not in all_names:
+                        all_names.append(mind.name)
+
             # Format relationships as readable lines, cap at 20
             lines: list[str] = []
             for rel in relationships[:20]:
-                source = id_to_name.get(rel["source_id"], "Unknown")
-                target = id_to_name.get(rel["target_id"], "Unknown")
+                source_raw = id_to_name.get(rel["source_id"], "Unknown")
+                target_raw = id_to_name.get(rel["target_id"], "Unknown")
+                source = self._resolve_canonical_name(source_raw, all_names)
+                target = self._resolve_canonical_name(target_raw, all_names)
                 rel_type = rel["rel_type"].replace("_", " ")
                 lines.append(f"- {source} {rel_type} {target}")
 
@@ -665,6 +691,27 @@ class GameSession:
 
     async def _extract_entities_to_graph(self, narrative_text: str):
         """Use LLM to extract entities and relationships from narrative, store in Neo4j."""
+        # Build canonical name list from existing graph nodes + NPC minds
+        canonical_names: list[str] = []
+        try:
+            existing_nodes = await self._graph.get_all_nodes()
+            canonical_names = [n.name for n in existing_nodes]
+        except Exception:
+            pass
+        if self._npc_minds:
+            for mind in self._npc_minds.get_all_minds(self.campaign_id):
+                if mind.name not in canonical_names:
+                    canonical_names.append(mind.name)
+
+        name_hint = ""
+        if canonical_names:
+            names_str = ", ".join(canonical_names[:40])
+            name_hint = (
+                f"\n\nKNOWN ENTITIES (use these exact names when they appear in the text): "
+                f"[{names_str}]. If the text mentions a short form (e.g. 'Megumi'), "
+                f"match it to the full canonical name (e.g. 'Megumi Fushiguro')."
+            )
+
         messages = [
             {
                 "role": "system",
@@ -680,7 +727,8 @@ class GameSession:
                     "'Nobara Kugisaki' not just 'Nobara'. "
                     "For locations, use the most specific full name. "
                     "Only include entities explicitly named in the text. "
-                    "rel_type should be a short verb phrase like GUARDS, LEADS, LOCATED_IN, OWNS, ALLIED_WITH."
+                    "rel_type should be a short verb phrase like GUARDS, LEADS, LOCATED_IN, OWNS, ALLIED_WITH, MET, KNOWS."
+                    + name_hint
                 ),
             },
             {"role": "user", "content": narrative_text},
