@@ -94,6 +94,7 @@ class NarratorEngine:
         inventory_context: str = "",
         max_tokens: int = 2000,
         narrator_hints: str = "",
+        graph_context: str = "",
     ) -> str:
         lang_instruction = _LANGUAGE_INSTRUCTIONS.get(
             language,
@@ -110,6 +111,8 @@ class NarratorEngine:
             sections.append(f"\nPLAYER INVENTORY:\n{inventory_context}")
         if narrator_hints:
             sections.append(narrator_hints)
+        if graph_context:
+            sections.append(f"\nWORLD RELATIONSHIPS (who knows who, connections between entities):\n{graph_context}")
 
         length_instruction = self._length_instruction(max_tokens)
 
