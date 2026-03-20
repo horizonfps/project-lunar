@@ -126,22 +126,22 @@ You can switch between providers at runtime in the Settings panel — no restart
 └────────────────────────────┬────────────────────────────────────┘
                              │ SSE / REST
 ┌────────────────────────────▼────────────────────────────────────┐
-│                     FastAPI Backend                              │
+│                     FastAPI Backend                             │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │                   GameSession (orchestrator)              │   │
+│  │                   GameSession (orchestrator)             │   │
 │  │  process_action() → detect_mode → narrate → side effects │   │
 │  └────┬─────┬──────┬──────┬──────┬──────┬──────┬──────┬─────┘   │
 │       │     │      │      │      │      │      │      │         │
 │  Narrator Memory Combat  NPC   Journal Graph  World  Plot       │
-│  Engine  Engine Engine  Minds  Engine  Engine Reactor Generator  │
+│  Engine  Engine Engine  Minds  Engine  Engine Reactor Generator │
 │       │     │      │      │      │      │      │      │         │
 │  ┌────▼─────▼──────▼──────▼──────▼──────┤      │      │         │
 │  │          LLM Router (litellm)        │      │      │         │
 │  │  DeepSeek · Anthropic · OpenAI       │      │      │         │
 │  └──────────────────────────────────────┘      │      │         │
 │  ┌──────────────────┐  ┌──────────────────┐    │      │         │
-│  │ EventStore (SQL)  │  │ ScenarioStore    │    │      │         │
-│  │ Append-only log   │  │ Worlds/Campaigns │    │      │         │
+│  │ EventStore (SQL) │  │ ScenarioStore    │    │      │         │
+│  │ Append-only log  │  │ Worlds/Campaigns │    │      │         │
 │  └──────────────────┘  └──────────────────┘    │      │         │
 └────────────────────────────────────────────────┼──────┘─────────┘
                                                  │
@@ -234,6 +234,50 @@ Project Lunar supports multiple LLM providers via [litellm](https://github.com/B
 | **DeepSeek** | deepseek-chat, deepseek-reasoner | 200K | Streaming + multi-call (5-6 LLM calls/action) | ~$0.002/action |
 | **Anthropic** | claude-sonnet-4-6, claude-opus-4-6 | 1M | Single-call + prompt caching (1 LLM call/action) | ~$0.07/action |
 | **OpenAI** | gpt-4o, gpt-4o-mini | 128K | Streaming + multi-call | ~$0.01/action |
+
+### Provider Quality Comparison
+
+After extensive playtesting (35+ actions per provider across multiple scenarios), here's how each provider performs as a storytelling engine:
+
+#### DeepSeek — Best Value 🏆
+
+**Narrative style:** Light novel — vivid, emotional, cinematic.
+
+DeepSeek delivers surprisingly rich storytelling at a fraction of the cost. Characters have well-defined emotions, combat scenes are dynamic and creative, and the AI consistently respects scenario rules and player technique limitations. It introduces original plot elements (items, locations, backstory reveals) that feel earned rather than random. At ~$0.002/action, it's absurdly cost-effective — you can play hundreds of actions for pennies.
+
+**Strengths:** Creative NPC dialogue, emotionally resonant moments, excellent technique/power consistency, emergent narrative details (e.g., inventing meaningful items tied to backstory).
+
+**Weaknesses:** Occasionally verbose. Slightly less character depth compared to Anthropic. Takes some creative liberties with player dialogue.
+
+#### Anthropic (Claude) — Best Quality 👑
+
+**Narrative style:** Literary fiction — a true novelist narrating your adventure.
+
+Any Claude model (even Sonnet) produces writing that is genuinely beautiful. Characters have significantly deeper psychological profiles — their motivations feel layered, their dialogue has subtext, and emotional beats hit harder. The AI builds tension masterfully and makes every choice feel consequential. Sonnet specifically offers the best speed-to-quality ratio in the market.
+
+**Strengths:** Deepest character work, most emotionally impactful writing, best instruction adherence, nuanced moral dilemmas, subtlety in foreshadowing.
+
+**Weaknesses:** Expensive (~$0.07/action). Even with single-call mode and prompt caching, long sessions add up fast.
+
+#### OpenAI (GPT) — Not Recommended ⚠️
+
+**Narrative style:** Technical manual pretending to be a novel.
+
+OpenAI models produce text that *looks* good at first glance but breaks down over extended play. Characters feel mechanized — they say the right words but lack literary depth. The AI tends to fall into repetitive narrative patterns (same sentence structures, same dramatic beats) and progressively ignores narrator instructions, defaulting to its own generic storytelling style. Still more expensive than DeepSeek with significantly worse results.
+
+**Strengths:** Fast response times. Adequate for short sessions or testing.
+
+**Weaknesses:** Repetitive narrative style, poor long-term instruction adherence, characters lack personality depth, formulaic combat descriptions, higher cost than DeepSeek for lower quality.
+
+#### TL;DR
+
+| | DeepSeek | Anthropic | OpenAI |
+|---|---------|-----------|--------|
+| **Quality** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
+| **Cost/action** | ~$0.002 | ~$0.07 | ~$0.01 |
+| **Character depth** | Good | Exceptional | Shallow |
+| **Instruction adherence** | Good | Excellent | Poor over time |
+| **Recommended for** | Daily play, long campaigns | Special moments, premium experience | Testing only |
 
 ### Anthropic Single-Call Mode
 
