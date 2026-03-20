@@ -69,6 +69,21 @@ export const useGameStore = create((set) => ({
       return { messages }
     }),
 
+  popLastPair: () =>
+    set((s) => {
+      const messages = [...s.messages]
+      // Remove last assistant message
+      if (messages.length > 0 && messages[messages.length - 1].role === 'assistant') {
+        messages.pop()
+      }
+      // Remove last user message
+      if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+        messages.pop()
+      }
+      try { localStorage.setItem('lunar_messages', JSON.stringify(messages)) } catch {}
+      return { messages }
+    }),
+
   clearMessages: () => {
     try { localStorage.removeItem('lunar_messages') } catch {}
     return set({ messages: [] })

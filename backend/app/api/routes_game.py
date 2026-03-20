@@ -228,6 +228,31 @@ async def get_history(campaign_id: str):
     return {"messages": messages}
 
 
+@router.post("/{campaign_id}/rewind")
+async def rewind(campaign_id: str):
+    """Delete the last player action + AI response and return updated history."""
+    deleted = _event_store.delete_last_pair(campaign_id)
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="No actions to rewind")
+
+    # If there's a live session, rewind its in-memory state
+    if campaign_id in _sessions:
+        _sessions[campaign_id].rewind()
+
+    # Return updated message history (same format as GET /history)
+    events = _event_store.get_by_type(campaign_id, EventType.PLAYER_ACTION) + \
+             _event_store.get_by_type(campaign_id, EventType.NARRATOR_RESPONSE)
+    events.sort(key=lambda e: e.created_at)
+    messages = []
+    for ev in events:
+        text = ev.payload.get("text", "")
+        if ev.event_type == EventType.PLAYER_ACTION:
+            messages.append({"role": "user", "content": text})
+        else:
+            messages.append({"role": "assistant", "content": text})
+    return {"messages": messages, "deleted": deleted}
+
+
 @router.get("/{campaign_id}/journal")
 async def get_journal(campaign_id: str, category: str | None = None):
     if category:

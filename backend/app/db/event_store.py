@@ -192,6 +192,28 @@ class EventStore:
             created_at=row[7],
         )
 
+    def delete_last_pair(self, campaign_id: str) -> int:
+        """Delete the last PLAYER_ACTION and all events created after it.
+
+        Returns the number of deleted rows.
+        """
+        with self._lock:
+            # Find the last PLAYER_ACTION event for this campaign
+            row = self._conn.execute(
+                "SELECT created_at FROM events WHERE campaign_id=? AND event_type=? ORDER BY created_at DESC LIMIT 1",
+                (campaign_id, EventType.PLAYER_ACTION.value),
+            ).fetchone()
+            if not row:
+                return 0
+            last_action_time = row[0]
+            # Delete the last PLAYER_ACTION and everything after it
+            cursor = self._conn.execute(
+                "DELETE FROM events WHERE campaign_id=? AND created_at >= ?",
+                (campaign_id, last_action_time),
+            )
+            self._conn.commit()
+            return cursor.rowcount
+
     def delete_by_campaign(self, campaign_id: str) -> int:
         """Delete all events for a campaign. Returns the number of deleted rows."""
         with self._lock:

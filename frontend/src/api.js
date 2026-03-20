@@ -191,6 +191,14 @@ export function streamAction({
     .catch((err) => onError?.(err))
 }
 
+export async function rewindLastAction(campaignId) {
+  const r = await fetch(`${BASE}/game/${campaignId}/rewind`, {
+    method: 'POST',
+  })
+  if (!r.ok) throw new Error('Failed to rewind')
+  return r.json()
+}
+
 export async function exportScenario(scenarioId, title) {
   const r = await fetch(`${BASE}/scenarios/${scenarioId}/export`)
   if (!r.ok) throw new Error('Failed to export scenario')
