@@ -34,10 +34,10 @@ export default function JournalPanel({ open, onClose, entries, onRefresh }) {
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
           <div className="flex items-center gap-3">
             <BookOpen size={16} className="text-yellow-400" />
-            <h2 className="text-white font-bold text-sm uppercase tracking-widest">
+            <h2 className="text-white font-bold text-sm uppercase tracking-widest flex items-center gap-2">
               Mission Log
               {entries.length > 0 && (
-                <span className="ml-2 text-white/40 font-normal text-xs">{entries.length}</span>
+                <span className="text-white/40 font-normal text-xs">{entries.length}</span>
               )}
             </h2>
           </div>

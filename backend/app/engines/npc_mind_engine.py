@@ -134,7 +134,13 @@ class NpcMindEngine:
                 if npc_name.lower() not in [a.lower() for a in candidate.aliases]:
                     candidate.aliases.append(npc_name)
                 if len(npc_name) > len(candidate.name):
+                    old_key = candidate.name.lower()
                     candidate.name = npc_name
+                    # Re-key: move entry from short name to full name
+                    minds = self._minds[campaign_id]
+                    if old_key in minds:
+                        del minds[old_key]
+                    minds[npc_name.lower()] = candidate
                 return candidate
 
         self._minds[campaign_id][key] = NpcMind(name=npc_name, campaign_id=campaign_id)
@@ -195,6 +201,11 @@ class NpcMindEngine:
                         if len(name) > len(candidate.name):
                             old_key = candidate.name.lower()
                             candidate.name = name
+                            # Re-key: move entry from short name to full name
+                            minds = self._minds[campaign_id]
+                            if old_key in minds:
+                                del minds[old_key]
+                            minds[name.lower()] = candidate
                         mind = candidate
                         merged = True
                         break

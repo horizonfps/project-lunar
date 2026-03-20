@@ -322,10 +322,12 @@ async def timeskip(campaign_id: str, req: TimeskipRequest):
         entities=[],
     )
     world_ctx = _memory.build_context_window(campaign_id)
+    session_language = _sessions[campaign_id].language if campaign_id in _sessions else "en"
     world_changes = await _world_reactor.process_tick(
         campaign_id=campaign_id,
         narrative_seconds=req.seconds,
         world_context=world_ctx,
+        language=session_language,
     )
     if world_changes:
         _event_store.append(
