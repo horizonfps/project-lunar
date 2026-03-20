@@ -53,7 +53,30 @@ function Home() {
     }
   }
 
+  const playCampaign = async (scenario) => {
+    try {
+      await warnIfNeo4jDown()
+      const campaigns = campaignsMap[scenario.id] || []
+      if (campaigns.length > 0) {
+        // Resume the most recent campaign
+        setActiveScenario(scenario)
+        setActiveCampaignId(campaigns[0].id)
+        navigate('/play')
+      } else {
+        // No campaigns yet — create one
+        const campaign = await createCampaign(scenario.id)
+        setActiveScenario(scenario)
+        setActiveCampaignId(campaign.id)
+        clearMessages()
+        navigate('/play')
+      }
+    } catch {
+      alert('Failed to start adventure')
+    }
+  }
+
   const startNewCampaign = async (scenario) => {
+    if (!confirm('Start a new adventure? Your current progress will be kept separately.')) return
     try {
       await warnIfNeo4jDown()
       const campaign = await createCampaign(scenario.id)
@@ -62,27 +85,21 @@ function Home() {
       clearMessages()
       navigate('/play')
     } catch {
-      alert('Failed to create campaign')
+      alert('Failed to create adventure')
     }
   }
 
-  const resumeCampaign = async (scenario, campaignId) => {
-    await warnIfNeo4jDown()
-    setActiveScenario(scenario)
-    setActiveCampaignId(campaignId)
-    navigate('/play')
-  }
-
-  const handleDeleteCampaign = async (scenarioId, campaignId) => {
-    if (!confirm('Delete this adventure? All progress will be lost.')) return
+  const handleDeleteAdventures = async (scenarioId) => {
+    const campaigns = campaignsMap[scenarioId] || []
+    if (campaigns.length === 0) return
+    if (!confirm(`Delete all ${campaigns.length} adventure(s) for this scenario? All progress will be lost.`)) return
     try {
-      await deleteCampaign(scenarioId, campaignId)
-      setCampaignsMap((prev) => ({
-        ...prev,
-        [scenarioId]: (prev[scenarioId] || []).filter((c) => c.id !== campaignId),
-      }))
+      for (const c of campaigns) {
+        await deleteCampaign(scenarioId, c.id)
+      }
+      setCampaignsMap((prev) => ({ ...prev, [scenarioId]: [] }))
     } catch {
-      alert('Failed to delete adventure.')
+      alert('Failed to delete adventures.')
     }
   }
 
@@ -170,53 +187,51 @@ function Home() {
                     </div>
 
                     <div className="flex flex-col gap-3 items-end">
-                      <div className="flex gap-4">
+                      <div className="flex gap-3">
                         <button
                           onClick={(e) => { e.stopPropagation(); handleDeleteScenario(s.id) }}
-                          className="p-4 rounded-2xl border border-white/5 hover:border-rose-500/40 text-white/20 hover:text-rose-400 transition-all"
+                          className="p-3 rounded-2xl border border-white/5 hover:border-rose-500/40 text-white/20 hover:text-rose-400 transition-all"
                           title="Delete Scenario"
                         >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
+
+                        {(campaignsMap[s.id] || []).length > 0 && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteAdventures(s.id) }}
+                            className="p-3 rounded-2xl border border-white/5 hover:border-rose-500/40 text-white/20 hover:text-rose-400 transition-all"
+                            title="Delete all adventures"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M5 6l1 14h12l1-14"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                          </button>
+                        )}
 
                         <button
                           onClick={(e) => { e.stopPropagation(); exportScenario(s.id, s.title).catch(() => alert('Export failed.')) }}
-                          className="p-4 rounded-2xl border border-white/5 hover:border-white/20 text-white/20 hover:text-white transition-all"
-                          title="Export Node"
+                          className="p-3 rounded-2xl border border-white/5 hover:border-white/20 text-white/20 hover:text-white transition-all"
+                          title="Export"
                         >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         </button>
 
+                        {(campaignsMap[s.id] || []).length > 0 && (
+                          <button
+                            onClick={() => startNewCampaign(s)}
+                            className="px-5 py-3 rounded-2xl border border-white/10 hover:border-white/30 text-white/40 hover:text-white transition-all text-[10px] font-bold tracking-[0.15em] uppercase"
+                            title="Start a fresh adventure"
+                          >
+                            New
+                          </button>
+                        )}
+
                         <button
-                          onClick={() => startNewCampaign(s)}
-                          className="px-8 py-4 rounded-2xl bg-white/5 hover:bg-white text-white/80 hover:text-black transition-all text-xs font-bold tracking-[0.2em] uppercase flex items-center gap-4"
+                          onClick={() => playCampaign(s)}
+                          className="px-8 py-3 rounded-2xl bg-white/5 hover:bg-white text-white/80 hover:text-black transition-all text-xs font-bold tracking-[0.2em] uppercase flex items-center gap-3"
                         >
-                          New Link
+                          Play
                           <PowerIcon />
                         </button>
                       </div>
-                      {(campaignsMap[s.id] || []).length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {campaignsMap[s.id].map((c) => (
-                            <div key={c.id} className="flex items-center gap-1">
-                              <button
-                                onClick={() => resumeCampaign(s, c.id)}
-                                className="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/30 text-emerald-400 hover:text-emerald-300 transition-all text-[10px] font-bold tracking-widest uppercase border border-emerald-500/20"
-                                title={`Created: ${new Date(c.created_at).toLocaleString()}`}
-                              >
-                                Resume {c.id.slice(0, 8)}
-                              </button>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleDeleteCampaign(s.id, c.id) }}
-                                className="p-1.5 rounded-lg text-white/20 hover:text-rose-400 transition-colors"
-                                title="Delete adventure"
-                              >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
