@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { Settings, Sparkles, Clock, Brain, Gem, Map, Backpack, BookOpen } from 'lucide-react'
+import { Settings, Sparkles, Clock, Brain, Gem, Map, Backpack, BookOpen, Undo2 } from 'lucide-react'
 import { useGameStore } from '../store'
-import { streamAction, fetchJournal, fetchHistory, fetchInventory as fetchInventoryApi } from '../api'
+import { streamAction, fetchJournal, fetchHistory, fetchInventory as fetchInventoryApi, rewindLastAction } from '../api'
 import ActionInput from './ActionInput'
 import JournalPanel from './JournalPanel'
 import CombatOverlay from './CombatOverlay'
@@ -52,6 +52,7 @@ export default function GameCanvas() {
     clearSession,
     maxTokens,
     replaceLastAssistantMessage,
+    popLastPair,
   } = useGameStore()
   const bottomRef = useRef(null)
   const [journalOpen, setJournalOpen] = useState(false)
@@ -62,6 +63,7 @@ export default function GameCanvas() {
   const [memoryOpen, setMemoryOpen] = useState(false)
   const [mapOpen, setMapOpen] = useState(false)
   const [inventoryOpen, setInventoryOpen] = useState(false)
+  const [rewinding, setRewinding] = useState(false)
 
   // Restore session on mount if state is missing
   useEffect(() => {
@@ -119,8 +121,24 @@ export default function GameCanvas() {
     ].join('\n\n')
   }
 
+  const scrollContainerRef = useRef(null)
+  const userScrolledUp = useRef(false)
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const container = scrollContainerRef.current
+    if (!container) return
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container
+      userScrolledUp.current = scrollHeight - scrollTop - clientHeight > 120
+    }
+    container.addEventListener('scroll', handleScroll)
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
+    if (!userScrolledUp.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages])
 
   const openJournal = async () => {
@@ -177,6 +195,20 @@ export default function GameCanvas() {
       },
       onError: () => setStreaming(false),
     })
+  }
+
+  const handleRewind = async () => {
+    if (!activeCampaignId || isStreaming || rewinding || messages.length === 0) return
+    if (!window.confirm('Undo the last action? This cannot be reversed.')) return
+    setRewinding(true)
+    try {
+      await rewindLastAction(activeCampaignId)
+      popLastPair()
+    } catch (err) {
+      console.error('Rewind failed:', err)
+    } finally {
+      setRewinding(false)
+    }
   }
 
   const handleTimeskip = (data) => {
@@ -286,7 +318,7 @@ export default function GameCanvas() {
         {/* Main content area */}
         <div className="flex flex-1 overflow-hidden">
           {/* Message feed */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
             <div className="max-w-4xl mx-auto space-y-8 pb-4">
               {messages.length === 0 && activeScenario?.opening_narrative && (
                 <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 md:p-8 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
@@ -349,7 +381,22 @@ export default function GameCanvas() {
 
         {/* Input Area */}
         <div className="flex-none bg-black/80 backdrop-blur-2xl border-t border-white/5 relative z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-          <ActionInput onSubmit={handleAction} disabled={isStreaming} />
+          <div className="flex items-end max-w-4xl mx-auto w-full">
+            <div className="flex-1">
+              <ActionInput onSubmit={handleAction} disabled={isStreaming} />
+            </div>
+            <div className="pb-4 pr-4 md:pr-6">
+              <button
+                onClick={handleRewind}
+                disabled={isStreaming || rewinding || messages.length === 0}
+                title="Undo last action"
+                aria-label="Undo last action"
+                className="p-3 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-rose-400 hover:border-rose-400/30 hover:bg-rose-400/10 transition-all disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:text-white/40 disabled:hover:border-white/10 disabled:hover:bg-white/5"
+              >
+                <Undo2 size={18} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
