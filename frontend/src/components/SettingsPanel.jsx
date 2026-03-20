@@ -59,8 +59,6 @@ export default function SettingsPanel({ open, onClose }) {
     }
   }
 
-  if (!open) return null
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
       <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[2rem] w-full max-w-md mx-4 overflow-hidden">
