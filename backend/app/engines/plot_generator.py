@@ -21,6 +21,12 @@ class RandomEvent:
     choices: list[str]
 
 
+@dataclass
+class MicroHook:
+    """A small narrative detail for the narrator to weave into the next response."""
+    description: str
+
+
 @dataclass(frozen=True)
 class AutoPlotRule:
     kind: str
@@ -32,9 +38,9 @@ class AutoPlotRule:
 
 
 AUTO_PLOT_RULES: dict[str, AutoPlotRule] = {
-    # Frequent micro-hook to keep sessions lively.
-    "event": AutoPlotRule(
-        kind="event",
+    # Micro-hooks: small scene details woven into narrator responses.
+    "micro_hook": AutoPlotRule(
+        kind="micro_hook",
         min_turns=3,
         min_narrative_seconds=15 * 60,
         cooldown_turns=4,
@@ -50,7 +56,7 @@ AUTO_PLOT_RULES: dict[str, AutoPlotRule] = {
         cooldown_narrative_seconds=45 * 60,
         max_triggers=8,
     ),
-    # Less frequent, macro-level narrative branch.
+    # Macro-level narrative arcs — future story branches.
     "plot_arc": AutoPlotRule(
         kind="plot_arc",
         min_turns=8,
@@ -99,13 +105,13 @@ class PlotGenerator:
 
     async def generate_npc(self, world_context: str, language: str = "en", recent_narrative: str = "") -> GeneratedNPC:
         lang_hint = f" Write all text values in {language}." if language and language != "en" else ""
-        recent_hint = f"\n\nRecent narrative (the NPC must fit naturally into this scene):\n{recent_narrative}" if recent_narrative else ""
+        recent_hint = f"\n\nRecent narrative:\n{recent_narrative}" if recent_narrative else ""
         messages = [
             {
                 "role": "system",
                 "content": (
                     "Generate a compelling NPC for this RPG world. "
-                    "The NPC must be contextually relevant to the current scene and situation. "
+                    "The NPC should be relevant to the world and could appear in future scenes. "
                     "Return ONLY valid JSON (no markdown): "
                     '{"name": str, "personality": str, "power_level": int (1-10), '
                     f'"secret": str, "goal": str, "appearance": str}}.{lang_hint}'
@@ -150,13 +156,12 @@ class PlotGenerator:
             else f"{narrative_time // 60} minutes"
         )
         lang_hint = f" Write all text values in {language}." if language and language != "en" else ""
-        recent_hint = f"\nRecent narrative (the event must connect to this scene):\n{recent_narrative}" if recent_narrative else ""
+        recent_hint = f"\nRecent narrative:\n{recent_narrative}" if recent_narrative else ""
         messages = [
             {
                 "role": "system",
                 "content": (
                     "Generate a contextually appropriate random encounter or event. "
-                    "The event must make sense given what is currently happening in the story. "
                     "Return ONLY valid JSON: "
                     f'{{"title": str, "description": str, "choices": [str, str, str]}}.{lang_hint}'
                 ),
@@ -195,16 +200,23 @@ class PlotGenerator:
 
     async def generate_plot_arc(self, world_context: str, language: str = "en", recent_narrative: str = "") -> str:
         lang_hint = f" Write in {language}." if language and language != "en" else ""
-        recent_hint = f"\n\nRecent narrative (the plot hook must connect naturally to this scene):\n{recent_narrative}" if recent_narrative else ""
+        recent_hint = f"\n\nRecent story summary:\n{recent_narrative}" if recent_narrative else ""
         messages = [
             {
                 "role": "system",
                 "content": (
-                    "Generate a compelling plot hook for a new quest or story branch. "
-                    "The hook must be a FUTURE seed — something that could naturally emerge "
-                    "from the current scene, not something that contradicts or interrupts it. "
-                    "It should feel like a foreshadowing or a consequence of recent events. "
-                    f"Write 2-3 sentences of narrative prose. No lists or headers.{lang_hint}"
+                    "You are a story architect for an RPG campaign. Generate a MACRO-LEVEL "
+                    "plot arc — a future story branch that will unfold over multiple sessions. "
+                    "This is NOT a scene action or something happening right now. "
+                    "It is a high-level narrative hook like:\n"
+                    "- A villain making moves behind the scenes\n"
+                    "- An ally facing a personal crisis\n"
+                    "- A political shift in the world\n"
+                    "- A new threat emerging far away\n"
+                    "- A betrayal being planned\n"
+                    "Write 2-3 sentences describing WHAT will happen in the future, "
+                    "not what is happening now. Think of it as a TV show's next-episode teaser. "
+                    f"No lists or headers.{lang_hint}"
                 ),
             },
             {"role": "user", "content": f"World context:\n{world_context}{recent_hint}"},
@@ -216,3 +228,42 @@ class PlotGenerator:
                 "A sealed archive contains proof that a trusted ally serves two masters. "
                 "If exposed, old alliances may collapse before the next moonrise."
             )
+
+    async def generate_micro_hook(self, world_context: str, recent_narrative: str, language: str = "en") -> MicroHook:
+        """Generate a small narrative detail for the narrator to weave into the next response.
+
+        Unlike plot arcs, micro-hooks are scene-level details: a mysterious object,
+        an NPC behaving oddly, an environmental clue, a sensory detail that hints
+        at something deeper. The narrator integrates these naturally into its text.
+        """
+        lang_hint = f" Write in {language}." if language and language != "en" else ""
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Generate a small, intriguing narrative detail that the narrator "
+                    "should weave into the next response. This is NOT a plot arc or "
+                    "a separate event — it is a detail the narrator will incorporate "
+                    "naturally into the prose. Examples:\n"
+                    "- A strange object is found during the current scene\n"
+                    "- An NPC reacts oddly to something\n"
+                    "- The environment shows an unusual sign\n"
+                    "- A sensory detail hints at a hidden presence\n"
+                    "- A character notices something no one else does\n"
+                    "Write ONE sentence describing the detail. Be specific to the "
+                    f"current scene.{lang_hint}"
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"World context:\n{world_context}\n\n"
+                    f"Current scene:\n{recent_narrative}"
+                ),
+            },
+        ]
+        try:
+            raw = await self._llm.complete(messages=messages)
+            return MicroHook(description=raw.strip())
+        except Exception:
+            return MicroHook(description="")

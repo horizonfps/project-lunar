@@ -93,6 +93,7 @@ class NarratorEngine:
         language: str,
         inventory_context: str = "",
         max_tokens: int = 2000,
+        narrator_hints: str = "",
     ) -> str:
         lang_instruction = _LANGUAGE_INSTRUCTIONS.get(
             language,
@@ -107,6 +108,8 @@ class NarratorEngine:
             sections.append(f"\nWORLD MEMORY:\n{memory_context}")
         if inventory_context:
             sections.append(f"\nPLAYER INVENTORY:\n{inventory_context}")
+        if narrator_hints:
+            sections.append(narrator_hints)
 
         length_instruction = self._length_instruction(max_tokens)
 

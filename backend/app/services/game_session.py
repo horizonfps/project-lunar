@@ -53,6 +53,9 @@ class GameSession:
             kind: {"last_turn": 0, "last_narrative_time": 0, "trigger_count": 0}
             for kind in self._auto_plot_rules.keys()
         }
+        # Active plot seeds and micro-hooks fed to the narrator as context
+        self._active_plot_seeds: list[str] = []
+        self._pending_micro_hook: str = ""
         # Plot lock: only one active plot at a time. A new plot can only
         # be generated after enough turns pass for the narrator to integrate it.
         self._plot_pending = False
@@ -120,13 +123,22 @@ class GameSession:
         )
 
     def _rebuild_plot_lock_from_events(self) -> None:
-        """Check if there's a recent unresolved plot that should block new generation."""
+        """Rebuild plot seeds and lock from persisted events."""
         plot_events = self._event_store.get_by_type(
             self.campaign_id, EventType.PLOT_GENERATION,
         )
         if not plot_events:
             return
-        # Count player actions after the last plot
+
+        # Rebuild active plot seeds (plot_arcs) for narrator context
+        for ev in plot_events:
+            kind = ev.payload.get("kind", "")
+            if kind == "plot_arc":
+                text = ev.payload.get("data", {}).get("text", "")
+                if text:
+                    self._active_plot_seeds.append(text)
+
+        # Check lock: count player actions after the last plot
         last_plot = plot_events[-1]
         player_events = self._event_store.get_by_type(
             self.campaign_id, EventType.PLAYER_ACTION,
@@ -221,12 +233,22 @@ class GameSession:
             inventory_ctx = ""
             if self._inventory:
                 inventory_ctx = self._inventory.format_for_prompt(self.campaign_id)
+            # Build narrator hints from active plot seeds and micro-hooks
+            narrator_hints = ""
+            if self._active_plot_seeds:
+                seeds = "\n".join(f"- {s}" for s in self._active_plot_seeds[-3:])
+                narrator_hints += f"\nFUTURE PLOT SEEDS (foreshadow subtly, do NOT resolve yet):\n{seeds}"
+            if self._pending_micro_hook:
+                narrator_hints += f"\nMICRO-HOOK (weave this detail naturally into your response):\n{self._pending_micro_hook}"
+                self._pending_micro_hook = ""  # consumed
+
             system_prompt = self._narrator.build_system_prompt(
                 tone_instructions=self.scenario_tone,
                 memory_context=memory_ctx,
                 language=self.language,
                 inventory_context=inventory_ctx,
                 max_tokens=getattr(self, '_max_tokens', 2000),
+                narrator_hints=narrator_hints,
             )
 
         # Stream narrative from LLM
@@ -408,7 +430,7 @@ class GameSession:
         safe_context = world_context or "(no context yet)"
         total_narrative_time = self._event_store.get_total_narrative_time(self.campaign_id)
 
-        # Get the last narrator response to give plot generators scene context
+        # Get the last narrator response for scene context
         recent_narrative = ""
         for msg in reversed(self._history):
             if msg["role"] == "assistant":
@@ -416,7 +438,7 @@ class GameSession:
                 break
 
         # Only one auto-trigger per turn to avoid noisy output.
-        for kind in ("plot_arc", "npc", "event"):
+        for kind in ("plot_arc", "micro_hook", "npc"):
             rule = self._auto_plot_rules.get(kind)
             if not rule:
                 continue
@@ -441,18 +463,21 @@ class GameSession:
             if kind == "npc":
                 npc = await self._plot_generator.generate_npc(safe_context, language=self.language, recent_narrative=recent_narrative)
                 payload = {"kind": kind, "source": "auto", "data": asdict(npc)}
-            elif kind == "event":
-                event = await self._plot_generator.generate_random_event(
-                    location="current",
-                    world_context=safe_context,
-                    narrative_time=total_narrative_time,
-                    language=self.language,
-                    recent_narrative=recent_narrative,
-                )
-                payload = {"kind": kind, "source": "auto", "data": asdict(event)}
-            else:
+                # NPC seeds are shown to the player
+                yield f"[PLOT_AUTO]{json.dumps(payload, ensure_ascii=False)}"
+            elif kind == "micro_hook":
+                hook = await self._plot_generator.generate_micro_hook(safe_context, recent_narrative, language=self.language)
+                if hook.description:
+                    self._pending_micro_hook = hook.description
+                payload = {"kind": kind, "source": "auto", "data": {"text": hook.description}}
+                # Micro-hooks are NOT shown to the player — they are
+                # injected into the narrator's system prompt for the next turn
+            else:  # plot_arc
                 arc = await self._plot_generator.generate_plot_arc(safe_context, language=self.language, recent_narrative=recent_narrative)
+                self._active_plot_seeds.append(arc)
                 payload = {"kind": kind, "source": "auto", "data": {"text": arc}}
+                # Plot arcs are NOT shown to the player — they are fed to
+                # the narrator as "future plot seeds" for subtle foreshadowing
 
             self._event_store.append(
                 campaign_id=self.campaign_id,
@@ -470,8 +495,6 @@ class GameSession:
             # Lock: block new plots until this one is consumed
             self._plot_pending = True
             self._plot_pending_since_turn = self._turn_count
-
-            yield f"[PLOT_AUTO]{json.dumps(payload, ensure_ascii=False)}"
             break
 
     async def _handle_combat(self, player_input: str, meta: dict) -> AsyncIterator[str]:
