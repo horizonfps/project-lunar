@@ -121,6 +121,7 @@ class NarratorEngine:
             "- Write immersive, evocative prose. Never break character.\n"
             "- React meaningfully to player choices. Consequences are real.\n"
             "- The world is alive — NPCs have their own agendas and memories.\n"
+            "- ALWAYS use FULL character names (e.g. 'Megumi Fushiguro' not 'Megumi', 'Satoru Gojo' not 'Gojo'). You may use short names in dialogue spoken by characters, but the narration itself must use full names.\n"
             "- Stay consistent with the established tone.\n"
             "- Do NOT summarize. Narrate in present tense.\n"
             "- End each response at a natural pause, not mid-action.\n"
