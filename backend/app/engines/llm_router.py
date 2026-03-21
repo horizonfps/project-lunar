@@ -15,13 +15,13 @@ class LLMProvider(str, Enum):
 # Context window sizes (in tokens) per provider/model.
 # Used to calculate dynamic context budgets.
 _CONTEXT_WINDOWS: dict[str, int] = {
-    # DeepSeek
-    "deepseek/deepseek-chat": 64_000,
-    "deepseek/deepseek-reasoner": 64_000,
-    # Anthropic
-    "anthropic/claude-sonnet-4-20250514": 200_000,
-    "anthropic/claude-opus-4-20250514": 200_000,
-    "anthropic/claude-haiku-4-20250506": 200_000,
+    # DeepSeek (200k context)
+    "deepseek/deepseek-chat": 200_000,
+    "deepseek/deepseek-reasoner": 200_000,
+    # Anthropic (1M context)
+    "anthropic/claude-sonnet-4-20250514": 1_000_000,
+    "anthropic/claude-opus-4-20250514": 1_000_000,
+    "anthropic/claude-haiku-4-20250506": 1_000_000,
     "anthropic/claude-3-5-sonnet-20241022": 200_000,
     "anthropic/claude-3-5-haiku-20241022": 200_000,
     # OpenAI
@@ -30,7 +30,7 @@ _CONTEXT_WINDOWS: dict[str, int] = {
     "gpt-4-turbo": 128_000,
     "gpt-3.5-turbo": 16_385,
 }
-_DEFAULT_CONTEXT_WINDOW = 64_000  # conservative fallback
+_DEFAULT_CONTEXT_WINDOW = 128_000  # reasonable fallback
 
 
 @dataclass
