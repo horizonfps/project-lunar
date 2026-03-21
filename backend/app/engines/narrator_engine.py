@@ -9,6 +9,13 @@ from app.utils.json_parsing import parse_json_dict
 logger = logging.getLogger(__name__)
 
 
+def estimate_tokens(text: str) -> int:
+    """Rough token estimate: ~4 chars per token for English, ~3 for CJK-heavy text."""
+    if not text:
+        return 0
+    return max(1, len(text) // 4)
+
+
 class NarrativeMode(str, Enum):
     NARRATIVE = "NARRATIVE"
     COMBAT = "COMBAT"
@@ -122,6 +129,7 @@ class NarratorEngine:
         graph_context: str = "",
         npc_context: str = "",
         journal_context: str = "",
+        story_cards_context: str = "",
     ) -> str:
         lang_instruction = _LANGUAGE_INSTRUCTIONS.get(
             language,
@@ -144,20 +152,8 @@ class NarratorEngine:
             sections.append(narrator_hints)
         if graph_context:
             sections.append(f"\nWORLD RELATIONSHIPS (who knows who, connections between entities):\n{graph_context}")
-
-        # Context budget: if total prompt exceeds 6000 chars, trim lower-priority sections
-        total = sum(len(s) for s in sections)
-        if total > 6000:
-            # Priority order for trimming: graph_context first, then journal, then npc
-            for marker in [
-                "\nWORLD RELATIONSHIPS (who knows who, connections between entities):",
-                "\nSTORY LOG (key events so far):",
-                "\nNPC STATES (what each NPC is currently thinking/feeling):",
-            ]:
-                sections = [s for s in sections if not s.startswith(marker)]
-                total = sum(len(s) for s in sections)
-                if total <= 6000:
-                    break
+        if story_cards_context:
+            sections.append(f"\n{story_cards_context}")
 
         sections.append(self._build_narrator_rules(max_tokens))
         return "\n".join(sections)
@@ -173,11 +169,14 @@ class NarratorEngine:
         graph_context: str = "",
         npc_context: str = "",
         journal_context: str = "",
+        story_cards_context: str = "",
     ) -> tuple[str, str]:
         """Build system prompt split into (static, dynamic) parts for prompt caching.
 
         Static part: role + language + tone + narrator rules (fixed per scenario).
-        Dynamic part: memory, inventory, NPCs, journal, hints, graph (changes per action).
+        Dynamic part: memory, inventory, NPCs, journal, hints, graph, story cards (changes per action).
+        No artificial character limit — the context budget is managed at the
+        session level based on the provider's actual context window.
         """
         lang_instruction = _LANGUAGE_INSTRUCTIONS.get(
             language,
@@ -207,19 +206,8 @@ class NarratorEngine:
             dynamic_sections.append(narrator_hints)
         if graph_context:
             dynamic_sections.append(f"\nWORLD RELATIONSHIPS (who knows who, connections between entities):\n{graph_context}")
-
-        # Context budget on dynamic sections only
-        total = len(static_part) + sum(len(s) for s in dynamic_sections)
-        if total > 6000:
-            for marker in [
-                "\nWORLD RELATIONSHIPS (who knows who, connections between entities):",
-                "\nSTORY LOG (key events so far):",
-                "\nNPC STATES (what each NPC is currently thinking/feeling):",
-            ]:
-                dynamic_sections = [s for s in dynamic_sections if not s.startswith(marker)]
-                total = len(static_part) + sum(len(s) for s in dynamic_sections)
-                if total <= 6000:
-                    break
+        if story_cards_context:
+            dynamic_sections.append(f"\n{story_cards_context}")
 
         dynamic_part = "\n".join(dynamic_sections)
         return static_part, dynamic_part
@@ -252,14 +240,45 @@ class NarratorEngine:
             sections.append(f"\nACTIVE NPCs:\n{npc_context}")
         return "\n".join(sections)
 
+    @staticmethod
+    def _dynamic_history_slice(history: list[dict], context_window: int, system_tokens: int) -> list[dict]:
+        """Return as many recent history messages as fit within the context budget.
+
+        Budget allocation:
+        - system_tokens: already consumed by the system prompt
+        - output reserve: 2500 tokens (narrative + JSON overhead)
+        - remaining budget goes to history, newest messages first
+        """
+        output_reserve = 2500
+        budget = context_window - system_tokens - output_reserve
+        if budget <= 0:
+            return history[-4:]  # absolute minimum: keep last 2 exchanges
+
+        selected: list[dict] = []
+        used = 0
+        for msg in reversed(history):
+            msg_tokens = estimate_tokens(msg.get("content", ""))
+            if used + msg_tokens > budget:
+                break
+            selected.append(msg)
+            used += msg_tokens
+        selected.reverse()
+        # Always keep at least 4 messages (2 exchanges) for coherence
+        if len(selected) < 4 and len(history) >= 4:
+            selected = history[-4:]
+        return selected
+
     async def stream_narrative(
         self,
         player_input: str,
         system_prompt: str,
         history: list[dict],
+        context_window: int = 64_000,
     ) -> AsyncIterator[str]:
+        system_tokens = estimate_tokens(system_prompt)
+        history_slice = self._dynamic_history_slice(history, context_window, system_tokens)
         messages = [{"role": "system", "content": system_prompt}]
-        messages.extend(history[-30:])
+        messages.extend(history_slice)
         messages.append({"role": "user", "content": player_input})
         try:
             async for chunk in self._llm.stream(messages=messages):
@@ -297,12 +316,14 @@ class NarratorEngine:
         history: list[dict],
         canonical_names: list[str] | None = None,
         max_tokens: int = 2000,
+        context_window: int = 200_000,
     ) -> dict:
         """Single LLM call that returns narrative + all side-effect data as JSON.
 
         Uses Anthropic prompt caching: the static part (role + tone + rules + format)
         is marked with cache_control so it's cached across actions in the same scenario.
         The dynamic part (memory, NPCs, etc.) changes every action and is not cached.
+        History window is dynamically sized based on the provider's context window.
         """
         names_hint = ""
         if canonical_names:
@@ -316,6 +337,10 @@ class NarratorEngine:
 
         # Dynamic part: memory + NPCs + hints + entity names (changes every action)
         dynamic_text = dynamic_prompt + names_hint
+
+        # Dynamic history window based on context budget
+        system_tokens = estimate_tokens(cached_text) + estimate_tokens(dynamic_text)
+        history_slice = self._dynamic_history_slice(history, context_window, system_tokens)
 
         # Build messages with cache_control on the static block
         messages = [
@@ -334,7 +359,7 @@ class NarratorEngine:
                 ],
             },
         ]
-        messages.extend(history[-30:])
+        messages.extend(history_slice)
         messages.append({"role": "user", "content": player_input})
 
         try:

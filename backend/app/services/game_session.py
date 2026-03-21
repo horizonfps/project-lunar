@@ -32,12 +32,14 @@ class GameSession:
         inventory_engine=None,
         auto_plot_rules=None,
         opening_narrative: str = "",
+        story_cards: list | None = None,
     ):
         self.campaign_id = campaign_id
         self.scenario_tone = scenario_tone
         self.language = language
         self._narrator = narrator
         self._memory = memory
+        self._story_cards = story_cards or []
         self._world_reactor = world_reactor
         self._journal = journal
         self._event_store = event_store
@@ -158,15 +160,73 @@ class GameSession:
             self._plot_pending_since_turn = self._turn_count - turns_after_plot
 
     def rewind(self) -> None:
-        """Pop the last user+assistant message pair from history and decrement turn count."""
-        # Remove trailing assistant message if present
-        if self._history and self._history[-1]["role"] == "assistant":
-            self._history.pop()
-        # Remove trailing user message if present
-        if self._history and self._history[-1]["role"] == "user":
-            self._history.pop()
-        if self._turn_count > 0:
-            self._turn_count -= 1
+        """Fully rewind the last action: rebuild all in-memory state from events.
+
+        After the route handler deletes the last event pair from the store,
+        this method reconstructs history, NPC minds, journal, plot state,
+        and memory crystals from the remaining events so that the game
+        state is fully consistent.
+        """
+        # Reset all in-memory state
+        self._history.clear()
+        self._turn_count = 0
+        if self._npc_minds:
+            self._npc_minds._minds.pop(self.campaign_id, None)
+        self._active_plot_seeds.clear()
+        self._pending_micro_hook = ""
+        self._pending_npc_seed = None
+        self._pending_npc_introduced = False
+        self._plot_pending = False
+        self._plot_pending_since_turn = 0
+        for state in self._auto_plot_state.values():
+            state["last_turn"] = 0
+            state["last_narrative_time"] = 0
+            state["trigger_count"] = 0
+
+        # Rebuild from remaining events
+        self._rebuild_history_from_events()
+        self._rebuild_npc_minds_from_events()
+        self._rebuild_plot_lock_from_events()
+        self._rebuild_journal_from_events()
+        self._rebuild_memory_crystals()
+
+    def _rebuild_journal_from_events(self) -> None:
+        """Rebuild the journal in-memory state from JOURNAL events in the store."""
+        if not self._journal:
+            return
+        # Clear existing journal for this campaign
+        self._journal._journals.pop(self.campaign_id, None)
+        # Rebuild from narrator responses — journal entries are embedded in events
+        # The journal doesn't persist entries as separate events, so we can only
+        # clear stale entries. Future entries will be re-evaluated on new actions.
+
+    def _rebuild_memory_crystals(self) -> None:
+        """Rebuild memory crystals from MEMORY_CRYSTAL events in the store."""
+        from app.engines.memory_engine import MemoryCrystal, CrystalTier
+        crystal_events = self._event_store.get_by_type(
+            self.campaign_id, EventType.MEMORY_CRYSTAL,
+        )
+        crystals = []
+        for ev in crystal_events:
+            try:
+                tier = CrystalTier(ev.payload.get("tier", "SHORT"))
+                crystals.append(MemoryCrystal(
+                    campaign_id=self.campaign_id,
+                    tier=tier,
+                    content=ev.payload.get("summary", ""),
+                    ai_content=ev.payload.get("ai_content", ""),
+                    event_count=ev.payload.get("event_count", 0),
+                    source_start_created_at=None,
+                    source_end_created_at=ev.created_at,
+                ))
+            except Exception:
+                continue
+        self._memory._crystals[self.campaign_id] = crystals
+        # Reset crystal cursor to last crystal's timestamp
+        if crystals:
+            self._memory._last_crystal_cursor[self.campaign_id] = crystals[-1].source_end_created_at
+        else:
+            self._memory._last_crystal_cursor.pop(self.campaign_id, None)
 
     def _is_single_call_provider(self) -> bool:
         """Check if the current LLM provider supports single-call mode (large context)."""
@@ -174,6 +234,80 @@ class GameSession:
             return self._narrator._llm.config.primary_provider == LLMProvider.ANTHROPIC
         except AttributeError:
             return False
+
+    def _get_context_window(self) -> int:
+        """Return the context window size (tokens) for the current LLM provider."""
+        try:
+            return self._narrator._llm.config.get_context_window()
+        except AttributeError:
+            return 64_000
+
+    def _format_story_cards_context(self) -> str:
+        """Format story cards for injection into the system prompt."""
+        if not self._story_cards:
+            return ""
+        lines = ["WORLD LORE (canonical story cards — NPCs, locations, factions, items):"]
+        for card in self._story_cards:
+            content = card.content if isinstance(card.content, dict) else {}
+            card_type = getattr(card, "card_type", "UNKNOWN")
+            if hasattr(card_type, "value"):
+                card_type = card_type.value
+            parts = [f"[{card_type}] {card.name}"]
+            for k, v in content.items():
+                if v:
+                    parts.append(f"  {k}: {v}")
+            lines.append("\n".join(parts))
+        return "\n".join(lines)
+
+    def _verify_npc_seed_in_response(self, narrative_text: str) -> None:
+        """Check if the pending NPC seed name appeared in the narrative response.
+
+        If the name (or a close variant) is found, mark the seed as introduced
+        and register it in the NPC minds. If not found, keep the seed pending
+        so the hint is re-injected in the next action.
+        """
+        if not self._pending_npc_seed or self._pending_npc_introduced:
+            return
+        npc_name = self._pending_npc_seed.get("name", "")
+        if not npc_name or not narrative_text:
+            return
+
+        # Check if the NPC name (or parts of it) appear in the response
+        text_lower = narrative_text.lower()
+        name_lower = npc_name.lower()
+        name_parts = name_lower.split()
+
+        # Match: full name, or first name, or last name (for "Kaito Zenin" → "Kaito" or "Zenin")
+        found = name_lower in text_lower or any(
+            part in text_lower for part in name_parts if len(part) > 2
+        )
+
+        if found:
+            self._pending_npc_introduced = True
+            # Register in NPC minds so the name persists in future prompts
+            if self._npc_minds:
+                mind = self._npc_minds._ensure_mind(self.campaign_id, npc_name)
+                npc = self._pending_npc_seed
+                mind.set_thought("feeling", npc.get("personality", "observing"))
+                mind.set_thought("goal", npc.get("goal", "unknown"))
+                self._event_store.append(
+                    campaign_id=self.campaign_id,
+                    event_type=EventType.NPC_THOUGHT,
+                    payload={
+                        "name": mind.name,
+                        "thoughts": {k: t.value for k, t in mind.thoughts.items()},
+                        "aliases": mind.aliases,
+                    },
+                    narrative_time_delta=0,
+                    location="npc_mind",
+                    entities=[mind.name],
+                )
+            logger.info("NPC seed '%s' confirmed in narrative — marked as introduced", npc_name)
+        else:
+            logger.info(
+                "NPC seed '%s' NOT found in narrative — keeping pending for next action",
+                npc_name,
+            )
 
     async def process_action(self, player_input: str, max_tokens: int = 2000) -> AsyncIterator[str]:
         self._max_tokens = max_tokens
@@ -332,16 +466,20 @@ class GameSession:
                 self._pending_micro_hook = ""  # consumed
             if self._pending_npc_seed and not self._pending_npc_introduced:
                 npc = self._pending_npc_seed
+                npc_name = npc.get('name', 'Unknown')
                 narrator_hints += (
-                    f"\nNEW NPC TO INTRODUCE (weave this character into the scene naturally — "
-                    f"have them appear and interact with the player):\n"
-                    f"Name: {npc.get('name', 'Unknown')}\n"
+                    f"\nNEW NPC TO INTRODUCE — YOU MUST USE THIS EXACT NAME: \"{npc_name}\"\n"
+                    f"(Weave this character into the scene naturally — "
+                    f"have them appear and interact with the player. "
+                    f"The character's name is {npc_name}. Use this name in the narrative text. "
+                    f"Do NOT substitute a different name or use a canonical character instead.)\n"
+                    f"Name: {npc_name}\n"
                     f"Appearance: {npc.get('appearance', '')}\n"
                     f"Personality: {npc.get('personality', '')}\n"
                     f"Goal: {npc.get('goal', '')}\n"
                     f"Power Level: {npc.get('power_level', 5)}/10"
                 )
-                self._pending_npc_introduced = True  # narrator has been told, mark as introduced
+                # Do NOT mark as introduced yet — we verify after the narrative response
 
             graph_ctx = await self.get_graph_relationship_summary()
 
@@ -377,12 +515,15 @@ class GameSession:
                 graph_context=graph_ctx,
                 npc_context=npc_ctx,
                 journal_context=journal_ctx,
+                story_cards_context=self._format_story_cards_context(),
             )
 
         # Stream narrative from LLM
+        context_window = self._get_context_window()
         full_response = ""
         async for chunk in self._narrator.stream_narrative(
-            player_input, system_prompt, self._history
+            player_input, system_prompt, self._history,
+            context_window=context_window,
         ):
             full_response += chunk
             yield chunk
@@ -402,6 +543,9 @@ class GameSession:
             for inv_event in inv_events:
                 self._apply_inventory_event(inv_event)
                 yield f"[INVENTORY]{json.dumps(inv_event)}"
+
+        # Verify NPC seed introduction: check if the NPC name appeared in the response
+        self._verify_npc_seed_in_response(clean_response)
 
         # Record in history and event store
         self._history.append({"role": "user", "content": player_input})
@@ -446,16 +590,20 @@ class GameSession:
             self._pending_micro_hook = ""
         if self._pending_npc_seed and not self._pending_npc_introduced:
             npc = self._pending_npc_seed
+            npc_name = npc.get('name', 'Unknown')
             narrator_hints += (
-                f"\nNEW NPC TO INTRODUCE (weave this character into the scene naturally — "
-                f"have them appear and interact with the player):\n"
-                f"Name: {npc.get('name', 'Unknown')}\n"
+                f"\nNEW NPC TO INTRODUCE — YOU MUST USE THIS EXACT NAME: \"{npc_name}\"\n"
+                f"(Weave this character into the scene naturally — "
+                f"have them appear and interact with the player. "
+                f"The character's name is {npc_name}. Use this name in the narrative text. "
+                f"Do NOT substitute a different name or use a canonical character instead.)\n"
+                f"Name: {npc_name}\n"
                 f"Appearance: {npc.get('appearance', '')}\n"
                 f"Personality: {npc.get('personality', '')}\n"
                 f"Goal: {npc.get('goal', '')}\n"
                 f"Power Level: {npc.get('power_level', 5)}/10"
             )
-            self._pending_npc_introduced = True
+            # Do NOT mark as introduced yet — we verify after the narrative response
 
         graph_ctx = await self.get_graph_relationship_summary()
 
@@ -491,6 +639,7 @@ class GameSession:
             graph_context=graph_ctx,
             npc_context=npc_ctx,
             journal_context=journal_ctx,
+            story_cards_context=self._format_story_cards_context(),
         )
 
         # Collect canonical names for entity extraction
@@ -507,6 +656,7 @@ class GameSession:
                     canonical_names.append(mind.name)
 
         # Single LLM call with prompt caching on static part
+        context_window = self._get_context_window()
         result = await self._narrator.complete_single_call(
             player_input=player_input,
             static_prompt=static_prompt,
@@ -514,6 +664,7 @@ class GameSession:
             history=self._history,
             canonical_names=canonical_names,
             max_tokens=max_tokens,
+            context_window=context_window,
         )
 
         # Extract mode
@@ -564,6 +715,9 @@ class GameSession:
 
         # Emit full narrative
         yield clean_response
+
+        # Verify NPC seed introduction: check if the NPC name appeared in the response
+        self._verify_npc_seed_in_response(clean_response)
 
         # Record in history and event store
         self._history.append({"role": "user", "content": player_input})

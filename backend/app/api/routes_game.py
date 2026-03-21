@@ -18,6 +18,7 @@ from app.engines.npc_mind_engine import NpcMindEngine
 from app.engines.inventory_engine import InventoryEngine
 from app.engines.llm_router import LLMRouter, LLMConfig, LLMProvider
 from app.db.event_store import EventStore, EventType
+from app.db.scenario_store import ScenarioStore
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,28 @@ _inventory = InventoryEngine(event_store=_event_store)
 
 _sessions: dict[str, GameSession] = {}
 _graph_engines: dict = {}
+
+_SCENARIO_DB_PATH = os.environ.get(
+    "SCENARIO_DB_PATH", os.path.join(_BACKEND_DIR, "scenarios.db")
+)
+
+
+def _load_story_cards_for_campaign(campaign_id: str):
+    """Look up the scenario_id from the campaign and load its story cards."""
+    try:
+        store = ScenarioStore(_SCENARIO_DB_PATH)
+        # Find the campaign's scenario_id
+        conn = store._conn
+        row = conn.execute(
+            "SELECT scenario_id FROM campaigns WHERE id=?", (campaign_id,)
+        ).fetchone()
+        if not row:
+            return []
+        scenario_id = row[0]
+        return store.get_story_cards(scenario_id)
+    except Exception:
+        logger.debug("Could not load story cards for campaign %s", campaign_id)
+        return []
 
 _graphiti_engine = None
 
@@ -177,6 +200,7 @@ async def player_action(req: PlayerActionRequest):
             except Exception:
                 logger.warning("GraphEngine initialization failed", exc_info=True)
                 graph = None
+        story_cards = _load_story_cards_for_campaign(req.campaign_id)
         _sessions[req.campaign_id] = GameSession(
             campaign_id=req.campaign_id,
             scenario_tone=req.scenario_tone,
@@ -193,6 +217,7 @@ async def player_action(req: PlayerActionRequest):
             plot_generator=_plot_generator,
             inventory_engine=_inventory,
             opening_narrative=req.opening_narrative,
+            story_cards=story_cards,
         )
 
     session = _sessions[req.campaign_id]
@@ -309,6 +334,26 @@ async def generate_content(campaign_id: str, req: GenerateRequest):
         arc = await _plot_generator.generate_plot_arc(world_ctx, language=req.language)
         return {"text": arc}
     return {"error": "Unknown type"}
+
+
+@router.post("/{campaign_id}/inject-npc-seed")
+async def inject_npc_seed(campaign_id: str, req: GenerateRequest):
+    """Generate an NPC and inject it as a pending seed in the active session."""
+    if campaign_id not in _sessions:
+        raise HTTPException(404, "No active session for this campaign")
+    session = _sessions[campaign_id]
+    world_ctx = _memory.build_context_window(campaign_id)
+    existing_names = []
+    if session._npc_minds:
+        existing_names = [m.name for m in session._npc_minds.get_all_minds(campaign_id)]
+    npc = await _plot_generator.generate_npc(
+        world_ctx, language=req.language, existing_npc_names=existing_names,
+    )
+    from dataclasses import asdict as _asdict
+    npc_data = _asdict(npc)
+    session._pending_npc_seed = npc_data
+    session._pending_npc_introduced = False
+    return {"status": "injected", "npc": npc_data}
 
 
 @router.post("/{campaign_id}/timeskip")
