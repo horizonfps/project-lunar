@@ -1228,7 +1228,18 @@ class GameSession:
             outcome_hint = f"[Combat outcome: {outcome_value}] "
             yield outcome_hint
 
-            async for chunk in self._handle_narrative(player_input, combat_outcome=outcome_value):
+            # Inject combat outcome into the player input itself so the LLM cannot ignore it.
+            # The system prompt hint alone is insufficient — DeepSeek often overrides FAIL outcomes.
+            outcome_injected_input = player_input
+            if outcome_value in ("FAIL", "CRIT_FAIL"):
+                outcome_injected_input = (
+                    f"[SYSTEM: The dice determined this action FAILS. You MUST narrate failure. "
+                    f"The action does NOT succeed — it is blocked, dodged, countered, or backfires. "
+                    f"Do NOT describe the player winning or achieving their goal.]\n\n"
+                    f"{player_input}"
+                )
+
+            async for chunk in self._handle_narrative(outcome_injected_input, combat_outcome=outcome_value):
                 yield chunk
 
             # Log combat as journal entry (supplement auto-detection)
@@ -1371,12 +1382,17 @@ class GameSession:
                 "Keep it grounded — success, not miraculous."
             ),
             "FAIL": (
-                "\n\nCOMBAT RESULT — FAIL:\n"
-                "The player's action FAILED. This is MANDATORY — do NOT narrate success. "
-                "The action must miss, be blocked, countered, or otherwise fail to achieve its goal. "
-                "The story continues — describe HOW it failed creatively. "
-                "The opponent may gain a tactical advantage. "
-                "DO NOT describe the player succeeding in any way."
+                "\n\nCOMBAT RESULT — FAIL (MANDATORY — THIS OVERRIDES PLAYER INTENT):\n"
+                "The player's action FAILED. The dice have spoken — no matter how well-described "
+                "the player's action is, it DOES NOT SUCCEED.\n"
+                "RULES YOU MUST FOLLOW:\n"
+                "1. The action MUST miss, be blocked, dodged, countered, or interrupted.\n"
+                "2. The opponent takes advantage of the failed attack.\n"
+                "3. The player suffers a setback: takes damage, loses position, wastes energy, or gets disarmed.\n"
+                "4. Do NOT let the player achieve ANY part of their stated goal.\n"
+                "5. Narrate the failure creatively — show WHY it failed (opponent too fast, technique backfired, environment interfered).\n"
+                "6. End with the player in a WORSE position than before the action.\n"
+                "ABSOLUTELY DO NOT describe the player succeeding, winning, or achieving their objective."
             ),
             "CRIT_FAIL": (
                 "\n\nCOMBAT RESULT — CRITICAL FAILURE:\n"
