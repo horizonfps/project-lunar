@@ -847,7 +847,7 @@ class GameSession:
             if npc_thoughts and self._npc_minds:
                 try:
                     for npc_data in npc_thoughts:
-                        name = npc_data.get("name", "").strip()
+                        name = npc_data.get("name", "").lstrip("@").strip()
                         if not name:
                             continue
                         mind = await self._npc_minds._ensure_mind_async(self.campaign_id, name)

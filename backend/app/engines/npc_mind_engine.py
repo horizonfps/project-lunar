@@ -127,6 +127,8 @@ class NpcMindEngine:
         return raw.strip().upper().startswith("YES")
 
     def _ensure_mind(self, campaign_id: str, npc_name: str) -> NpcMind:
+        # Strip @ prefix that narration uses for mentions (e.g. "@Yuji Itadori" → "Yuji Itadori")
+        npc_name = npc_name.lstrip("@").strip()
         if campaign_id not in self._minds:
             self._minds[campaign_id] = {}
         key = npc_name.lower()
@@ -139,6 +141,8 @@ class NpcMindEngine:
 
     async def _ensure_mind_async(self, campaign_id: str, npc_name: str) -> NpcMind:
         """Like _ensure_mind but with fuzzy matching + LLM confirmation."""
+        # Strip @ prefix that narration uses for mentions
+        npc_name = npc_name.lstrip("@").strip()
         if campaign_id not in self._minds:
             self._minds[campaign_id] = {}
         key = npc_name.lower()
@@ -203,7 +207,7 @@ class NpcMindEngine:
         updated = []
         data = parse_json_dict(raw) or {}
         for npc_data in data.get("npcs", []):
-            name = npc_data.get("name", "")
+            name = npc_data.get("name", "").lstrip("@").strip()
             if not name:
                 continue
 
