@@ -1425,14 +1425,15 @@ class GameSession:
         'suairmã' → 'sua irmã' (DeepSeek word concatenation).
         """
         import re
+        # Fix numbered items FIRST (before general letter→digit spacing)
+        # 'usadas2.' → 'usadas\n2.' and 'combate3)' → 'combate\n3)'
+        text = re.sub(r'([a-zA-ZÀ-ÿ.,;:!?])(\d+[).](?:\s|$))', r'\1\n\2', text)
+        # Fix list items glued: '- ' after word without newline
+        text = re.sub(r'([a-zA-ZÀ-ÿ.,;:!?])- ([A-ZÀ-ÿ])', r'\1\n- \2', text)
         # Insert space between a letter (including accented) and a digit
         text = re.sub(r'([a-zA-ZÀ-ÿ])(\d)', r'\1 \2', text)
         # Insert space between a digit and an uppercase letter
         text = re.sub(r'(\d)([A-ZÀ-ÿ])', r'\1 \2', text)
-        # Fix list items glued: '- ' after word without newline
-        text = re.sub(r'([a-zA-ZÀ-ÿ.,;:!?])- ([A-ZÀ-ÿ])', r'\1\n- \2', text)
-        # Fix numbered items glued: 'combate3)' → 'combate\n3)'
-        text = re.sub(r'([a-zA-ZÀ-ÿ.,;:!?])(\d+\))', r'\1\n\2', text)
         # Fix Portuguese word concatenation (DeepSeek artifact).
         # Only use 4+ letter prefixes to avoid false positives inside real words.
         # Short prefixes (de/do/na/no/em/um/nos/das) appear inside too many words.
