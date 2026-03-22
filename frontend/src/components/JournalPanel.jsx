@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BookOpen, RefreshCw, X } from 'lucide-react'
 
 const CATEGORIES = [
@@ -20,6 +20,13 @@ const CATEGORY_COLORS = {
 
 export default function JournalPanel({ open, onClose, entries, onRefresh }) {
   const [filter, setFilter] = useState(null)
+
+  // Auto-refresh when panel opens with no entries (fixes stale data on first open)
+  useEffect(() => {
+    if (open && entries.length === 0 && onRefresh) {
+      onRefresh()
+    }
+  }, [open])
 
   if (!open) return null
 

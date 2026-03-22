@@ -116,7 +116,8 @@ class NarratorEngine:
             "- When an item is LOST, STOLEN, or DESTROYED, emit: [ITEM_LOSE:item_name]\n"
             "- Categories: weapon, armor, consumable, quest, tool, misc\n"
             "- If the player tries to use an item NOT in their inventory, reject the action narratively.\n"
-            "- Place item tags at the end of the relevant sentence, inline with the narrative."
+            "- Place item tags at the end of the relevant sentence, inline with the narrative.\n"
+            "- IMPORTANT: If you mention an item from the WORLD LORE / story cards that the player is carrying or using for the FIRST TIME in the story (e.g. a keepsake, a weapon described in the scenario), emit [ITEM_ADD] for it so it appears in the inventory. Story card items that the player already has but haven't been registered yet MUST be tagged."
         )
 
     def build_system_prompt(

@@ -521,7 +521,7 @@ class GameSession:
                 story_cards_context=self._format_story_cards_context(),
             )
 
-        # Stream narrative from LLM
+        # Stream narrative from LLM with auto-continuation on truncation
         context_window = self._get_context_window()
         full_response = ""
         async for chunk in self._narrator.stream_narrative(
@@ -531,9 +531,30 @@ class GameSession:
             full_response += chunk
             yield chunk
 
-        # Clean truncation: if the response was cut mid-sentence by token limit,
-        # trim to the last complete sentence so there's no dangling text.
+        # Auto-continuation: if the response was truncated mid-sentence,
+        # ask the LLM to finish instead of just trimming.
+        if full_response and not self._is_response_complete(full_response):
+            continuation_prompt = (
+                "Continue the narrative EXACTLY where you stopped. "
+                "Do NOT repeat any text. Complete the current sentence and paragraph, "
+                "then end at a natural pause point. Keep the same tone and language."
+            )
+            # Add partial response to history temporarily for continuation
+            continuation_history = self._history + [
+                {"role": "user", "content": player_input},
+                {"role": "assistant", "content": full_response},
+            ]
+            async for chunk in self._narrator.stream_narrative(
+                continuation_prompt, system_prompt, continuation_history,
+                context_window=context_window,
+            ):
+                full_response += chunk
+                yield chunk
+
+        # Final cleanup: trim any remaining truncation after continuation attempt
         cleaned = self._clean_truncated_response(full_response)
+        # Fix numbers glued to words (common LLM output artifact)
+        cleaned = self._fix_number_spacing(cleaned)
         if cleaned != full_response:
             # Tell the frontend to replace the displayed text with the clean version
             yield f"[TRUNCATE_CLEAN]{cleaned}"
@@ -748,7 +769,34 @@ class GameSession:
 
         # Get narrative text and emit it all at once
         full_response = result.get("narrative_text", "")
+        already_emitted = False
+
+        # Auto-continuation for single-call: if truncated, do a streaming continuation
+        if full_response and not self._is_response_complete(full_response):
+            yield full_response  # emit what we have so far
+            already_emitted = True
+            continuation_prompt = (
+                "Continue the narrative EXACTLY where you stopped. "
+                "Do NOT repeat any text. Complete the current sentence and paragraph, "
+                "then end at a natural pause point. Keep the same tone and language."
+            )
+            continuation_history = self._history + [
+                {"role": "user", "content": player_input},
+                {"role": "assistant", "content": full_response},
+            ]
+            system_prompt = static_prompt + "\n" + dynamic_prompt
+            async for chunk in self._narrator.stream_narrative(
+                continuation_prompt, system_prompt, continuation_history,
+                context_window=context_window,
+            ):
+                full_response += chunk
+                yield chunk
+
         cleaned = self._clean_truncated_response(full_response)
+        # Fix numbers glued to words (common LLM output artifact)
+        cleaned = self._fix_number_spacing(cleaned)
+        if already_emitted and cleaned != full_response:
+            yield f"[TRUNCATE_CLEAN]{cleaned}"
 
         # Process inventory tags
         clean_response = cleaned
@@ -758,8 +806,9 @@ class GameSession:
                 self._apply_inventory_event(inv_event)
                 yield f"[INVENTORY]{json.dumps(inv_event)}"
 
-        # Emit full narrative
-        yield clean_response
+        # Emit full narrative (skip if already streamed via auto-continuation)
+        if not already_emitted:
+            yield clean_response
 
         # Verify NPC seed introduction: check if the NPC name appeared in the response
         self._verify_npc_seed_in_response(clean_response)
@@ -1340,6 +1389,36 @@ class GameSession:
             ),
         }
         return rules.get(outcome, rules["FAIL"])
+
+    @staticmethod
+    def _is_response_complete(text: str) -> bool:
+        """Check if the LLM response ends with complete sentence punctuation."""
+        if not text:
+            return True
+        stripped = text.rstrip()
+        if not stripped:
+            return True
+        return stripped[-1] in '.!?…"\u201d»)'
+
+    @staticmethod
+    def _fix_number_spacing(text: str) -> str:
+        """Fix LLM output where numbers get glued to preceding words.
+
+        Common patterns: 'Grau3' → 'Grau 3', 'às7h' → 'às 7h',
+        'de5%' → 'de 5%', 'desde2005' → 'desde 2005', 'Vítima1' → 'Vítima 1'.
+        """
+        import re
+        # Insert space between a letter (including accented) and a digit
+        # when the letter is lowercase or titlecase (avoids breaking things like H2O in code)
+        text = re.sub(r'([a-zA-ZÀ-ÿ])(\d)', r'\1 \2', text)
+        # Insert space between a digit and a letter when it looks like glued
+        # (e.g. '3º' is fine, but '3Estabelecer' needs a space)
+        text = re.sub(r'(\d)([A-ZÀ-ÿ])', r'\1 \2', text)
+        # Fix list items glued: '- ' after word without newline (e.g. 'coberto- Prateleiras')
+        text = re.sub(r'([a-zA-ZÀ-ÿ.,;:!?])- ([A-ZÀ-ÿ])', r'\1\n- \2', text)
+        # Fix numbered items glued: 'combate3)' → 'combate\n3)'
+        text = re.sub(r'([a-zA-ZÀ-ÿ.,;:!?])(\d+\))', r'\1\n\2', text)
+        return text
 
     @staticmethod
     def _clean_truncated_response(text: str) -> str:
