@@ -1402,22 +1402,38 @@ class GameSession:
 
     @staticmethod
     def _fix_number_spacing(text: str) -> str:
-        """Fix LLM output where numbers get glued to preceding words.
+        """Fix LLM output where numbers and words get glued together.
 
         Common patterns: 'Grau3' → 'Grau 3', 'às7h' → 'às 7h',
-        'de5%' → 'de 5%', 'desde2005' → 'desde 2005', 'Vítima1' → 'Vítima 1'.
+        'de5%' → 'de 5%', 'desde2005' → 'desde 2005', 'Vítima1' → 'Vítima 1',
+        'suairmã' → 'sua irmã' (DeepSeek word concatenation).
         """
         import re
         # Insert space between a letter (including accented) and a digit
-        # when the letter is lowercase or titlecase (avoids breaking things like H2O in code)
         text = re.sub(r'([a-zA-ZÀ-ÿ])(\d)', r'\1 \2', text)
-        # Insert space between a digit and a letter when it looks like glued
-        # (e.g. '3º' is fine, but '3Estabelecer' needs a space)
+        # Insert space between a digit and an uppercase letter
         text = re.sub(r'(\d)([A-ZÀ-ÿ])', r'\1 \2', text)
-        # Fix list items glued: '- ' after word without newline (e.g. 'coberto- Prateleiras')
+        # Fix list items glued: '- ' after word without newline
         text = re.sub(r'([a-zA-ZÀ-ÿ.,;:!?])- ([A-ZÀ-ÿ])', r'\1\n- \2', text)
         # Fix numbered items glued: 'combate3)' → 'combate\n3)'
         text = re.sub(r'([a-zA-ZÀ-ÿ.,;:!?])(\d+\))', r'\1\n\2', text)
+        # Fix lowercase→lowercase word concatenation (DeepSeek artifact)
+        # Pattern: lowercase letter followed by uppercase letter mid-word
+        # e.g. 'suaIrmã' is unlikely, but 'suairmã' happens when both are lowercase
+        # Fix common Portuguese possessive+noun concatenation patterns:
+        # sua/seu/seus/suas/minha/meu/tua/teu + word, also de/da/do/na/no/em/ao/à + word
+        _PT_GLUE_PREFIXES = (
+            r'(?:sua|seu|seus|suas|minha|meu|meus|minhas|tua|teu|teus|tuas|'
+            r'nossa|nosso|nossos|nossas|'
+            r'da|do|das|dos|de|na|no|nas|nos|em|ao|à|às|pela|pelo|pelas|pelos|'
+            r'uma|um|uns|umas|essa|esse|este|esta|aquela|aquele)'
+        )
+        text = re.sub(
+            rf'\b({_PT_GLUE_PREFIXES})([a-záàâãéèêíïóôõúüç])',
+            lambda m: m.group(1) + ' ' + m.group(2),
+            text,
+            flags=re.IGNORECASE,
+        )
         return text
 
     @staticmethod
