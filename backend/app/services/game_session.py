@@ -1433,22 +1433,21 @@ class GameSession:
         text = re.sub(r'([a-zA-ZÀ-ÿ.,;:!?])- ([A-ZÀ-ÿ])', r'\1\n- \2', text)
         # Fix numbered items glued: 'combate3)' → 'combate\n3)'
         text = re.sub(r'([a-zA-ZÀ-ÿ.,;:!?])(\d+\))', r'\1\n\2', text)
-        # Fix lowercase→lowercase word concatenation (DeepSeek artifact)
-        # Pattern: lowercase letter followed by uppercase letter mid-word
-        # e.g. 'suaIrmã' is unlikely, but 'suairmã' happens when both are lowercase
-        # Fix common Portuguese possessive+noun concatenation patterns:
-        # sua/seu/seus/suas/minha/meu/tua/teu + word, also de/da/do/na/no/em/ao/à + word
-        _PT_GLUE_PREFIXES = (
-            r'(?:sua|seu|seus|suas|minha|meu|meus|minhas|tua|teu|teus|tuas|'
-            r'nossa|nosso|nossos|nossas|'
-            r'da|do|das|dos|de|na|no|nas|nos|em|ao|à|às|pela|pelo|pelas|pelos|'
-            r'uma|um|uns|umas|essa|esse|este|esta|aquela|aquele)'
+        # Fix Portuguese word concatenation (DeepSeek artifact).
+        # Only use 4+ letter prefixes to avoid false positives inside real words.
+        # Short prefixes (de/do/na/no/em/um/nos/das) appear inside too many words.
+        _PT_SAFE_PREFIXES = (
+            r'(?:suas|seus|minha|meus|minhas|tuas|teus|'
+            r'nossa|nosso|nossas|nossos|'
+            r'pela|pelo|pelas|pelos|'
+            r'aquela|aquele|sobre|contra|'
+            r'para|mais|menos|muito|pouco|outro|outra|outros|outras)'
         )
+        # Require the glued suffix to be 3+ chars; prefix must not be preceded by a letter
         text = re.sub(
-            rf'\b({_PT_GLUE_PREFIXES})([a-záàâãéèêíïóôõúüç])',
+            rf'(?<![a-zA-ZÀ-ÿ])({_PT_SAFE_PREFIXES})([a-záàâãéèêíïóôõúüç]{{3,}})',
             lambda m: m.group(1) + ' ' + m.group(2),
             text,
-            flags=re.IGNORECASE,
         )
         return text
 
