@@ -1440,8 +1440,8 @@ class GameSession:
             r'(?:suas|seus|minha|meus|minhas|tuas|teus|'
             r'nossa|nosso|nossas|nossos|'
             r'pela|pelo|pelas|pelos|'
-            r'aquela|aquele|sobre|contra|'
-            r'para|mais|menos|muito|pouco|outro|outra|outros|outras)'
+            r'aquela|aquele|'
+            r'muito|pouco|outro|outra|outros|outras)'
         )
         # Require the glued suffix to be 3+ chars; prefix must not be preceded by a letter
         text = re.sub(
