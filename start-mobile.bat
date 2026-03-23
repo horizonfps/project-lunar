@@ -20,7 +20,7 @@ echo.
 REM Start CLIProxyAPI if binary exists
 IF EXIST "%~dp0proxy\cliproxyapi\cli-proxy-api.exe" (
     echo Starting CLIProxyAPI...
-    start "CLIProxyAPI" cmd /k "cd /d "%~dp0proxy\cliproxyapi" && cli-proxy-api.exe -config config.yaml"
+    start "" /D "%~dp0proxy\cliproxyapi" cli-proxy-api.exe -config config.yaml
     timeout /t 2 /nobreak >nul
 ) ELSE (
     echo CLIProxyAPI not found, skipping proxy.
