@@ -302,11 +302,13 @@ class GameSession:
             self._memory._last_crystal_cursor.pop(self.campaign_id, None)
 
     def _is_single_call_provider(self) -> bool:
-        """Check if the current LLM provider supports single-call mode (large context)."""
-        try:
-            return self._narrator._llm.config.primary_provider == LLMProvider.ANTHROPIC
-        except AttributeError:
-            return False
+        """Single-call mode disabled — all providers use the streaming path.
+
+        The single-call JSON format is unreliable with large prompts (100k+
+        chars of context causes the model to ignore the JSON format instruction
+        and return plain narrative). Streaming path works for all providers.
+        """
+        return False
 
     def _get_context_window(self) -> int:
         """Return the context window size (tokens) for the current LLM provider."""
