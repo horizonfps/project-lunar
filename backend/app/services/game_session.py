@@ -76,6 +76,8 @@ class GameSession:
         self._rebuild_history_from_events()
         self._rebuild_npc_minds_from_events()
         self._rebuild_plot_lock_from_events()
+        self._rebuild_journal_from_events()
+        self._rebuild_memory_crystals()
 
         # If this is a brand-new campaign (no history) and we have an
         # opening narrative, seed the history so the AI knows the story setup.
@@ -132,20 +134,47 @@ class GameSession:
         )
 
     def _rebuild_plot_lock_from_events(self) -> None:
-        """Rebuild plot seeds, NPC seeds, and lock from persisted events."""
+        """Rebuild plot seeds, NPC seeds, micro-hooks, auto-plot counters,
+        and lock from persisted PLOT_GENERATION events."""
         plot_events = self._event_store.get_by_type(
             self.campaign_id, EventType.PLOT_GENERATION,
         )
         if not plot_events:
             return
 
-        # Rebuild active plot seeds (plot_arcs) for narrator context
+        player_events = self._event_store.get_by_type(
+            self.campaign_id, EventType.PLAYER_ACTION,
+        )
+
+        # Rebuild active plot seeds, micro-hooks, and auto_plot_state counters
         for ev in plot_events:
             kind = ev.payload.get("kind", "")
             if kind == "plot_arc":
                 text = ev.payload.get("data", {}).get("text", "")
                 if text:
                     self._active_plot_seeds.append(text)
+            elif kind == "micro_hook":
+                text = ev.payload.get("data", {}).get("text", "")
+                if text:
+                    # Check if any narrator response after this event consumed it
+                    narrator_events = self._event_store.get_by_type(
+                        self.campaign_id, EventType.NARRATOR_RESPONSE,
+                    )
+                    consumed = any(
+                        e.created_at > ev.created_at for e in narrator_events
+                    )
+                    if not consumed:
+                        self._pending_micro_hook = text
+
+            # Rebuild auto_plot_state counters per kind
+            if kind in self._auto_plot_state:
+                state = self._auto_plot_state[kind]
+                state["trigger_count"] += 1
+                # Derive last_turn: count player actions up to this event
+                turns_at_event = sum(
+                    1 for e in player_events if e.created_at <= ev.created_at
+                )
+                state["last_turn"] = turns_at_event
 
         # Restore pending NPC seed if the last plot event was an NPC
         # and it hasn't been introduced yet (name not found in subsequent narratives)
@@ -155,7 +184,6 @@ class GameSession:
             npc_data = last_plot.payload.get("data", {})
             npc_name = npc_data.get("name", "")
             if npc_name:
-                # Check if the NPC name appears in any narrator response after the seed
                 narrator_events = self._event_store.get_by_type(
                     self.campaign_id, EventType.NARRATOR_RESPONSE,
                 )
@@ -175,9 +203,6 @@ class GameSession:
                     self._pending_npc_introduced = True
 
         # Check lock: count player actions after the last plot
-        player_events = self._event_store.get_by_type(
-            self.campaign_id, EventType.PLAYER_ACTION,
-        )
         turns_after_plot = sum(
             1 for e in player_events if e.created_at > last_plot.created_at
         )
@@ -217,14 +242,36 @@ class GameSession:
         self._rebuild_memory_crystals()
 
     def _rebuild_journal_from_events(self) -> None:
-        """Rebuild the journal in-memory state from JOURNAL events in the store."""
+        """Rebuild the journal in-memory state from JOURNAL_ENTRY events in the store."""
         if not self._journal:
             return
         # Clear existing journal for this campaign
         self._journal._journals.pop(self.campaign_id, None)
-        # Rebuild from narrator responses — journal entries are embedded in events
-        # The journal doesn't persist entries as separate events, so we can only
-        # clear stale entries. Future entries will be re-evaluated on new actions.
+        # Rebuild from persisted JOURNAL_ENTRY events
+        from app.engines.journal_engine import JournalEntry, JournalCategory
+        journal_events = self._event_store.get_by_type(
+            self.campaign_id, EventType.JOURNAL_ENTRY,
+        )
+        if not journal_events:
+            return
+        entries = []
+        for ev in journal_events:
+            try:
+                category = JournalCategory(ev.payload.get("category", ""))
+                entries.append(JournalEntry(
+                    campaign_id=self.campaign_id,
+                    category=category,
+                    summary=ev.payload.get("summary", ""),
+                    created_at=ev.created_at,
+                ))
+            except (ValueError, KeyError):
+                continue
+        if entries:
+            self._journal._journals[self.campaign_id] = entries
+        logger.info(
+            "Rebuilt %d journal entries from events for campaign %s",
+            len(entries), self.campaign_id,
+        )
 
     def _rebuild_memory_crystals(self) -> None:
         """Rebuild memory crystals from MEMORY_CRYSTAL events in the store."""

@@ -24,8 +24,9 @@ class JournalEntry:
 
 
 class JournalEngine:
-    def __init__(self, llm):
+    def __init__(self, llm, event_store=None):
         self._llm = llm
+        self._event_store = event_store
         self._journals: dict[str, list[JournalEntry]] = {}
 
     async def evaluate_and_log(
@@ -177,4 +178,18 @@ class JournalEngine:
         if campaign_id not in self._journals:
             self._journals[campaign_id] = []
         self._journals[campaign_id].append(entry)
+        # Persist to event store so journal survives restarts
+        if self._event_store:
+            from app.db.event_store import EventType
+            self._event_store.append(
+                campaign_id=campaign_id,
+                event_type=EventType.JOURNAL_ENTRY,
+                payload={
+                    "category": category.value,
+                    "summary": summary,
+                },
+                narrative_time_delta=0,
+                location="journal",
+                entities=[],
+            )
         return entry
