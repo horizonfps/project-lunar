@@ -89,6 +89,9 @@ export default function GameCanvas() {
     restoreSession,
     clearSession,
     maxTokens,
+    llmProvider,
+    llmModel,
+    temperature,
     replaceLastAssistantMessage,
     popLastPair,
   } = useGameStore()
@@ -208,6 +211,9 @@ export default function GameCanvas() {
       action,
       openingNarrative: activeScenario?.opening_narrative ?? '',
       maxTokens: maxTokens || 2000,
+      provider: llmProvider,
+      model: llmModel,
+      temperature,
       onChunk: appendToLastMessage,
       onJournal: addJournalEntry,
       onMode: (mode) => {
@@ -443,7 +449,7 @@ export default function GameCanvas() {
 
       {/* Modals */}
       {settingsOpen && <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />}
-      <PlotGeneratorPanel open={plotGenOpen} onClose={() => setPlotGenOpen(false)} campaignId={activeCampaignId} />
+      <PlotGeneratorPanel open={plotGenOpen} onClose={() => setPlotGenOpen(false)} campaignId={activeCampaignId} language={activeScenario?.language ?? 'en'} />
       <TimeskipModal open={timeskipOpen} onClose={() => setTimeskipOpen(false)} campaignId={activeCampaignId} onTimeskip={handleTimeskip} />
       <NpcInspector open={npcOpen} onClose={() => setNpcOpen(false)} campaignId={activeCampaignId} />
       <MemoryInspector open={memoryOpen} onClose={() => setMemoryOpen(false)} campaignId={activeCampaignId} />

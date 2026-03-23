@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Clock, X } from 'lucide-react'
+import { timeskip } from '../api'
 
 const PRESETS = [
   { label: '1 Hour', seconds: 3600 },
@@ -20,13 +21,7 @@ export default function TimeskipModal({ open, onClose, campaignId, onTimeskip })
     setLoading(true)
     setSummary(null)
     try {
-      const r = await fetch(`/api/game/${campaignId}/timeskip`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seconds: selected.seconds }),
-      })
-      if (!r.ok) throw new Error('Timeskip failed')
-      const data = await r.json()
+      const data = await timeskip(campaignId, selected.seconds)
       setSummary(data.summary)
       onTimeskip?.(data)
     } catch {

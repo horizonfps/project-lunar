@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Brain, X, RefreshCw } from 'lucide-react'
+import { fetchNpcMinds } from '../api'
 
 export default function NpcInspector({ open, onClose, campaignId }) {
   const [npcs, setNpcs] = useState([])
@@ -10,9 +11,7 @@ export default function NpcInspector({ open, onClose, campaignId }) {
     if (!campaignId) return
     setLoading(true)
     try {
-      const r = await fetch(`/api/game/${campaignId}/npc-minds`)
-      if (!r.ok) throw new Error('Failed')
-      const data = await r.json()
+      const data = await fetchNpcMinds(campaignId)
       setNpcs(data)
     } catch {
       setNpcs([])

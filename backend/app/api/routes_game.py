@@ -158,6 +158,9 @@ class PlayerActionRequest(BaseModel):
     action: str = Field(..., min_length=1, max_length=10000)
     opening_narrative: str = Field(default="", max_length=20000)
     max_tokens: int = Field(default=2000, ge=256, le=8192)
+    provider: str = Field(default="deepseek", max_length=20)
+    model: str = Field(default="deepseek-chat", max_length=64)
+    temperature: float = Field(default=0.85, ge=0.0, le=2.0)
 
 
 class SettingsRequest(BaseModel):
@@ -229,7 +232,13 @@ async def player_action(req: PlayerActionRequest):
         )
 
     session = _sessions[req.campaign_id]
-    # Apply user's max_tokens setting to the LLM router
+    # Apply user's LLM settings per-request
+    try:
+        _llm.config.primary_provider = LLMProvider(req.provider)
+    except ValueError:
+        pass
+    _llm.config.primary_model = req.model
+    _llm.config.temperature = req.temperature
     _llm.config.max_tokens = req.max_tokens
 
     async def event_stream():

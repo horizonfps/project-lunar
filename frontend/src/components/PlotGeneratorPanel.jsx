@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Sparkles, X, User, Zap, BookOpen } from 'lucide-react'
+import { generateContent } from '../api'
 
-export default function PlotGeneratorPanel({ open, onClose, campaignId }) {
+export default function PlotGeneratorPanel({ open, onClose, campaignId, language = 'en' }) {
   const [tab, setTab] = useState('npc')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
@@ -10,13 +11,7 @@ export default function PlotGeneratorPanel({ open, onClose, campaignId }) {
     setLoading(true)
     setResult(null)
     try {
-      const r = await fetch(`/api/game/${campaignId}/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type }),
-      })
-      if (!r.ok) throw new Error('Generation failed')
-      const data = await r.json()
+      const data = await generateContent(campaignId, type, language)
       setResult({ type, data })
     } catch {
       setResult({ type, data: null, error: 'Generation failed. Is the backend running?' })

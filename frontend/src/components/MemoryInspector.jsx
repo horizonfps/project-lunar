@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Gem, X, RefreshCw } from 'lucide-react'
+import { fetchMemoryCrystals, crystallizeMemory } from '../api'
 
 const TIER_STYLES = {
   SHORT: { label: 'Short Crystal', color: 'text-white', bg: 'bg-white/10 border-white/20' },
@@ -14,9 +15,7 @@ export default function MemoryInspector({ open, onClose, campaignId }) {
     if (!campaignId) return
     setLoading(true)
     try {
-      const r = await fetch(`/api/game/${campaignId}/memory-crystals`)
-      if (!r.ok) throw new Error('Failed')
-      const data = await r.json()
+      const data = await fetchMemoryCrystals(campaignId)
       setCrystals(data)
     } catch {
       setCrystals([])
@@ -28,7 +27,7 @@ export default function MemoryInspector({ open, onClose, campaignId }) {
   const handleCrystallize = async () => {
     setLoading(true)
     try {
-      await fetch(`/api/game/${campaignId}/crystallize`, { method: 'POST' })
+      await crystallizeMemory(campaignId)
       await fetchCrystals()
     } catch {} finally {
       setLoading(false)

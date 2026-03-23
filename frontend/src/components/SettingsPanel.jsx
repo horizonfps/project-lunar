@@ -14,7 +14,6 @@ export default function SettingsPanel({ open, onClose }) {
   const [model, setModel] = useState(llmModel)
   const [temp, setTemp] = useState(temperature)
   const [tokens, setTokens] = useState(maxTokens)
-  const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
   const currentProviderModels = PROVIDERS.find((p) => p.id === provider)?.models || []
@@ -25,38 +24,15 @@ export default function SettingsPanel({ open, onClose }) {
     setModel(providerModels[0] || '')
   }
 
-  const handleSave = async () => {
-    setSaving(true)
-    try {
-      await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          provider,
-          model,
-          temperature: temp,
-          max_tokens: tokens,
-        }),
-      })
-      updateSettings({
-        llmProvider: provider,
-        llmModel: model,
-        temperature: temp,
-        maxTokens: tokens,
-      })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-    } catch {
-      // silent fail — settings still update locally
-      updateSettings({
-        llmProvider: provider,
-        llmModel: model,
-        temperature: temp,
-        maxTokens: tokens,
-      })
-    } finally {
-      setSaving(false)
-    }
+  const handleSave = () => {
+    updateSettings({
+      llmProvider: provider,
+      llmModel: model,
+      temperature: temp,
+      maxTokens: tokens,
+    })
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }
 
   return (
@@ -157,10 +133,9 @@ export default function SettingsPanel({ open, onClose }) {
           {/* Save */}
           <button
             onClick={handleSave}
-            disabled={saving}
             className="w-full bg-white text-black hover:bg-gray-200 uppercase text-sm tracking-[0.2em] font-bold rounded-full px-6 py-3 rounded-lg font-semibold tracking-wide border border-white/20"
           >
-            {saved ? 'Saved!' : saving ? 'Applying...' : 'Apply Settings'}
+            {saved ? 'Saved!' : 'Apply Settings'}
           </button>
         </div>
       </div>

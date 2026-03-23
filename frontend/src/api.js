@@ -53,7 +53,7 @@ export async function createCampaign(scenarioId, playerName = 'Player') {
   const r = await fetch(`${BASE}/scenarios/${scenarioId}/campaigns`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ scenario_id: scenarioId, player_name: playerName }),
+    body: JSON.stringify({ player_name: playerName }),
   })
   if (!r.ok) throw new Error('Failed to create campaign')
   return r.json()
@@ -79,6 +79,9 @@ export function streamAction({
   action,
   openingNarrative,
   maxTokens,
+  provider,
+  model,
+  temperature,
   onChunk,
   onJournal,
   onMode,
@@ -99,6 +102,9 @@ export function streamAction({
       action,
       opening_narrative: openingNarrative || '',
       max_tokens: maxTokens || 2000,
+      provider: provider || 'deepseek',
+      model: model || 'deepseek-chat',
+      temperature: temperature ?? 0.85,
     }),
   })
     .then(async (res) => {
@@ -277,5 +283,43 @@ export async function importScenario(data) {
     body: JSON.stringify(data),
   })
   if (!r.ok) throw new Error('Failed to import scenario')
+  return r.json()
+}
+
+export async function fetchMemoryCrystals(campaignId) {
+  const r = await fetch(`${BASE}/game/${campaignId}/memory-crystals`)
+  if (!r.ok) throw new Error('Failed to fetch memory crystals')
+  return r.json()
+}
+
+export async function crystallizeMemory(campaignId) {
+  const r = await fetch(`${BASE}/game/${campaignId}/crystallize`, { method: 'POST' })
+  if (!r.ok) throw new Error('Failed to crystallize')
+  return r.json()
+}
+
+export async function fetchNpcMinds(campaignId) {
+  const r = await fetch(`${BASE}/game/${campaignId}/npc-minds`)
+  if (!r.ok) throw new Error('Failed to fetch NPC minds')
+  return r.json()
+}
+
+export async function generateContent(campaignId, type, language = 'en') {
+  const r = await fetch(`${BASE}/game/${campaignId}/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, language }),
+  })
+  if (!r.ok) throw new Error('Generation failed')
+  return r.json()
+}
+
+export async function timeskip(campaignId, seconds) {
+  const r = await fetch(`${BASE}/game/${campaignId}/timeskip`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ seconds }),
+  })
+  if (!r.ok) throw new Error('Timeskip failed')
   return r.json()
 }
