@@ -15,9 +15,9 @@ class LLMProvider(str, Enum):
 # Context window sizes (in tokens) per provider/model.
 # Used to calculate dynamic context budgets.
 _CONTEXT_WINDOWS: dict[str, int] = {
-    # DeepSeek (200k context)
-    "deepseek/deepseek-chat": 200_000,
-    "deepseek/deepseek-reasoner": 200_000,
+    # DeepSeek (128k context)
+    "deepseek/deepseek-chat": 128_000,
+    "deepseek/deepseek-reasoner": 128_000,
     # Anthropic — Claude 4.6 (1M context)
     "anthropic/claude-opus-4-6": 1_000_000,
     "anthropic/claude-sonnet-4-6": 1_000_000,

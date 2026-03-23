@@ -6,7 +6,7 @@ from typing import AsyncIterator
 
 from app.db.event_store import EventStore, EventType
 from app.engines.llm_router import LLMProvider
-from app.engines.narrator_engine import NarrativeMode
+from app.engines.narrator_engine import NarrativeMode, estimate_tokens
 from app.engines.plot_generator import AUTO_PLOT_RULES
 from app.utils.json_parsing import parse_json_dict
 
@@ -268,12 +268,135 @@ class GameSession:
         except AttributeError:
             return 64_000
 
-    def _format_story_cards_context(self) -> str:
-        """Format story cards for injection into the system prompt."""
+    # ── Story Card RAG ──────────────────────────────────────────────
+    # Fraction of the provider's context window allocated to story cards.
+    # The rest is split between system prompt, chat history, and output.
+    _STORY_CARDS_CONTEXT_FRACTION = 0.15  # 15% of context window
+    _STORY_CARDS_MIN_BUDGET = 4_000       # floor: always allow at least 4k tokens
+    _STORY_CARDS_MAX_BUDGET = 40_000      # ceiling: never exceed 40k even on 1M windows
+
+    # Bonus scores for card relevance ranking
+    _LORE_BONUS = 100         # LORE cards (world rules) always rank highest
+    _ACTIVE_NPC_BONUS = 50    # cards whose name matches an active NPC mind
+    _MENTIONED_BONUS = 30     # cards mentioned by name in recent narrative/input
+    _KEYWORD_MATCH_SCORE = 5  # per keyword hit in card content
+
+    @staticmethod
+    def _extract_context_keywords(text: str) -> set[str]:
+        """Extract meaningful keywords from text for relevance matching."""
+        if not text:
+            return set()
+        # Lowercase, split on whitespace and punctuation
+        import re
+        words = re.findall(r"[a-zA-ZÀ-ÿ]{3,}", text.lower())
+        # Filter very common words (basic stop words for EN/PT)
+        stop = {
+            "the", "and", "for", "that", "this", "with", "you", "your", "are",
+            "was", "were", "has", "have", "had", "been", "will", "not", "but",
+            "from", "they", "she", "his", "her", "its", "our", "que", "para",
+            "com", "uma", "por", "ele", "ela", "seu", "sua", "dos", "das",
+            "nos", "nas", "mais", "como", "não", "está", "isso", "esse",
+            "essa", "são", "tem", "foi", "ser", "ter", "mas", "quando",
+            "sobre", "entre", "depois", "antes", "muito", "pode", "seus",
+            "suas", "ainda", "também", "apenas", "cada", "outro", "outra",
+        }
+        return {w for w in words if w not in stop and len(w) > 2}
+
+    def _compute_story_cards_budget(self) -> int:
+        """Compute token budget for story cards based on provider context window."""
+        context_window = self._get_context_window()
+        budget = int(context_window * self._STORY_CARDS_CONTEXT_FRACTION)
+        return max(self._STORY_CARDS_MIN_BUDGET, min(self._STORY_CARDS_MAX_BUDGET, budget))
+
+    def _score_card_relevance(
+        self,
+        card,
+        context_keywords: set[str],
+        active_npc_names: set[str],
+        mentioned_names: set[str],
+    ) -> float:
+        """Score a story card's relevance to the current context."""
+        card_type = getattr(card, "card_type", "UNKNOWN")
+        if hasattr(card_type, "value"):
+            card_type = card_type.value
+        card_name_lower = card.name.lower()
+
+        score = 0.0
+
+        # LORE cards always get highest priority (world rules)
+        if card_type == "LORE":
+            score += self._LORE_BONUS
+
+        # Cards whose name matches an active NPC in the scene
+        if card_name_lower in active_npc_names:
+            score += self._ACTIVE_NPC_BONUS
+
+        # Cards mentioned by name in recent text
+        if card_name_lower in mentioned_names:
+            score += self._MENTIONED_BONUS
+
+        # Keyword overlap between card content and context
+        content = card.content if isinstance(card.content, dict) else {}
+        card_text = (card.name + " " + " ".join(str(v) for v in content.values())).lower()
+        card_words = set(card_text.split())
+        hits = len(context_keywords & card_words)
+        score += hits * self._KEYWORD_MATCH_SCORE
+
+        return score
+
+    def _format_story_cards_context(
+        self,
+        player_input: str = "",
+        recent_narrative: str = "",
+    ) -> str:
+        """Select and format story cards using RAG relevance scoring.
+
+        Cards are ranked by relevance to the current context (player input,
+        recent narrative, active NPCs) and included until the token budget
+        is exhausted.  Budget scales with the provider's context window:
+        ~30k tokens on DeepSeek (200k), ~40k on Anthropic (1M, capped).
+        """
         if not self._story_cards:
             return ""
-        lines = ["WORLD LORE (canonical story cards — NPCs, locations, factions, items):"]
+
+        budget = self._compute_story_cards_budget()
+
+        # Build context for relevance scoring
+        context_text = f"{player_input} {recent_narrative}"
+        context_keywords = self._extract_context_keywords(context_text)
+
+        # Collect active NPC names (lowercase) from NPC minds
+        active_npc_names: set[str] = set()
+        if self._npc_minds:
+            for mind in self._npc_minds.get_all_minds(self.campaign_id):
+                active_npc_names.add(mind.name.lower())
+
+        # Collect names explicitly mentioned in context text (lowercase)
+        mentioned_names: set[str] = set()
+        context_lower = context_text.lower()
         for card in self._story_cards:
+            if card.name.lower() in context_lower:
+                mentioned_names.add(card.name.lower())
+
+        # Score all cards
+        scored_cards: list[tuple[float, int, object]] = []
+        for idx, card in enumerate(self._story_cards):
+            score = self._score_card_relevance(
+                card, context_keywords, active_npc_names, mentioned_names,
+            )
+            scored_cards.append((score, idx, card))
+
+        # Sort by score descending (idx breaks ties for stable order)
+        scored_cards.sort(key=lambda x: (-x[0], x[1]))
+
+        # Fill budget with highest-relevance cards
+        header = "WORLD LORE (story cards selected by relevance to current scene):"
+        lines = [header]
+        used_tokens = estimate_tokens(header)
+        included = 0
+        skipped = 0
+
+        for score, _idx, card in scored_cards:
             content = card.content if isinstance(card.content, dict) else {}
             card_type = getattr(card, "card_type", "UNKNOWN")
             if hasattr(card_type, "value"):
@@ -282,7 +405,29 @@ class GameSession:
             for k, v in content.items():
                 if v:
                     parts.append(f"  {k}: {v}")
-            lines.append("\n".join(parts))
+            card_text = "\n".join(parts)
+            card_tokens = estimate_tokens(card_text)
+
+            if used_tokens + card_tokens > budget:
+                skipped += 1
+                continue
+
+            lines.append(card_text)
+            used_tokens += card_tokens
+            included += 1
+
+        if skipped > 0:
+            lines.append(
+                f"\n(... {skipped} additional cards available but omitted — "
+                f"budget {budget} tokens, used {used_tokens})"
+            )
+
+        logger.info(
+            "Story cards RAG: included %d/%d (budget %d tokens, used %d, context_window %d)",
+            included, len(self._story_cards), budget, used_tokens,
+            self._get_context_window(),
+        )
+
         return "\n".join(lines)
 
     def _verify_npc_seed_in_response(self, narrative_text: str) -> None:
@@ -544,7 +689,10 @@ class GameSession:
                 graph_context=graph_ctx,
                 npc_context=npc_ctx,
                 journal_context=journal_ctx,
-                story_cards_context=self._format_story_cards_context(),
+                story_cards_context=self._format_story_cards_context(
+                    player_input=player_input,
+                    recent_narrative=self._history[-1]["content"][:1000] if self._history else "",
+                ),
             )
 
         # Stream narrative from LLM with auto-continuation on truncation
@@ -765,7 +913,10 @@ class GameSession:
             graph_context=graph_ctx,
             npc_context=npc_ctx,
             journal_context=journal_ctx,
-            story_cards_context=self._format_story_cards_context(),
+            story_cards_context=self._format_story_cards_context(
+                player_input=player_input,
+                recent_narrative=self._history[-1]["content"][:1000] if self._history else "",
+            ),
         )
 
         # Collect canonical names for entity extraction
