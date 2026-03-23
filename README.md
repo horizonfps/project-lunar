@@ -304,27 +304,6 @@ At 0.70, the same prompts produced competent but predictable, exposition-heavy r
 
 > **Note:** These results are specific to DeepSeek (deepseek-chat). Anthropic models produce excellent results across a wider temperature range (0.7–1.0) due to stronger instruction adherence. OpenAI models tend to degrade above 0.9.
 
-### Anthropic Single-Call Mode
-
-When using Anthropic, the engine consolidates 5-6 separate LLM calls into **one** API call that returns:
-- Narrative text (full prose)
-- Mode classification (NARRATIVE/COMBAT/META)
-- NPC thought updates
-- Entity/relationship extraction
-- World changes
-
-The static portion of the system prompt (role + tone + narrator rules + JSON format) is marked with `cache_control` for Anthropic's prompt caching, reducing input token costs by ~90% on repeated actions within the same scenario.
-
-### DeepSeek Streaming Mode
-
-DeepSeek uses the traditional pipeline with real-time streaming:
-1. `detect_mode()` — classify action
-2. `stream_narrative()` — stream narrative to frontend via SSE
-3. `update_npc_thoughts()` — extract NPC mental states
-4. `extract_entities_to_graph()` — populate Neo4j
-5. `process_tick()` — world evolution
-6. `auto_crystallize()` — memory compression (every 4 turns)
-
 ---
 
 ## Auto-Plot System
