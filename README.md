@@ -14,6 +14,7 @@
   <a href="#memory-system">Memory</a> &middot;
   <a href="#combat-system">Combat</a> &middot;
   <a href="#llm-providers">LLM Providers</a> &middot;
+  <a href="#claude-max-proxy-optional">Proxy</a> &middot;
   <a href="#contributing">Contributing</a>
 </p>
 
@@ -373,6 +374,15 @@ project-lunar/
 │       ├── store.js               # Zustand state management
 │       ├── api.js                 # REST + SSE API helpers
 │       └── App.jsx                # Routes (/, /create, /play)
+├── proxy/
+│   ├── cliproxyapi/           # CLIProxyAPI (Go binary, recommended)
+│   │   ├── config.yaml            # Proxy config (port, API key)
+│   │   └── cli-proxy-api.exe      # Binary (downloaded, .gitignored)
+│   ├── auth.py                # Legacy OAuth PKCE auth (Haiku only)
+│   ├── server.py              # Legacy FastAPI proxy
+│   ├── config.py              # Legacy proxy config
+│   ├── run.py                 # Legacy proxy CLI
+│   └── README.md              # Proxy documentation
 ├── docker-compose.yml         # Neo4j container
 ├── .env.example               # Environment template
 └── install.sh                 # One-command setup
@@ -442,6 +452,55 @@ pytest tests/ -v --cov=app --cov-report=term-missing
 
 ---
 
+## Claude Max Proxy (Optional)
+
+If you have a Claude Pro/Max subscription ($20/$100/month), you can route API calls through your subscription instead of paying per-token. This gives access to **all Claude models** (Sonnet 4.6, Opus 4.6, etc.) at no extra API cost.
+
+### How it works
+
+The proxy uses [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI), a Go binary that wraps the Claude Code OAuth flow into an Anthropic-compatible API server. It authenticates with your Claude subscription and exposes a local `/v1/messages` endpoint. The backend's `LLMRouter` detects the `ANTHROPIC_PROXY_URL` env var and routes all Anthropic calls through it automatically.
+
+> **Note:** CLIProxyAPI is a pre-compiled Go binary (not built from source in this repo) because it handles the OAuth flow, token refresh, and Claude Code protocol translation — functionality that would be complex to reimplement. The binary is `.gitignore`d; you download it during setup.
+
+### Setup
+
+```bash
+# 1. Download CLIProxyAPI (one-time)
+cd proxy/cliproxyapi
+# Download from: https://github.com/router-for-me/CLIProxyAPI/releases/latest
+# Extract cli-proxy-api.exe (or cli-proxy-api for Linux/macOS) into this folder
+
+# 2. Authenticate with your Claude account (opens browser)
+./cli-proxy-api.exe -claude-login -config config.yaml
+
+# 3. Start the proxy
+./cli-proxy-api.exe -config config.yaml
+# Proxy runs on http://127.0.0.1:8317
+```
+
+### Configure .env
+
+```env
+ANTHROPIC_PROXY_URL=http://127.0.0.1:8317
+ANTHROPIC_PROXY_KEY=lunar-proxy-key
+```
+
+Then select any Anthropic model in the Settings panel — Sonnet 4.6, Opus 4.6, Haiku 4.5, etc. — and play.
+
+### Available models via proxy
+
+| Model | Context | Via Proxy |
+|-------|---------|-----------|
+| claude-sonnet-4-6 | 1M | Yes |
+| claude-opus-4-6 | 1M | Yes |
+| claude-sonnet-4-5-20250929 | 200K | Yes |
+| claude-opus-4-5-20251101 | 200K | Yes |
+| claude-haiku-4-5-20251001 | 200K | Yes |
+
+> See [`proxy/README.md`](proxy/README.md) for detailed setup, troubleshooting, and the legacy OAuth proxy documentation.
+
+---
+
 ## Contributing
 
 Contributions are welcome! This is an open-source project built for the community.
@@ -460,6 +519,7 @@ Contributions are welcome! This is an open-source project built for the communit
 - **AI Dungeon** — Pioneering AI-driven interactive fiction and story cards
 - **Graphiti** — Temporal knowledge graph concepts
 - **litellm** — Multi-provider LLM abstraction
+- **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — Claude Max subscription proxy enabling API access to all Claude models without per-token billing
 
 ---
 
