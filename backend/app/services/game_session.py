@@ -1236,7 +1236,12 @@ class GameSession:
                     entities=[mind.name],
                 )
         except Exception:
-            logger.warning("NPC mind update failed", exc_info=True)
+            logger.error(
+                "NPC mind update failed for campaign %s (narrative length: %d chars)",
+                self.campaign_id,
+                len(narrative_text),
+                exc_info=True,
+            )
 
     async def _extract_to_graph(self, narrative_text: str) -> None:
         if not self._graph or not narrative_text:

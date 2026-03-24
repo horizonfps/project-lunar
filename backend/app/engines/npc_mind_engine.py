@@ -192,8 +192,11 @@ class NpcMindEngine:
                     "Return ONLY valid JSON (no markdown): "
                     '{"npcs": [{"name": str, "thoughts": {"feeling": str, "goal": str, '
                     '"opinion_of_player": str, "secret_plan": str}}]}. '
-                    "Only include NPCs that actively appear in the narrative. "
-                    "Thoughts should reflect their personality and recent events."
+                    "Include ALL NPCs that actively appear in the narrative — speaking, acting, "
+                    "reacting, or being directly described. Do NOT skip NPCs just because others "
+                    "are more prominent in the scene. If a character speaks or acts, they MUST "
+                    "be included. Aim for completeness over brevity. "
+                    "Thoughts should reflect their personality and recent events. "
                     "Preserve NPC names exactly as they appear in the narrative."
                     + lang_hint
                 ),
