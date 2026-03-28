@@ -244,6 +244,7 @@ class GameSession:
         self._rebuild_plot_lock_from_events()
         self._rebuild_journal_from_events()
         self._rebuild_memory_crystals()
+        self._rebuild_player_power()
 
     def _rebuild_journal_from_events(self) -> None:
         """Rebuild the journal in-memory state from JOURNAL_ENTRY events in the store."""
@@ -313,7 +314,7 @@ class GameSession:
         """
         npc_powers = []
         for card in self._story_cards:
-            if hasattr(card, 'card_type') and str(card.card_type).upper() == "NPC":
+            if hasattr(card, 'card_type') and getattr(card.card_type, 'value', str(card.card_type)).upper() == "NPC":
                 content = card.content if isinstance(card.content, dict) else {}
                 power = content.get("power_level")
                 if power is not None:
@@ -344,8 +345,7 @@ class GameSession:
         )
 
     def _init_player_power(self) -> int:
-        """Default player power — will be overridden by LLM evaluation on first action
-        or by _rebuild_player_power from events."""
+        """Sync default — overridden by _rebuild_player_power or _ensure_player_power."""
         return 3
 
     def _rebuild_player_power(self) -> None:
@@ -361,6 +361,97 @@ class GameSession:
                     self._player_power = max(0, min(10, int(latest.payload.get("new_power", self._player_power))))
                 except (TypeError, ValueError):
                     pass
+        self._player_power_initialized = len(events) > 0
+
+    async def _ensure_player_power(self) -> None:
+        """If player power was never evaluated, run a full-context LLM analysis.
+
+        Uses scenario tone, story cards (NPC power scale), and conversation
+        history to determine where the player currently sits on the power scale.
+        Only runs once — persists the result as a POWER_LEVEL_UPDATE event.
+        """
+        if getattr(self, '_player_power_initialized', False):
+            return
+        if not self._combat:
+            self._player_power_initialized = True
+            return
+
+        power_scale = self._build_power_scale_reference()
+        if not power_scale:
+            self._player_power_initialized = True
+            return
+
+        # Build story summary using the same dynamic budget as the narrator
+        history_summary = ""
+        if self._history:
+            context_window = self._get_context_window()
+            system_overhead = estimate_tokens(power_scale) + estimate_tokens(self.scenario_tone or "") + 500
+            output_reserve = 500  # small response (just JSON)
+            budget = context_window - system_overhead - output_reserve
+            parts: list[str] = []
+            used = 0
+            for msg in reversed(self._history):
+                content = msg.get("content", "")
+                line = f"[{msg.get('role', '?')}] {content}"
+                line_tokens = estimate_tokens(line)
+                if used + line_tokens > budget:
+                    break
+                parts.append(line)
+                used += line_tokens
+            parts.reverse()
+            history_summary = "\n".join(parts)
+
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Analyze the player character's current power level based on the world context. "
+                    "Return ONLY JSON: {\"power\": int, \"reason\": str}. "
+                    "power must be 0-10, calibrated against the NPC power scale below.\n\n"
+                    + power_scale
+                    + "\n\nSCENARIO CONTEXT:\n" + (self.scenario_tone or "")[:500]
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Based on the world power scale above and the story so far, "
+                    "what is the player character's current power level?\n\n"
+                    "RECENT STORY:\n" + (history_summary or "(new campaign, no history yet)")
+                ),
+            },
+        ]
+        try:
+            logger.info(
+                "_ensure_player_power: running for campaign %s (history=%d msgs, scale=%d chars)",
+                self.campaign_id, len(self._history), len(power_scale),
+            )
+            raw = await self._combat._llm.complete(messages=messages, max_tokens=128)
+            logger.info("_ensure_player_power: LLM response: %s", (raw or "")[:200])
+            data = parse_json_dict(raw)
+            if data and "power" in data:
+                new_power = max(0, min(10, int(data["power"])))
+                reason = str(data.get("reason", "initial evaluation"))
+                self._player_power = new_power
+                self._event_store.append(
+                    campaign_id=self.campaign_id,
+                    event_type=EventType.POWER_LEVEL_UPDATE,
+                    payload={
+                        "target": "player",
+                        "old_power": 3,
+                        "new_power": new_power,
+                        "reason": reason,
+                    },
+                    narrative_time_delta=0,
+                    location="current",
+                    entities=["player"],
+                )
+                logger.info("Initial player power evaluated: %d (%s)", new_power, reason)
+            else:
+                logger.warning("_ensure_player_power: LLM returned no 'power' key. data=%s", data)
+        except Exception:
+            logger.warning("Initial player power evaluation failed", exc_info=True)
+        self._player_power_initialized = True
 
     def _resolve_opponent_power(self, opponent_name: str, llm_estimate: int) -> int:
         """Resolve opponent power: check story cards first, fall back to LLM estimate."""
@@ -369,7 +460,7 @@ class GameSession:
 
         name_lower = opponent_name.lower()
         for card in self._story_cards:
-            if hasattr(card, 'card_type') and str(card.card_type).upper() == "NPC":
+            if hasattr(card, 'card_type') and getattr(card.card_type, 'value', str(card.card_type)).upper() == "NPC":
                 if card.name.lower() == name_lower or name_lower in card.name.lower():
                     power = card.content.get("power_level", llm_estimate) if isinstance(card.content, dict) else llm_estimate
                     return max(1, min(10, int(power)))
@@ -674,6 +765,9 @@ class GameSession:
 
     async def process_action(self, player_input: str, max_tokens: int = 2000) -> AsyncIterator[str]:
         self._max_tokens = max_tokens
+
+        # Ensure player power is evaluated with full context (runs once per campaign)
+        await self._ensure_player_power()
 
         # Single-call mode for Anthropic: one LLM call does everything
         if self._is_single_call_provider():
@@ -1023,7 +1117,7 @@ class GameSession:
                     return
 
                 combat_opponent_name = meta.get("opponent_name", "opponent")
-                llm_estimate = meta.get("opponent_power", 5)
+                llm_estimate = meta.get("opponent_power", 3)
                 combat_npc_power = self._resolve_opponent_power(combat_opponent_name, llm_estimate)
                 evaluation = await self._combat.evaluate_action(
                     action=player_input,
@@ -1649,7 +1743,7 @@ class GameSession:
                 return
 
             opponent_name = meta.get("opponent_name", "opponent")
-            llm_estimate = meta.get("opponent_power", 5)
+            llm_estimate = meta.get("opponent_power", 3)
             npc_power = self._resolve_opponent_power(opponent_name, llm_estimate)
             evaluation = await self._combat.evaluate_action(
                 action=player_input,
@@ -1827,7 +1921,7 @@ class GameSession:
     def _build_combat_narrator_hint(
         outcome: str,
         opponent_name: str = "",
-        opponent_power: int = 5,
+        opponent_power: int = 3,
         player_power: int = 3,
     ) -> str:
         """Build narrator instructions based on combat outcome and power levels.

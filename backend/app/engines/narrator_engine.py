@@ -82,9 +82,9 @@ class NarratorEngine:
 
         opponent_name = str(data.get("opponent_name", "")).strip()
         try:
-            opponent_power = max(1, min(10, int(data.get("opponent_power", 5))))
+            opponent_power = max(1, min(10, int(data.get("opponent_power", 3))))
         except (TypeError, ValueError):
-            opponent_power = 5
+            opponent_power = 3
 
         return mode, {
             "mode": mode.value,
@@ -544,6 +544,8 @@ class NarratorEngine:
             "mode": mode.value,
             "ambush": False,
             "narrative_time_seconds": seconds,
+            "opponent_name": "",
+            "opponent_power": 3,
         }
 
     @staticmethod
