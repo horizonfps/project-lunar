@@ -321,7 +321,21 @@ class GameSession:
         if not npc_powers:
             return ""
         npc_powers.sort(key=lambda x: x[1], reverse=True)
-        lines = [f"  {name}: {p}/10" for name, p in npc_powers[:20]]
+        # Include both ends of the scale — top AND bottom anchors
+        # so the LLM sees what "strong" and "weak" look like in this world.
+        if len(npc_powers) <= 20:
+            selected = npc_powers
+        else:
+            top = npc_powers[:12]
+            bottom = npc_powers[-8:]
+            # Deduplicate in case of overlap
+            seen = {n for n, _ in top}
+            for item in bottom:
+                if item[0] not in seen:
+                    top.append(item)
+                    seen.add(item[0])
+            selected = sorted(top, key=lambda x: x[1], reverse=True)
+        lines = [f"  {name}: {p}/10" for name, p in selected]
         return (
             "WORLD POWER SCALE — use these characters as anchors when estimating power:\n"
             + "\n".join(lines)
