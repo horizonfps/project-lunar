@@ -323,11 +323,11 @@ class GameSession:
         npc_powers.sort(key=lambda x: x[1], reverse=True)
         # Include both ends of the scale — top AND bottom anchors
         # so the LLM sees what "strong" and "weak" look like in this world.
-        if len(npc_powers) <= 20:
+        if len(npc_powers) <= 50:
             selected = npc_powers
         else:
-            top = npc_powers[:12]
-            bottom = npc_powers[-8:]
+            top = npc_powers[:25]
+            bottom = npc_powers[-25:]
             # Deduplicate in case of overlap
             seen = {n for n, _ in top}
             for item in bottom:
