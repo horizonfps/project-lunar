@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 import json
 import logging
 from dataclasses import asdict
@@ -283,7 +284,12 @@ class GameSession:
         )
 
     def _rebuild_memory_crystals(self) -> None:
-        """Rebuild memory crystals from MEMORY_CRYSTAL events in the store."""
+        """Rebuild memory crystals from MEMORY_CRYSTAL events in the store.
+
+        Handles the pyramid system: SHORT, MEDIUM, LONG, MEMORY tiers.
+        Crystals that were consolidated into a higher tier are marked consumed.
+        The cursor tracks the last SHORT crystal's timestamp for uncrystallized events.
+        """
         from app.engines.memory_engine import MemoryCrystal, CrystalTier
         crystal_events = self._event_store.get_by_type(
             self.campaign_id, EventType.MEMORY_CRYSTAL,
@@ -291,22 +297,29 @@ class GameSession:
         crystals = []
         for ev in crystal_events:
             try:
-                tier = CrystalTier(ev.payload.get("tier", "SHORT"))
+                tier_str = ev.payload.get("tier", "SHORT")
+                # Handle old "LONG" crystals from before the pyramid system
+                # by mapping them to MEDIUM (closest equivalent)
+                if tier_str == "LONG" and "consumed" not in ev.payload:
+                    tier_str = "MEDIUM"
+                tier = CrystalTier(tier_str)
                 crystals.append(MemoryCrystal(
                     campaign_id=self.campaign_id,
                     tier=tier,
                     content=ev.payload.get("summary", ""),
                     ai_content=ev.payload.get("ai_content", ""),
                     event_count=ev.payload.get("event_count", 0),
+                    consumed=ev.payload.get("consumed", False),
                     source_start_created_at=None,
                     source_end_created_at=ev.created_at,
                 ))
             except Exception:
                 continue
         self._memory._crystals[self.campaign_id] = crystals
-        # Reset crystal cursor to last crystal's timestamp
-        if crystals:
-            self._memory._last_crystal_cursor[self.campaign_id] = crystals[-1].source_end_created_at
+        # Cursor = last SHORT crystal's timestamp (for uncrystallized event tracking)
+        short_crystals = [c for c in crystals if c.tier == CrystalTier.SHORT]
+        if short_crystals:
+            self._memory._last_crystal_cursor[self.campaign_id] = short_crystals[-1].source_end_created_at
         else:
             self._memory._last_crystal_cursor.pop(self.campaign_id, None)
 
@@ -848,33 +861,9 @@ class GameSession:
             async for chunk in self._handle_narrative(player_input, mode):
                 yield chunk
 
+        # World reactor and auto-plot run async (fire-and-forget)
         if mode != NarrativeMode.META:
-            if self._graphiti:
-                world_ctx = await self._memory.build_context_window_async(self.campaign_id)
-            else:
-                world_ctx = self._memory.build_context_window(self.campaign_id)
-            world_changes = await self._world_reactor.process_tick(
-                campaign_id=self.campaign_id,
-                narrative_seconds=narrative_time,
-                world_context=world_ctx,
-                language=self.language,
-            )
-            if world_changes:
-                self._event_store.append(
-                    campaign_id=self.campaign_id,
-                    event_type=EventType.WORLD_TICK,
-                    payload={"text": world_changes},
-                    narrative_time_delta=0,
-                    location="world",
-                    entities=[],
-                )
-                await self._ingest_to_graphiti(world_changes, "world_tick")
-
-            try:
-                async for chunk in self._maybe_trigger_auto_plot(world_ctx):
-                    yield chunk
-            except Exception:
-                logger.warning("Auto plot generation failed", exc_info=True)
+            asyncio.create_task(self._async_world_tick(narrative_time))
 
     def _resolve_canonical_name(self, short_name: str, all_names: list[str]) -> str:
         """Resolve a potentially short name to its full canonical form.
@@ -939,12 +928,51 @@ class GameSession:
         else:
             memory_ctx = self._memory.build_context_window(self.campaign_id)
 
+        # Gather world context (shared by all modes)
+        inventory_ctx = ""
+        if self._inventory:
+            inventory_ctx = self._inventory.format_for_prompt(self.campaign_id)
+
+        graph_ctx = await self.get_graph_relationship_summary()
+
+        npc_ctx = ""
+        if self._npc_minds:
+            minds = self._npc_minds.get_all_minds(self.campaign_id)
+            if minds:
+                lines = ["NPC STATES (what each NPC is currently thinking/feeling):"]
+                for m in minds[:10]:
+                    thoughts = ", ".join(f"{k}={t.value}" for k, t in list(m.thoughts.items())[:4])
+                    lines.append(f"- {m.name}: {thoughts}")
+                npc_ctx = "\n".join(lines)
+
+        journal_ctx = ""
+        if self._journal:
+            try:
+                entries = self._journal.get_journal(self.campaign_id)
+                if entries:
+                    lines = ["STORY LOG (key events so far):"]
+                    for e in entries[-8:]:
+                        lines.append(f"- {e.summary}")
+                    journal_ctx = "\n".join(lines)
+            except Exception:
+                pass
+
+        story_cards_ctx = self._format_story_cards_context(
+            player_input=player_input,
+            recent_narrative=self._history[-1]["content"][:1000] if self._history else "",
+        )
+
         if mode == NarrativeMode.META:
-            system_prompt = self._build_meta_system_prompt()
+            system_prompt = self._narrator.build_meta_prompt(
+                language=self.language,
+                memory_context=memory_ctx,
+                inventory_context=inventory_ctx,
+                journal_context=journal_ctx,
+                npc_context=npc_ctx,
+                graph_context=graph_ctx,
+                story_cards_context=story_cards_ctx,
+            )
         else:
-            inventory_ctx = ""
-            if self._inventory:
-                inventory_ctx = self._inventory.format_for_prompt(self.campaign_id)
             # Build narrator hints from active plot seeds, micro-hooks, and NPC seeds
             narrator_hints = ""
             if self._active_plot_seeds:
@@ -978,30 +1006,6 @@ class GameSession:
                     player_power=self._player_power,
                 )
 
-            graph_ctx = await self.get_graph_relationship_summary()
-
-            npc_ctx = ""
-            if self._npc_minds:
-                minds = self._npc_minds.get_all_minds(self.campaign_id)
-                if minds:
-                    lines = ["NPC STATES (what each NPC is currently thinking/feeling):"]
-                    for m in minds[:10]:
-                        thoughts = ", ".join(f"{k}={t.value}" for k, t in list(m.thoughts.items())[:4])
-                        lines.append(f"- {m.name}: {thoughts}")
-                    npc_ctx = "\n".join(lines)
-
-            journal_ctx = ""
-            if self._journal:
-                try:
-                    entries = self._journal.get_journal(self.campaign_id)
-                    if entries:
-                        lines = ["STORY LOG (key events so far):"]
-                        for e in entries[-8:]:
-                            lines.append(f"- {e.summary}")
-                        journal_ctx = "\n".join(lines)
-                except Exception:
-                    pass
-
             system_prompt = self._narrator.build_system_prompt(
                 tone_instructions=self.scenario_tone,
                 memory_context=memory_ctx,
@@ -1012,10 +1016,7 @@ class GameSession:
                 graph_context=graph_ctx,
                 npc_context=npc_ctx,
                 journal_context=journal_ctx,
-                story_cards_context=self._format_story_cards_context(
-                    player_input=player_input,
-                    recent_narrative=self._history[-1]["content"][:1000] if self._history else "",
-                ),
+                story_cards_context=story_cards_ctx,
             )
 
         # Collect full response before sending to frontend (no streaming)
@@ -1076,15 +1077,13 @@ class GameSession:
             entities=[],
         )
 
-        # Journal evaluation
-        entry = await self._journal.evaluate_and_log(self.campaign_id, clean_response)
-        if self._is_journal_entry(entry):
-            yield f"[JOURNAL]{json.dumps({'category': entry.category.value, 'summary': entry.summary, 'created_at': entry.created_at})}"
-
-        # Post-narrative side effects (only for non-META actions)
+        # Fire side-effects async (non-blocking) — journal, NPC minds, graph,
+        # crystallization, power update all run after the narrative is sent.
         if mode != NarrativeMode.META and clean_response:
-            async for chunk in self._post_narrative_pipeline(clean_response):
-                yield chunk
+            asyncio.create_task(self._async_side_effects(clean_response))
+        else:
+            # META mode: only journal (lightweight)
+            asyncio.create_task(self._async_journal(clean_response))
 
     async def _process_action_single_call(self, player_input: str, max_tokens: int) -> AsyncIterator[str]:
         """Single LLM call mode for Anthropic: narrative + mode + NPCs + entities in one request."""
@@ -1497,8 +1496,83 @@ class GameSession:
         elif action == "lose":
             self._inventory.lose_item(self.campaign_id, inv_event["name"])
 
+    async def _async_side_effects(self, clean_response: str) -> None:
+        """Fire-and-forget side effects that run after the narrative is sent to the player.
+
+        These are important for game state but don't need to block the SSE response.
+        Any errors are logged but never surface to the player.
+        """
+        try:
+            logger.info("_async_side_effects: starting (response %d chars)", len(clean_response))
+
+            # Journal evaluation (lightweight LLM call)
+            await self._async_journal(clean_response)
+
+            # NPC mind updates
+            await self._update_npc_minds(clean_response)
+
+            # Graph entity extraction
+            await self._extract_to_graph(clean_response)
+
+            # Memory crystallization (may cascade to higher tiers)
+            await self._try_auto_crystallize()
+
+            # Graphiti ingestion
+            await self._ingest_to_graphiti(clean_response, "narrator_response")
+
+            # Power level evaluation
+            last_player_input = ""
+            if len(self._history) >= 2:
+                last_player_input = self._history[-2].get("content", "")
+            await self._evaluate_power_update(clean_response, last_player_input)
+
+            logger.info("_async_side_effects: completed")
+        except Exception:
+            logger.error("_async_side_effects failed", exc_info=True)
+
+    async def _async_world_tick(self, narrative_time: int) -> None:
+        """Fire-and-forget world reactor tick + auto-plot generation."""
+        try:
+            if self._graphiti:
+                world_ctx = await self._memory.build_context_window_async(self.campaign_id)
+            else:
+                world_ctx = self._memory.build_context_window(self.campaign_id)
+            world_changes = await self._world_reactor.process_tick(
+                campaign_id=self.campaign_id,
+                narrative_seconds=narrative_time,
+                world_context=world_ctx,
+                language=self.language,
+            )
+            if world_changes:
+                self._event_store.append(
+                    campaign_id=self.campaign_id,
+                    event_type=EventType.WORLD_TICK,
+                    payload={"text": world_changes},
+                    narrative_time_delta=0,
+                    location="world",
+                    entities=[],
+                )
+                await self._ingest_to_graphiti(world_changes, "world_tick")
+
+            # Auto-plot (still uses yields internally but we consume them here)
+            async for _ in self._maybe_trigger_auto_plot(world_ctx):
+                pass  # Plot events are persisted in _maybe_trigger_auto_plot
+        except Exception:
+            logger.error("_async_world_tick failed", exc_info=True)
+
+    async def _async_journal(self, clean_response: str) -> None:
+        """Fire-and-forget journal evaluation."""
+        try:
+            await self._journal.evaluate_and_log(self.campaign_id, clean_response)
+        except Exception:
+            logger.warning("Async journal evaluation failed", exc_info=True)
+
     async def _post_narrative_pipeline(self, clean_response: str) -> AsyncIterator[str]:
-        """Run all post-narrative side effects: NPC minds, graph, memory, graphiti, power."""
+        """Run all post-narrative side effects: NPC minds, graph, memory, graphiti, power.
+
+        Legacy method — used by the single-call path which still yields signals inline.
+        The streaming path uses _async_side_effects instead (fire-and-forget).
+        """
         logger.info("_post_narrative_pipeline: starting (response %d chars)", len(clean_response))
         await self._update_npc_minds(clean_response)
         await self._extract_to_graph(clean_response)
@@ -1509,8 +1583,6 @@ class GameSession:
 
         await self._ingest_to_graphiti(clean_response, "narrator_response")
 
-        # Evaluate player power changes from non-combat events too
-        # (e.g., absorbing artifacts, training, crippling injuries)
         last_player_input = ""
         if len(self._history) >= 2:
             last_player_input = self._history[-2].get("content", "")
@@ -1585,40 +1657,6 @@ class GameSession:
         except Exception:
             logger.warning("Graphiti %s ingestion failed", description, exc_info=True)
 
-    def _build_meta_system_prompt(self) -> str:
-        inventory_ctx = ""
-        if self._inventory:
-            inventory_ctx = self._inventory.format_for_prompt(self.campaign_id)
-
-        journal_ctx = ""
-        try:
-            entries = self._journal.get_journal(self.campaign_id)
-            if entries:
-                journal_ctx = "\n".join(
-                    f"- [{e.category.value}] {e.summary} ({e.created_at})"
-                    for e in entries[-10:]
-                )
-        except Exception:
-            pass
-
-        npc_ctx = ""
-        if self._npc_minds:
-            minds = self._npc_minds.get_all_minds(self.campaign_id)
-            if minds:
-                lines = []
-                for m in minds:
-                    thoughts_summary = ", ".join(
-                        f"{k}: {t.value}" for k, t in list(m.thoughts.items())[:3]
-                    )
-                    lines.append(f"- {m.name}: {thoughts_summary}")
-                npc_ctx = "\n".join(lines)
-
-        return self._narrator.build_meta_prompt(
-            language=self.language,
-            inventory_context=inventory_ctx,
-            journal_context=journal_ctx,
-            npc_context=npc_ctx,
-        )
 
     async def _maybe_trigger_auto_plot(self, world_context: str) -> AsyncIterator[str]:
         if not self._plot_generator or not self._auto_plot_rules:

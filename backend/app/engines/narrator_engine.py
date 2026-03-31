@@ -279,9 +279,12 @@ class NarratorEngine:
     def build_meta_prompt(
         self,
         language: str,
+        memory_context: str = "",
         inventory_context: str = "",
         journal_context: str = "",
         npc_context: str = "",
+        graph_context: str = "",
+        story_cards_context: str = "",
     ) -> str:
         lang_instruction = _LANGUAGE_INSTRUCTIONS.get(
             language,
@@ -295,39 +298,60 @@ class NarratorEngine:
             "- Reference action numbers and locations when citing events.",
             "- Use bullet points and structured formatting.",
             "- Answer questions about game state using the structured data below.",
+            "- Use ONLY the provided world data to answer. Do NOT invent or guess facts.",
         ]
+        if memory_context:
+            sections.append(f"\nWORLD MEMORY:\n{memory_context}")
         if inventory_context:
             sections.append(f"\n{inventory_context}")
         if journal_context:
             sections.append(f"\nJOURNAL (recent entries):\n{journal_context}")
         if npc_context:
             sections.append(f"\nACTIVE NPCs:\n{npc_context}")
+        if graph_context:
+            sections.append(f"\nWORLD RELATIONSHIPS:\n{graph_context}")
+        if story_cards_context:
+            sections.append(f"\n{story_cards_context}")
         return "\n".join(sections)
+
+    # Hard cap on history messages sent to the LLM.
+    # The crystal memory pyramid handles long-term context, so we only need
+    # recent exchanges for narrative continuity and tone consistency.
+    MAX_HISTORY_MESSAGES = 25  # ~12 exchanges + 1 user message
 
     @staticmethod
     def _dynamic_history_slice(history: list[dict], context_window: int, system_tokens: int) -> list[dict]:
-        """Return as many recent history messages as fit within the context budget.
+        """Return recent history messages, capped at MAX_HISTORY_MESSAGES.
+
+        The crystal memory pyramid (SHORT→MEDIUM→LONG→MEMORY) in the system
+        prompt provides long-term context.  The history slice only needs to
+        cover the most recent exchanges for narrative flow and tone.
 
         Budget allocation:
-        - system_tokens: already consumed by the system prompt
-        - output reserve: 2500 tokens (narrative + JSON overhead)
-        - remaining budget goes to history, newest messages first
+        - Hard cap: MAX_HISTORY_MESSAGES (newest messages)
+        - Then: fit within (context_window - system_tokens - output_reserve)
+        - Minimum: 4 messages (2 exchanges) for coherence
         """
+        max_msgs = NarratorEngine.MAX_HISTORY_MESSAGES
         output_reserve = 2500
         budget = context_window - system_tokens - output_reserve
         if budget <= 0:
-            return history[-4:]  # absolute minimum: keep last 2 exchanges
+            return history[-4:]
 
+        # Start from the most recent messages, capped at max_msgs
+        candidates = history[-max_msgs:] if len(history) > max_msgs else history
+
+        # Further trim by token budget
         selected: list[dict] = []
         used = 0
-        for msg in reversed(history):
+        for msg in reversed(candidates):
             msg_tokens = estimate_tokens(msg.get("content", ""))
             if used + msg_tokens > budget:
                 break
             selected.append(msg)
             used += msg_tokens
         selected.reverse()
-        # Always keep at least 4 messages (2 exchanges) for coherence
+
         if len(selected) < 4 and len(history) >= 4:
             selected = history[-4:]
         return selected

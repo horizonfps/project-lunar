@@ -16,7 +16,7 @@ from app.engines.combat_engine import CombatEngine
 from app.engines.plot_generator import PlotGenerator
 from app.engines.npc_mind_engine import NpcMindEngine
 from app.engines.inventory_engine import InventoryEngine
-from app.engines.llm_router import LLMRouter, LLMConfig, LLMProvider
+from app.engines.llm_router import LLMRouter, LLMConfig, LLMProvider, reset_call_log, get_call_summary
 from app.db.event_store import EventStore, EventType
 from app.db.scenario_store import ScenarioStore
 
@@ -235,6 +235,10 @@ class TimeskipRequest(BaseModel):
     seconds: int
 
 
+class NpcMindUpdateRequest(BaseModel):
+    thoughts: dict[str, str]  # {thought_key: value}
+
+
 class InventoryActionRequest(BaseModel):
     name: str
     action: str  # "use" or "discard"
@@ -270,6 +274,8 @@ async def player_action(req: PlayerActionRequest):
     _llm.config.max_tokens = req.max_tokens
 
     async def event_stream():
+        import json as _json
+        reset_call_log()
         async for chunk in session.process_action(req.action, max_tokens=req.max_tokens):
             # SSE requires each data line to be prefixed with "data:".
             # This preserves paragraph breaks/newlines in streamed prose.
@@ -277,6 +283,14 @@ async def player_action(req: PlayerActionRequest):
             for line in text.split("\n"):
                 yield f"data: {line}\n"
             yield "\n"
+        # Emit token debug summary as a special SSE event
+        summary = get_call_summary()
+        logger.warning(
+            "📊 ACTION COMPLETE: %d LLM calls, %d input tokens, %d output tokens, %.1fs total",
+            summary["call_count"], summary["total_input_tokens"],
+            summary["total_output_tokens"], summary["total_time_s"],
+        )
+        yield f"data: [TOKEN_DEBUG]{_json.dumps(summary)}\n\n"
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
@@ -342,6 +356,32 @@ async def get_npc_minds(campaign_id: str):
     _ensure_session(campaign_id)
     minds = _npc_minds.get_all_minds(campaign_id)
     return [m.to_dict() for m in minds]
+
+
+@router.delete("/{campaign_id}/npc-minds/{npc_name}")
+async def delete_npc_mind(campaign_id: str, npc_name: str):
+    """Delete an NPC mind from memory and event store."""
+    _ensure_session(campaign_id)
+    deleted = _npc_minds.delete_mind(campaign_id, npc_name)
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"NPC '{npc_name}' not found")
+    _event_store.delete_npc_thoughts(campaign_id, npc_name)
+    return {"status": "deleted", "name": npc_name}
+
+
+@router.put("/{campaign_id}/npc-minds/{npc_name}")
+async def update_npc_mind(campaign_id: str, npc_name: str, req: NpcMindUpdateRequest):
+    """Update thoughts for an NPC mind."""
+    _ensure_session(campaign_id)
+    mind = None
+    for key, value in req.thoughts.items():
+        mind = _npc_minds.update_thought(campaign_id, npc_name, key, value)
+    if not mind:
+        raise HTTPException(status_code=404, detail=f"NPC '{npc_name}' not found")
+    # Persist updated thoughts to event store
+    thoughts_dict = {k: t.value for k, t in mind.thoughts.items()}
+    _event_store.upsert_npc_thought(campaign_id, mind.name, thoughts_dict, mind.aliases)
+    return mind.to_dict()
 
 
 @router.get("/{campaign_id}/characters")

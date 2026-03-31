@@ -1,10 +1,109 @@
 from __future__ import annotations
+import inspect
+import logging
 import os
+import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import AsyncIterator
 
 import litellm
+
+logger = logging.getLogger(__name__)
+
+# ── Token Debug Tracking ────────────────────────────────────────────
+# Accumulates per-action stats across all LLM calls.
+_call_log: list[dict] = []
+
+
+def reset_call_log():
+    """Reset the per-action call log. Call at the start of each action."""
+    _call_log.clear()
+
+
+def get_call_log() -> list[dict]:
+    """Return accumulated LLM call stats for the current action."""
+    return list(_call_log)
+
+
+def get_call_summary() -> dict:
+    """Return a summary of all LLM calls in the current action."""
+    total_input = sum(c.get("input_tokens", 0) for c in _call_log)
+    total_output = sum(c.get("output_tokens", 0) for c in _call_log)
+    total_time = sum(c.get("elapsed_s", 0) for c in _call_log)
+    return {
+        "call_count": len(_call_log),
+        "total_input_tokens": total_input,
+        "total_output_tokens": total_output,
+        "total_tokens": total_input + total_output,
+        "total_time_s": round(total_time, 2),
+        "calls": [
+            {
+                "caller": c.get("caller", "?"),
+                "input_tokens": c.get("input_tokens", 0),
+                "output_tokens": c.get("output_tokens", 0),
+                "max_tokens": c.get("max_tokens", 0),
+                "elapsed_s": c.get("elapsed_s", 0),
+                "msg_count": c.get("msg_count", 0),
+                "system_chars": c.get("system_chars", 0),
+            }
+            for c in _call_log
+        ],
+    }
+
+
+def _get_caller() -> str:
+    """Walk the stack to find the meaningful caller (skip llm_router frames)."""
+    for frame_info in inspect.stack()[2:6]:
+        module = frame_info.filename
+        if "llm_router" not in module:
+            fname = os.path.basename(module).replace(".py", "")
+            return f"{fname}:{frame_info.function}:{frame_info.lineno}"
+    return "unknown"
+
+
+def _count_message_chars(messages: list[dict]) -> tuple[int, int]:
+    """Return (system_chars, total_chars) from messages."""
+    system_chars = 0
+    total_chars = 0
+    for msg in messages:
+        content = msg.get("content", "")
+        if isinstance(content, list):
+            chars = sum(len(p.get("text", "")) for p in content if isinstance(p, dict))
+        else:
+            chars = len(content)
+        total_chars += chars
+        if msg.get("role") == "system":
+            system_chars += chars
+    return system_chars, total_chars
+
+
+def _log_call(caller: str, messages: list[dict], max_tokens: int, response, elapsed: float):
+    """Log a completed LLM call with token usage."""
+    system_chars, total_chars = _count_message_chars(messages)
+    usage = getattr(response, "usage", None)
+    input_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
+    output_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
+
+    # Fallback: estimate from chars if usage not available
+    if not input_tokens:
+        input_tokens = total_chars // 4  # rough estimate
+
+    entry = {
+        "caller": caller,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "max_tokens": max_tokens,
+        "elapsed_s": round(elapsed, 2),
+        "msg_count": len(messages),
+        "system_chars": system_chars,
+    }
+    _call_log.append(entry)
+    logger.warning(
+        "🔥 LLM CALL [%s] input=%d output=%d max=%d time=%.1fs msgs=%d sys_chars=%d",
+        caller, input_tokens, output_tokens, max_tokens, elapsed,
+        len(messages), system_chars,
+    )
 
 
 class LLMProvider(str, Enum):
@@ -88,6 +187,7 @@ class LLMRouter:
         return None
 
     async def complete(self, messages: list[dict], **kwargs) -> str:
+        caller = _get_caller()
         model = self._build_model_string(
             self.config.primary_provider, self.config.primary_model
         )
@@ -97,6 +197,7 @@ class LLMRouter:
         if api_base:
             call_kwargs["api_base"] = api_base
             call_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
+        t0 = time.monotonic()
         try:
             response = await litellm.acompletion(
                 model=model,
@@ -105,6 +206,7 @@ class LLMRouter:
                 max_tokens=max_tokens,
                 **call_kwargs,
             )
+            _log_call(caller, messages, max_tokens, response, time.monotonic() - t0)
             return response.choices[0].message.content
         except Exception:
             if self.config.fallback_provider and self.config.fallback_model:
@@ -123,10 +225,12 @@ class LLMRouter:
                     max_tokens=self.config.max_tokens,
                     **fb_kwargs,
                 )
+                _log_call(caller, messages, max_tokens, response, time.monotonic() - t0)
                 return response.choices[0].message.content
             raise
 
     async def stream(self, messages: list[dict], **kwargs) -> AsyncIterator[str]:
+        caller = _get_caller()
         model = self._build_model_string(
             self.config.primary_provider, self.config.primary_model
         )
@@ -138,6 +242,7 @@ class LLMRouter:
             call_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
             # CLIProxyAPI streaming adds extra fields that confuse litellm's
             # SSE parser, so fall back to non-streaming and yield the result.
+            t0 = time.monotonic()
             response = await litellm.acompletion(
                 model=model,
                 messages=messages,
@@ -146,10 +251,12 @@ class LLMRouter:
                 stream=False,
                 **call_kwargs,
             )
+            _log_call(caller + "(stream→sync)", messages, max_tokens, response, time.monotonic() - t0)
             content = response.choices[0].message.content
             if content:
                 yield content
             return
+        t0 = time.monotonic()
         response = await litellm.acompletion(
             model=model,
             messages=messages,
@@ -158,7 +265,26 @@ class LLMRouter:
             stream=True,
             **call_kwargs,
         )
+        output_chars = 0
         async for chunk in response:
             delta = chunk.choices[0].delta.content
             if delta:
+                output_chars += len(delta)
                 yield delta
+        # For streaming, estimate tokens from output chars
+        system_chars, total_chars = _count_message_chars(messages)
+        entry = {
+            "caller": caller + "(stream)",
+            "input_tokens": total_chars // 4,
+            "output_tokens": output_chars // 4,
+            "max_tokens": max_tokens,
+            "elapsed_s": round(time.monotonic() - t0, 2),
+            "msg_count": len(messages),
+            "system_chars": system_chars,
+        }
+        _call_log.append(entry)
+        logger.warning(
+            "🔥 LLM CALL [%s] input≈%d output≈%d max=%d time=%.1fs msgs=%d sys_chars=%d",
+            entry["caller"], entry["input_tokens"], entry["output_tokens"],
+            max_tokens, entry["elapsed_s"], len(messages), system_chars,
+        )
