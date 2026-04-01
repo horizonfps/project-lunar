@@ -37,6 +37,10 @@ proxy/cliproxyapi/LICENSE
 proxy/cliproxyapi/README.md
 proxy/cliproxyapi/README_CN.md
 
+# Scenario exports (user data)
+scenario-*.json
+fix_scenario.py
+
 # Temp / tool dirs
 .inference_venv/
 .playwright-mcp/
