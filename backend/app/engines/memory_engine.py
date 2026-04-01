@@ -164,7 +164,7 @@ class MemoryEngine:
 
     # ── SHORT crystal creation (from raw events) ────────────────────
 
-    async def crystallize_short(self, campaign_id: str) -> MemoryCrystal | None:
+    async def crystallize_short(self, campaign_id: str, language: str = "en") -> MemoryCrystal | None:
         """Create a SHORT crystal from recent uncrystallized events."""
         events = self._get_uncrystallized_events(
             campaign_id, limit=self.MAX_CRYSTALLIZE_EVENTS,
@@ -177,6 +177,7 @@ class MemoryEngine:
             tier=CrystalTier.SHORT,
             source_text=events_text,
             max_tokens=256,
+            language=language,
         )
         if not ai_content:
             ai_content = self._fallback_short(events)
@@ -204,7 +205,7 @@ class MemoryEngine:
     # ── Tier consolidation (SHORT→MEDIUM→LONG→MEMORY) ──────────────
 
     async def _consolidate_tier(
-        self, campaign_id: str, target_tier: CrystalTier,
+        self, campaign_id: str, target_tier: CrystalTier, language: str = "en",
     ) -> MemoryCrystal | None:
         """Consolidate N crystals of the previous tier into 1 of target_tier."""
         prev_tier = target_tier.previous_tier
@@ -229,6 +230,7 @@ class MemoryEngine:
             tier=target_tier,
             source_text=source_text,
             max_tokens=max_tokens,
+            language=language,
         )
         if not ai_content:
             # Fallback: just concatenate with separator
@@ -264,7 +266,7 @@ class MemoryEngine:
         )
         return crystal
 
-    async def cascade_consolidation(self, campaign_id: str) -> list[MemoryCrystal]:
+    async def cascade_consolidation(self, campaign_id: str, language: str = "en") -> list[MemoryCrystal]:
         """Run the full consolidation cascade: SHORT→MEDIUM→LONG→MEMORY.
 
         After creating a SHORT crystal, checks if enough unconsumed crystals
@@ -273,7 +275,7 @@ class MemoryEngine:
         """
         created: list[MemoryCrystal] = []
         for target_tier in (CrystalTier.MEDIUM, CrystalTier.LONG, CrystalTier.MEMORY):
-            crystal = await self._consolidate_tier(campaign_id, target_tier)
+            crystal = await self._consolidate_tier(campaign_id, target_tier, language=language)
             if crystal:
                 created.append(crystal)
             else:
@@ -282,7 +284,7 @@ class MemoryEngine:
 
     # ── Auto-crystallize (called from game_session) ─────────────────
 
-    async def auto_crystallize_if_needed(self, campaign_id: str) -> MemoryCrystal | None:
+    async def auto_crystallize_if_needed(self, campaign_id: str, language: str = "en") -> MemoryCrystal | None:
         """Auto-crystallize when raw events exceed threshold, then cascade."""
         if campaign_id in self._crystallizing:
             return None
@@ -299,10 +301,10 @@ class MemoryEngine:
                 "Auto-crystallizing %d events for campaign %s",
                 len(pending_events), campaign_id,
             )
-            short_crystal = await self.crystallize_short(campaign_id)
+            short_crystal = await self.crystallize_short(campaign_id, language=language)
             if short_crystal:
                 # Cascade: check if we can consolidate higher tiers
-                cascaded = await self.cascade_consolidation(campaign_id)
+                cascaded = await self.cascade_consolidation(campaign_id, language=language)
                 if cascaded:
                     logger.info(
                         "Cascade created %d higher-tier crystals: %s",
@@ -323,10 +325,11 @@ class MemoryEngine:
         campaign_id: str,
         tier: CrystalTier = CrystalTier.SHORT,
         force: bool = False,
+        language: str = "en",
     ) -> MemoryCrystal:
         """Backward-compatible crystallize. SHORT → crystallize_short, others → consolidate."""
         if tier == CrystalTier.SHORT:
-            result = await self.crystallize_short(campaign_id)
+            result = await self.crystallize_short(campaign_id, language=language)
             if result:
                 return result
             # Return latest if nothing new
@@ -361,9 +364,12 @@ class MemoryEngine:
 
     async def _compress_with_llm(
         self, tier: CrystalTier, source_text: str, max_tokens: int = 512,
+        language: str = "en",
     ) -> tuple[str, str]:
         """Compress source text using the tier-specific prompt. Returns (ai_content, summary)."""
         prompt_text = _CRYSTAL_PROMPTS.get(tier, _CRYSTAL_PROMPTS[CrystalTier.SHORT])
+        if language and language != "en":
+            prompt_text += f"\n\nIMPORTANT: Write the 'summary' field in {language}. The 'ai' field can use any language for compression but proper names must match the source text."
         messages = [
             {"role": "system", "content": prompt_text},
             {"role": "user", "content": source_text},

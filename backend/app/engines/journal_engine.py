@@ -33,7 +33,11 @@ class JournalEngine:
         self,
         campaign_id: str,
         narrative_text: str,
+        language: str = "en",
     ) -> JournalEntry | None:
+        lang_hint = ""
+        if language and language != "en":
+            lang_hint = f" Write the summary in {language}."
         messages = [
             {
                 "role": "system",
@@ -51,6 +55,7 @@ class JournalEngine:
                     '{"relevant": bool, '
                     '"category": "DISCOVERY|RELATIONSHIP_CHANGE|COMBAT|DECISION|WORLD_EVENT|null", '
                     '"summary": "one sentence summary or null"}'
+                    + lang_hint
                 ),
             },
             {"role": "user", "content": narrative_text},

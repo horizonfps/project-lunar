@@ -1345,7 +1345,7 @@ class GameSession:
         )
 
         # Journal evaluation for narrative
-        entry = await self._journal.evaluate_and_log(self.campaign_id, clean_response)
+        entry = await self._journal.evaluate_and_log(self.campaign_id, clean_response, language=self.language)
         if self._is_journal_entry(entry):
             yield f"[JOURNAL]{json.dumps({'category': entry.category.value, 'summary': entry.summary, 'created_at': entry.created_at})}"
 
@@ -1357,7 +1357,7 @@ class GameSession:
                 f"Player power: {self._player_power}. "
                 f"Outcome: {combat_outcome}. Quality: {combat_quality}/10."
             )
-            combat_entry = await self._journal.evaluate_and_log(self.campaign_id, combat_summary)
+            combat_entry = await self._journal.evaluate_and_log(self.campaign_id, combat_summary, language=self.language)
             if self._is_journal_entry(combat_entry):
                 yield f"[JOURNAL]{json.dumps({'category': combat_entry.category.value, 'summary': combat_entry.summary, 'created_at': combat_entry.created_at})}"
 
@@ -1563,7 +1563,7 @@ class GameSession:
     async def _async_journal(self, clean_response: str) -> None:
         """Fire-and-forget journal evaluation."""
         try:
-            await self._journal.evaluate_and_log(self.campaign_id, clean_response)
+            await self._journal.evaluate_and_log(self.campaign_id, clean_response, language=self.language)
         except Exception:
             logger.warning("Async journal evaluation failed", exc_info=True)
 
@@ -1640,7 +1640,7 @@ class GameSession:
 
     async def _try_auto_crystallize(self):
         try:
-            return await self._memory.auto_crystallize_if_needed(self.campaign_id)
+            return await self._memory.auto_crystallize_if_needed(self.campaign_id, language=self.language)
         except Exception:
             logger.warning("Auto-crystallization failed", exc_info=True)
             return None
@@ -1877,7 +1877,7 @@ class GameSession:
                 f"Player power: {self._player_power}. "
                 f"Outcome: {outcome_value}. Quality: {evaluation.final_quality}/10."
             )
-            combat_entry = await self._journal.evaluate_and_log(self.campaign_id, combat_summary)
+            combat_entry = await self._journal.evaluate_and_log(self.campaign_id, combat_summary, language=self.language)
             if self._is_journal_entry(combat_entry):
                 yield f"[JOURNAL]{json.dumps({'category': combat_entry.category.value, 'summary': combat_entry.summary, 'created_at': combat_entry.created_at})}"
         except Exception:
