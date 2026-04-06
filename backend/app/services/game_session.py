@@ -287,7 +287,8 @@ class GameSession:
         """Rebuild memory crystals from MEMORY_CRYSTAL events in the store.
 
         Handles the pyramid system: SHORT, MEDIUM, LONG, MEMORY tiers.
-        Crystals that were consolidated into a higher tier are marked consumed.
+        Consumed state is INFERRED from tier counts (the DB payload is unreliable
+        because consumed is only updated in-memory during consolidation).
         The cursor tracks the last SHORT crystal's timestamp for uncrystallized events.
         """
         from app.engines.memory_engine import MemoryCrystal, CrystalTier
@@ -309,12 +310,27 @@ class GameSession:
                     content=ev.payload.get("summary", ""),
                     ai_content=ev.payload.get("ai_content", ""),
                     event_count=ev.payload.get("event_count", 0),
-                    consumed=ev.payload.get("consumed", False),
+                    consumed=False,  # Inferred below from tier counts
                     source_start_created_at=None,
                     source_end_created_at=ev.created_at,
                 ))
             except Exception:
                 continue
+
+        # Infer consumed state from tier counts.
+        # Each higher-tier crystal was created by consuming CONSOLIDATION_COUNT
+        # crystals of the previous tier (oldest first, in creation order).
+        consolidation_count = self._memory.CONSOLIDATION_COUNT
+        for current_tier in (CrystalTier.SHORT, CrystalTier.MEDIUM, CrystalTier.LONG):
+            next_tier = current_tier.next_tier
+            if next_tier is None:
+                continue
+            next_count = sum(1 for c in crystals if c.tier == next_tier)
+            consumed_count = next_count * consolidation_count
+            current_tier_crystals = [c for c in crystals if c.tier == current_tier]
+            for c in current_tier_crystals[:consumed_count]:
+                c.consumed = True
+
         self._memory._crystals[self.campaign_id] = crystals
         # Cursor = last SHORT crystal's timestamp (for uncrystallized event tracking)
         short_crystals = [c for c in crystals if c.tier == CrystalTier.SHORT]
