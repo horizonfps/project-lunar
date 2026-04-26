@@ -7,7 +7,7 @@ from app.engines.llm_router import LLMRouter, LLMConfig, LLMProvider
 def config():
     return LLMConfig(
         primary_provider=LLMProvider.DEEPSEEK,
-        primary_model="deepseek-chat",
+        primary_model="deepseek-v4-flash",
         temperature=0.85,
         max_tokens=2000,
     )
@@ -19,8 +19,8 @@ def router(config):
 
 
 def test_build_deepseek_model_string(router):
-    model = router._build_model_string(LLMProvider.DEEPSEEK, "deepseek-chat")
-    assert model == "deepseek/deepseek-chat"
+    model = router._build_model_string(LLMProvider.DEEPSEEK, "deepseek-v4-flash")
+    assert model == "deepseek/deepseek-v4-flash"
 
 
 def test_build_openai_model_string(router):

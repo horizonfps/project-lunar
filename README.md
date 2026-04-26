@@ -232,7 +232,7 @@ Project Lunar supports multiple LLM providers via [litellm](https://github.com/B
 
 | Provider | Models | Context | Pipeline | Cost |
 |----------|--------|---------|----------|------|
-| **DeepSeek** | deepseek-chat, deepseek-reasoner | 200K | Streaming + multi-call (5-6 LLM calls/action) | ~$0.002/action |
+| **DeepSeek** | deepseek-v4-flash, deepseek-v4-pro | 1M | Streaming + multi-call (5-6 LLM calls/action) | ~$0.002/action |
 | **Anthropic** | claude-sonnet-4-6, claude-opus-4-6 | 1M | Single-call + prompt caching (1 LLM call/action) | ~$0.07/action |
 | **OpenAI** | gpt-4o, gpt-4o-mini | 128K | Streaming + multi-call | ~$0.01/action |
 
@@ -303,7 +303,7 @@ At 0.85, DeepSeek produces prose that reads like literary fiction rather than ge
 
 At 0.70, the same prompts produced competent but predictable, exposition-heavy responses. At 1.00, creativity increased but prose occasionally became unfocused or verbose. 0.85 hits the sweet spot where every response feels like it was written by a human author who genuinely cares about the story.
 
-> **Note:** These results are specific to DeepSeek (deepseek-chat). Anthropic models produce excellent results across a wider temperature range (0.7–1.0) due to stronger instruction adherence. OpenAI models tend to degrade above 0.9.
+> **Note:** These results are specific to DeepSeek (deepseek-v4-flash). Anthropic models produce excellent results across a wider temperature range (0.7–1.0) due to stronger instruction adherence. OpenAI models tend to degrade above 0.9.
 
 ---
 

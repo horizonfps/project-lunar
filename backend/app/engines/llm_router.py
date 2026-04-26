@@ -115,9 +115,12 @@ class LLMProvider(str, Enum):
 # Context window sizes (in tokens) per provider/model.
 # Used to calculate dynamic context budgets.
 _CONTEXT_WINDOWS: dict[str, int] = {
-    # DeepSeek (128k context)
-    "deepseek/deepseek-chat": 128_000,
-    "deepseek/deepseek-reasoner": 128_000,
+    # DeepSeek V4 (1M context)
+    "deepseek/deepseek-v4-flash": 1_000_000,
+    "deepseek/deepseek-v4-pro": 1_000_000,
+    # Legacy aliases — map to DeepSeek-V4-Flash (non-thinking / thinking modes)
+    "deepseek/deepseek-chat": 1_000_000,
+    "deepseek/deepseek-reasoner": 1_000_000,
     # Anthropic — Claude 4.6 (1M context)
     "anthropic/claude-opus-4-6": 1_000_000,
     "anthropic/claude-sonnet-4-6": 1_000_000,
@@ -149,7 +152,7 @@ _DEFAULT_CONTEXT_WINDOW = 200_000  # reasonable fallback
 @dataclass
 class LLMConfig:
     primary_provider: LLMProvider = LLMProvider.DEEPSEEK
-    primary_model: str = "deepseek-chat"
+    primary_model: str = "deepseek-v4-flash"
     fallback_provider: LLMProvider | None = None
     fallback_model: str | None = None
     temperature: float = 0.85

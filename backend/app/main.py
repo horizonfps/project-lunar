@@ -54,7 +54,7 @@ async def health_neo4j():
 
 class SettingsUpdateRequest(BaseModel):
     provider: str = "deepseek"
-    model: str = "deepseek-chat"
+    model: str = "deepseek-v4-flash"
     temperature: float = 0.85
     max_tokens: int = 2000
 

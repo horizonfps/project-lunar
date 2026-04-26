@@ -103,7 +103,7 @@ export function streamAction({
       opening_narrative: openingNarrative || '',
       max_tokens: maxTokens || 2000,
       provider: provider || 'deepseek',
-      model: model || 'deepseek-chat',
+      model: model || 'deepseek-v4-flash',
       temperature: temperature ?? 0.85,
     }),
   })

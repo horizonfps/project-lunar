@@ -19,7 +19,7 @@ export const useGameStore = create((set) => ({
 
   // Settings
   llmProvider: 'deepseek',
-  llmModel: 'deepseek-chat',
+  llmModel: 'deepseek-v4-flash',
   temperature: 0.85,
   maxTokens: 2000,
 

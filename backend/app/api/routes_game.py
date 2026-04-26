@@ -215,13 +215,13 @@ class PlayerActionRequest(BaseModel):
     opening_narrative: str = Field(default="", max_length=20000)
     max_tokens: int = Field(default=2000, ge=256, le=8192)
     provider: str = Field(default="deepseek", max_length=20)
-    model: str = Field(default="deepseek-chat", max_length=64)
+    model: str = Field(default="deepseek-v4-flash", max_length=64)
     temperature: float = Field(default=0.85, ge=0.0, le=2.0)
 
 
 class SettingsRequest(BaseModel):
     provider: str = "deepseek"
-    model: str = "deepseek-chat"
+    model: str = "deepseek-v4-flash"
     temperature: float = 0.85
     max_tokens: int = 2000
 
