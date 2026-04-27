@@ -304,6 +304,24 @@ export async function fetchNpcMinds(campaignId) {
   return r.json()
 }
 
+export async function deleteNpcMind(campaignId, npcName) {
+  const r = await fetch(`${BASE}/game/${campaignId}/npc-minds/${encodeURIComponent(npcName)}`, {
+    method: 'DELETE',
+  })
+  if (!r.ok) throw new Error('Failed to delete NPC mind')
+  return r.json()
+}
+
+export async function updateNpcMind(campaignId, npcName, thoughts) {
+  const r = await fetch(`${BASE}/game/${campaignId}/npc-minds/${encodeURIComponent(npcName)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ thoughts }),
+  })
+  if (!r.ok) throw new Error('Failed to update NPC mind')
+  return r.json()
+}
+
 export async function generateContent(campaignId, type, language = 'en') {
   const r = await fetch(`${BASE}/game/${campaignId}/generate`, {
     method: 'POST',
@@ -321,5 +339,66 @@ export async function timeskip(campaignId, seconds) {
     body: JSON.stringify({ seconds }),
   })
   if (!r.ok) throw new Error('Timeskip failed')
+  return r.json()
+}
+
+export async function fetchSetupState(campaignId) {
+  const r = await fetch(`${BASE}/game/${campaignId}/setup-state`)
+  if (!r.ok) throw new Error('Failed to fetch setup state')
+  return r.json()
+}
+
+export async function saveSetupAnswers(campaignId, answers) {
+  const r = await fetch(`${BASE}/game/${campaignId}/setup-answers`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ answers }),
+  })
+  if (!r.ok) throw new Error('Failed to save setup answers')
+  return r.json()
+}
+
+export async function fetchScenarioView(campaignId) {
+  const r = await fetch(`${BASE}/game/${campaignId}/scenario-view`)
+  if (!r.ok) throw new Error('Failed to fetch scenario view')
+  return r.json()
+}
+
+export async function previewOpening({
+  language,
+  tone,
+  lore,
+  directive,
+  setup_questions,
+  sample_answers,
+}) {
+  const r = await fetch(`${BASE}/scenarios/preview-opening`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      language: language || 'en',
+      tone: tone || '',
+      lore: lore || '',
+      directive: directive || '',
+      setup_questions: setup_questions || [],
+      sample_answers: sample_answers || {},
+    }),
+  })
+  if (!r.ok) throw new Error('Failed to preview opening')
+  return r.json()
+}
+
+export async function regenerateOpening(campaignId) {
+  const r = await fetch(`${BASE}/game/${campaignId}/regenerate-opening`, {
+    method: 'POST',
+  })
+  if (!r.ok) {
+    const err = new Error('Failed to regenerate opening')
+    err.status = r.status
+    try {
+      err.detail = (await r.json()).detail
+    } catch {}
+    throw err
+  }
   return r.json()
 }

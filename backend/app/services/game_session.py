@@ -9,6 +9,7 @@ from app.db.event_store import EventStore, EventType
 from app.engines.llm_router import LLMProvider
 from app.engines.narrator_engine import NarrativeMode, estimate_tokens
 from app.engines.plot_generator import AUTO_PLOT_RULES
+from app.services.scenario_interpolation import interpolate
 from app.utils.json_parsing import parse_json_dict
 
 logger = logging.getLogger(__name__)
@@ -34,10 +35,18 @@ class GameSession:
         auto_plot_rules=None,
         opening_narrative: str = "",
         story_cards: list | None = None,
+        setup_answers: dict | None = None,
     ):
         self.campaign_id = campaign_id
-        self.scenario_tone = scenario_tone
         self.language = language
+        self._setup_answers = setup_answers or {}
+        # Tone may reference {var} placeholders that draw from setup_answers
+        # — resolve them once now so the narrator never sees raw template tokens.
+        self.scenario_tone = interpolate(
+            scenario_tone, self._setup_answers,
+            context=f"campaign:{campaign_id}:tone",
+        )
+        self._character_setup_block = self._build_character_setup_block()
         self._narrator = narrator
         self._memory = memory
         self._story_cards = story_cards or []
@@ -90,7 +99,11 @@ class GameSession:
         # If this is a brand-new campaign (no history) and we have an
         # opening narrative, seed the history so the AI knows the story setup.
         if not self._history and opening_narrative:
-            self._history.append({"role": "assistant", "content": opening_narrative})
+            resolved_opening = interpolate(
+                opening_narrative, self._setup_answers,
+                context=f"campaign:{campaign_id}:opening",
+            )
+            self._history.append({"role": "assistant", "content": resolved_opening})
 
     def _rebuild_history_from_events(self) -> None:
         """Rebuild _history from persisted events so the AI retains context."""
@@ -376,6 +389,27 @@ class GameSession:
             + "\n"
             "Unnamed creatures/enemies should be calibrated relative to these anchors."
         )
+
+    def _build_character_setup_block(self) -> str:
+        """Format setup_answers into a CHARACTER SETUP block injected into the
+        narrator's system prompt. Returns empty string when no answers exist."""
+        if not self._setup_answers:
+            return ""
+        lines: list[str] = ["CHARACTER SETUP (locked from session start):"]
+        for answer in self._setup_answers.values():
+            if not isinstance(answer, dict):
+                continue
+            var_name = answer.get("var_name") or ""
+            value = answer.get("value") or ""
+            description = answer.get("description") or ""
+            if not var_name or not value:
+                continue
+            lines.append(f"- {var_name}: {value}")
+            if description:
+                lines.append(f"  {description}")
+        if len(lines) == 1:  # only the header
+            return ""
+        return "\n".join(lines)
 
     def _init_player_power(self) -> int:
         """Sync default — overridden by _rebuild_player_power or _ensure_player_power."""
@@ -1033,6 +1067,7 @@ class GameSession:
                 npc_context=npc_ctx,
                 journal_context=journal_ctx,
                 story_cards_context=story_cards_ctx,
+                character_setup=self._character_setup_block,
             )
 
         # Collect full response before sending to frontend (no streaming)
@@ -1275,6 +1310,7 @@ class GameSession:
                 player_input=player_input,
                 recent_narrative=self._history[-1]["content"][:1000] if self._history else "",
             ),
+            character_setup=self._character_setup_block,
         )
 
         # Collect canonical names for entity extraction

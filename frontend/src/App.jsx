@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useGameStore } from './store'
-import { fetchScenarios, exportScenario, fetchCampaigns, createCampaign, checkNeo4j, deleteCampaign, deleteScenario } from './api'
+import { fetchScenarios, exportScenario, fetchCampaigns, createCampaign, checkNeo4j, deleteCampaign, deleteScenario, fetchSetupState } from './api'
 import ErrorBoundary from './components/ErrorBoundary'
 import GameCanvas from './components/GameCanvas'
 import ScenarioBuilder from './components/ScenarioBuilder'
+import SetupWizard from './components/SetupWizard'
 
 const ArchiveIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -254,6 +255,52 @@ function Home() {
   )
 }
 
+function PlayGate() {
+  const { activeScenario, activeCampaignId } = useGameStore()
+  const [state, setState] = useState({ status: 'loading', questions: [] })
+
+  useEffect(() => {
+    if (!activeCampaignId) {
+      setState({ status: 'ready', questions: [] })
+      return
+    }
+    let cancelled = false
+    fetchSetupState(activeCampaignId)
+      .then((data) => {
+        if (cancelled) return
+        if (data.needs_setup) {
+          setState({ status: 'wizard', questions: data.questions || [] })
+        } else {
+          setState({ status: 'ready', questions: [] })
+        }
+      })
+      .catch(() => {
+        // Backend down or campaign missing — let GameCanvas surface the error.
+        if (!cancelled) setState({ status: 'ready', questions: [] })
+      })
+    return () => { cancelled = true }
+  }, [activeCampaignId])
+
+  if (state.status === 'loading') {
+    return (
+      <div className="min-h-screen bg-black text-white/40 flex items-center justify-center text-xs uppercase tracking-[0.3em]">
+        Loading…
+      </div>
+    )
+  }
+  if (state.status === 'wizard') {
+    return (
+      <SetupWizard
+        scenario={activeScenario}
+        campaignId={activeCampaignId}
+        questions={state.questions}
+        onComplete={() => setState({ status: 'ready', questions: [] })}
+      />
+    )
+  }
+  return <GameCanvas />
+}
+
 export default function App() {
   useEffect(() => {
     useGameStore.getState().restoreSettings()
@@ -265,7 +312,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/create" element={<ScenarioBuilder onCreated={() => window.location.href = '/'} />} />
-          <Route path="/play" element={<GameCanvas />} />
+          <Route path="/play" element={<PlayGate />} />
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>

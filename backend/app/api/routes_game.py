@@ -17,8 +17,13 @@ from app.engines.plot_generator import PlotGenerator
 from app.engines.npc_mind_engine import NpcMindEngine
 from app.engines.inventory_engine import InventoryEngine
 from app.engines.llm_router import LLMRouter, LLMConfig, LLMProvider, reset_call_log, get_call_summary
+from app.engines.opening_generator import (
+    format_setup_lines,
+    generate_opening,
+)
 from app.db.event_store import EventStore, EventType
 from app.db.scenario_store import ScenarioStore
+from app.services.scenario_interpolation import interpolate
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +94,17 @@ def _load_scenario_for_campaign(campaign_id: str):
         return "", "en", ""
 
 
+def _load_setup_answers_for_campaign(campaign_id: str) -> dict:
+    """Load setup wizard answers persisted for the campaign (empty if none)."""
+    try:
+        with ScenarioStore(_SCENARIO_DB_PATH) as store:
+            campaign = store.get_campaign(campaign_id)
+        return campaign.setup_answers if campaign else {}
+    except Exception:
+        logger.debug("Could not load setup answers for campaign %s", campaign_id)
+        return {}
+
+
 def _ensure_session(campaign_id: str) -> GameSession:
     """Get or create a GameSession, ensuring all in-memory state is rebuilt.
 
@@ -100,6 +116,16 @@ def _ensure_session(campaign_id: str) -> GameSession:
 
     tone, language, opening = _load_scenario_for_campaign(campaign_id)
     story_cards = _load_story_cards_for_campaign(campaign_id)
+    setup_answers = _load_setup_answers_for_campaign(campaign_id)
+    # If the campaign has an AI-generated opening, prefer it over the
+    # scenario template — that's the text the player saw in the UI.
+    try:
+        with ScenarioStore(_SCENARIO_DB_PATH) as _store:
+            _campaign = _store.get_campaign(campaign_id)
+        if _campaign and _campaign.generated_opening:
+            opening = _campaign.generated_opening
+    except Exception:
+        logger.debug("Could not load generated_opening for campaign %s", campaign_id)
     graph = _get_graph_engine(campaign_id)
     graphiti = _get_graphiti_engine()
     if graphiti:
@@ -122,6 +148,7 @@ def _ensure_session(campaign_id: str) -> GameSession:
         inventory_engine=_inventory,
         opening_narrative=opening,
         story_cards=story_cards,
+        setup_answers=setup_answers,
     )
     return _sessions[campaign_id]
 
@@ -209,10 +236,10 @@ async def _fallback_graph_search(campaign_id: str, query: str, limit: int = 10) 
 
 class PlayerActionRequest(BaseModel):
     campaign_id: str = Field(..., min_length=1, max_length=64)
-    scenario_tone: str = Field(default="", max_length=10000)
+    scenario_tone: str = Field(default="", max_length=50000)
     language: str = Field(default="en", max_length=10)
-    action: str = Field(..., min_length=1, max_length=10000)
-    opening_narrative: str = Field(default="", max_length=20000)
+    action: str = Field(..., min_length=1, max_length=20000)
+    opening_narrative: str = Field(default="", max_length=50000)
     max_tokens: int = Field(default=2000, ge=256, le=8192)
     provider: str = Field(default="deepseek", max_length=20)
     model: str = Field(default="deepseek-v4-flash", max_length=64)
@@ -244,6 +271,18 @@ class InventoryActionRequest(BaseModel):
     action: str  # "use" or "discard"
 
 
+class SetupAnswer(BaseModel):
+    var_name: str
+    resolved_prompt: str = ""
+    type: str  # "text" | "choice"
+    value: str
+    description: str = ""
+
+
+class SetupAnswersRequest(BaseModel):
+    answers: dict[str, SetupAnswer]
+
+
 def _get_graph_engine(campaign_id: str):
     """Get or create a GraphEngine for the given campaign."""
     if campaign_id in _graph_engines:
@@ -261,8 +300,14 @@ def _get_graph_engine(campaign_id: str):
 @router.post("/action")
 async def player_action(req: PlayerActionRequest):
     session = _ensure_session(req.campaign_id)
-    # Update session with request-specific values that may differ per action
-    session.scenario_tone = req.scenario_tone or session.scenario_tone
+    # Update session with request-specific values that may differ per action.
+    # The frontend may send the raw tone template — re-interpolate against the
+    # session's setup answers so {var} tokens never reach the narrator.
+    if req.scenario_tone:
+        session.scenario_tone = interpolate(
+            req.scenario_tone, session._setup_answers,
+            context=f"campaign:{req.campaign_id}:tone",
+        )
     session.language = req.language or session.language
     # Apply user's LLM settings per-request
     try:
@@ -294,6 +339,189 @@ async def player_action(req: PlayerActionRequest):
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+@router.get("/{campaign_id}/scenario-view")
+async def get_scenario_view(campaign_id: str):
+    """Return the resolved per-campaign scenario surface (opening, tone, lore).
+
+    Precedence for ``opening_narrative``:
+      1. ``campaign.generated_opening`` if non-empty (AI-generated path).
+      2. ``scenario.opening_narrative`` interpolated against setup_answers.
+    """
+    with ScenarioStore(_SCENARIO_DB_PATH) as store:
+        campaign = store.get_campaign(campaign_id)
+        if not campaign:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+        scenario = store.get_scenario(campaign.scenario_id)
+    if not scenario:
+        raise HTTPException(status_code=404, detail="Scenario not found")
+
+    answers = campaign.setup_answers or {}
+    ctx_root = f"campaign:{campaign_id}"
+    opening = campaign.generated_opening or interpolate(
+        scenario.opening_narrative, answers, context=f"{ctx_root}:opening",
+    )
+    return {
+        "title": scenario.title,
+        "language": scenario.language,
+        "opening_narrative": opening,
+        "tone_instructions": interpolate(
+            scenario.tone_instructions, answers, context=f"{ctx_root}:tone",
+        ),
+        "lore_text": interpolate(
+            scenario.lore_text, answers, context=f"{ctx_root}:lore",
+        ),
+        "opening_mode": scenario.opening_mode,
+        "has_generated_opening": bool(campaign.generated_opening),
+    }
+
+
+@router.get("/{campaign_id}/setup-state")
+async def get_setup_state(campaign_id: str):
+    """Return the wizard state for a campaign: questions defined by the scenario,
+    answers already saved, and whether the wizard still needs to run."""
+    with ScenarioStore(_SCENARIO_DB_PATH) as store:
+        campaign = store.get_campaign(campaign_id)
+        if not campaign:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+        scenario = store.get_scenario(campaign.scenario_id)
+    if not scenario:
+        raise HTTPException(status_code=404, detail="Scenario not found")
+
+    questions = scenario.setup_questions or []
+    answers = campaign.setup_answers or {}
+    needs_setup = bool(questions) and not answers
+    return {
+        "questions": questions,
+        "answers": answers,
+        "needs_setup": needs_setup,
+    }
+
+
+async def _maybe_generate_opening(
+    campaign_id: str,
+    setup_payload: dict,
+) -> str | None:
+    """If the scenario opts into AI openings, generate one and persist it.
+
+    Returns the generated text on success, ``None`` if the scenario is in
+    fixed mode or generation failed (the caller falls back to the static
+    template). Any LLM failure is logged but never raised — players should
+    not be blocked by an outage at session start.
+    """
+    import time
+
+    with ScenarioStore(_SCENARIO_DB_PATH) as store:
+        campaign = store.get_campaign(campaign_id)
+        if not campaign:
+            return None
+        scenario = store.get_scenario(campaign.scenario_id)
+    if not scenario or scenario.opening_mode != "ai":
+        return None
+
+    lines = format_setup_lines(setup_payload, scenario.setup_questions)
+    router_ = LLMRouter(LLMConfig())
+    t0 = time.monotonic()
+    try:
+        text = await generate_opening(
+            language=scenario.language,
+            tone=scenario.tone_instructions,
+            lore=scenario.lore_text,
+            character_setup_lines=lines,
+            director_note=scenario.ai_opening_directive,
+            router=router_,
+        )
+    except Exception:
+        logger.exception(
+            "AI opening generation failed for campaign %s — falling back to template",
+            campaign_id,
+        )
+        return None
+
+    duration_ms = int((time.monotonic() - t0) * 1000)
+    if not text:
+        return None
+
+    with ScenarioStore(_SCENARIO_DB_PATH) as store:
+        store.update_generated_opening(campaign_id, text)
+
+    try:
+        _event_store.append(
+            campaign_id=campaign_id,
+            event_type=EventType.AI_OPENING_GENERATED,
+            payload={
+                "char_count": len(text),
+                "model": router_.config.primary_model,
+                "duration_ms": duration_ms,
+            },
+            narrative_time_delta=0,
+            location="meta",
+            entities=[],
+        )
+    except Exception:
+        logger.debug("Could not log AI_OPENING_GENERATED event", exc_info=True)
+    return text
+
+
+@router.post("/{campaign_id}/setup-answers")
+async def save_setup_answers(campaign_id: str, req: SetupAnswersRequest):
+    """Persist the wizard answers and refresh the active session so the
+    CHARACTER SETUP block is injected on the next action."""
+    payload = {k: v.model_dump() for k, v in req.answers.items()}
+    with ScenarioStore(_SCENARIO_DB_PATH) as store:
+        ok = store.update_setup_answers(campaign_id, payload)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    generated = await _maybe_generate_opening(campaign_id, payload)
+
+    # Drop the cached session so _ensure_session re-reads setup_answers next call.
+    _sessions.pop(campaign_id, None)
+    return {
+        "status": "ok",
+        "answers": payload,
+        "generated_opening": generated or "",
+    }
+
+
+@router.post("/{campaign_id}/regenerate-opening")
+async def regenerate_opening(campaign_id: str):
+    """Re-roll the AI-generated opening for an as-yet-untouched campaign.
+
+    Locked once any narrator turn exists for the campaign — re-rolling the
+    opening mid-story would break the AI's history continuity.
+    """
+    with ScenarioStore(_SCENARIO_DB_PATH) as store:
+        campaign = store.get_campaign(campaign_id)
+        if not campaign:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+        scenario = store.get_scenario(campaign.scenario_id)
+    if not scenario:
+        raise HTTPException(status_code=404, detail="Scenario not found")
+    if scenario.opening_mode != "ai":
+        raise HTTPException(
+            status_code=400,
+            detail="Scenario is not in AI opening mode.",
+        )
+
+    existing = _event_store.get_by_type(campaign_id, EventType.NARRATOR_RESPONSE)
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot re-roll the opening after the story has begun.",
+        )
+
+    generated = await _maybe_generate_opening(campaign_id, campaign.setup_answers or {})
+    if not generated:
+        raise HTTPException(
+            status_code=502,
+            detail="Opening generation failed. Try again or check API keys.",
+        )
+
+    # Drop the cached session so the new opening seeds the next history rebuild.
+    _sessions.pop(campaign_id, None)
+    return {"status": "ok", "opening_narrative": generated}
 
 
 @router.get("/{campaign_id}/history")

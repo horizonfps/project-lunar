@@ -38,6 +38,52 @@ class NpcMind:
         }
 
 
+def _is_generic_npc_name(name: str) -> bool:
+    """Return True if the name looks like a generic/unnamed NPC description.
+
+    Generic names are role/appearance descriptions rather than proper names,
+    e.g. 'young servant', 'gate guardian', 'first raider'.
+    """
+    import re
+    n = name.lower().strip()
+
+    # Ordinal prefixes: "primeiro saqueador", "second guard", "terceiro bandido"
+    ordinal_pt = r"^(primeir[oa]|segund[oa]|terceir[oa]|quart[oa]|quint[oa]|sext[oa]|sétim[oa]|oitav[oa]|non[oa]|décim[oa])\b"
+    ordinal_en = r"^(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\b"
+    if re.search(ordinal_pt, n) or re.search(ordinal_en, n):
+        return True
+
+    # Common generic role/descriptor words (pt-br and en)
+    generic_markers_pt = [
+        "servo", "serva", "guarda", "guardião", "guardiã", "soldado", "cavaleiro",
+        "mercador", "mercadora", "comerciante", "aldeão", "aldeã", "camponês", "camponesa",
+        "saqueador", "saqueadora", "bandido", "bandida", "ladrão", "ladra",
+        "figura", "viajante", "mendigo", "mendiga", "escravo", "escrava",
+        "sacerdote", "sacerdotisa", "monge", "monja", "criança", "velho", "velha",
+        "jovem", "ancião", "anciã", "ferreiro", "ferreira", "taberneiro", "taberneira",
+        "barqueiro", "barqueira", "mensageiro", "mensageira", "espião", "espiã",
+        "capitão", "capitã", "tenente", "sargento", "arqueiro", "arqueira",
+        "mago", "maga", "feiticeiro", "feiticeira", "curandeiro", "curandeira",
+    ]
+    generic_markers_en = [
+        "servant", "guard", "guardian", "soldier", "knight", "merchant", "trader",
+        "villager", "peasant", "raider", "bandit", "thief", "figure", "traveler",
+        "beggar", "slave", "priest", "priestess", "monk", "nun", "child", "elder",
+        "old", "young", "blacksmith", "innkeeper", "bartender", "messenger", "spy",
+        "captain", "lieutenant", "sergeant", "archer", "mage", "sorcerer", "sorceress",
+        "healer", "hooded", "masked", "cloaked", "stranger",
+    ]
+
+    words = set(re.split(r"\s+", n))
+    # If ALL words in the name are generic markers or short connectors, it's generic
+    connectors = {"do", "da", "dos", "das", "de", "o", "a", "os", "as", "the", "of"}
+    all_markers = set(generic_markers_pt + generic_markers_en) | connectors
+    if words and words.issubset(all_markers):
+        return True
+
+    return False
+
+
 class NpcMindEngine:
     def __init__(self, llm):
         self._llm = llm
@@ -171,6 +217,34 @@ class NpcMindEngine:
         self._minds[campaign_id][key] = NpcMind(name=npc_name, campaign_id=campaign_id)
         return self._minds[campaign_id][key]
 
+    def delete_mind(self, campaign_id: str, npc_name: str) -> bool:
+        """Delete an NPC mind from memory. Returns True if found and deleted."""
+        minds = self._minds.get(campaign_id, {})
+        key = npc_name.lower()
+        if key in minds:
+            del minds[key]
+            return True
+        # Check aliases
+        for k, mind in list(minds.items()):
+            if npc_name.lower() in [a.lower() for a in mind.aliases]:
+                del minds[k]
+                return True
+        return False
+
+    def update_thought(self, campaign_id: str, npc_name: str, thought_key: str, value: str) -> NpcMind | None:
+        """Update a single thought for an NPC. Returns the updated mind or None."""
+        mind = self.get_mind(campaign_id, npc_name)
+        if not mind:
+            # Check aliases
+            minds = self._minds.get(campaign_id, {})
+            for m in minds.values():
+                if npc_name.lower() in [a.lower() for a in m.aliases]:
+                    mind = m
+                    break
+        if mind:
+            mind.set_thought(thought_key, value)
+        return mind
+
     async def update_npc_thoughts(
         self,
         campaign_id: str,
@@ -194,6 +268,10 @@ class NpcMindEngine:
                 "Do NOT include NPCs that are only mentioned by other characters or "
                 "referenced in memories/flashbacks — only those physically present "
                 "in the current scene. "
+                "IMPORTANT: Only include NPCs with proper names (e.g. 'Satoru Gojo', 'Yuji'). "
+                "Do NOT include generic unnamed characters described only by their role or appearance "
+                "(e.g. 'young servant', 'gate guardian', 'first raider', 'hooded figure', 'old merchant'). "
+                "These background characters do not get internal thoughts. "
                 "Thoughts should reflect their personality and recent events. "
                 "Preserve NPC names exactly as they appear in the narrative."
             ),
@@ -211,6 +289,10 @@ class NpcMindEngine:
                 "NÃO inclua NPCs que são apenas mencionados por outros personagens ou "
                 "referenciados em memórias/flashbacks — apenas aqueles fisicamente presentes "
                 "na cena atual. "
+                "IMPORTANTE: Inclua APENAS NPCs com nomes próprios (ex: 'Satoru Gojo', 'Yuji'). "
+                "NÃO inclua personagens genéricos sem nome descritos apenas por papel ou aparência "
+                "(ex: 'servo jovem', 'guardião do portão', 'primeiro saqueador', 'figura encapuzada', "
+                "'mercador velho'). Personagens de fundo não recebem pensamentos internos. "
                 "Os pensamentos devem refletir a personalidade deles e eventos recentes. "
                 "Preserve os nomes dos NPCs exatamente como aparecem na narrativa. "
                 "Escreva todos os valores de pensamento em português brasileiro."
@@ -237,6 +319,8 @@ class NpcMindEngine:
         for npc_data in data.get("npcs", []):
             name = npc_data.get("name", "").lstrip("@").strip()
             if not name:
+                continue
+            if _is_generic_npc_name(name):
                 continue
 
             # Check for known alias first (no LLM call needed)

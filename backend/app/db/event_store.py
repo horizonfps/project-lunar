@@ -20,6 +20,7 @@ class EventType(str, Enum):
     TIMESKIP = "TIMESKIP"
     INVENTORY = "INVENTORY"
     POWER_LEVEL_UPDATE = "POWER_LEVEL_UPDATE"
+    AI_OPENING_GENERATED = "AI_OPENING_GENERATED"
 
 
 _EventBase = namedtuple(

@@ -1,7 +1,7 @@
 import sqlite3
 import json
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from threading import Lock
@@ -25,6 +25,9 @@ class Scenario:
     language: str
     lore_text: str
     created_at: str
+    setup_questions: list = field(default_factory=list)
+    opening_mode: str = "fixed"  # "fixed" | "ai"
+    ai_opening_directive: str = ""
 
 
 @dataclass
@@ -43,10 +46,12 @@ class Campaign:
     scenario_id: str
     player_name: str
     created_at: str
+    setup_answers: dict = field(default_factory=dict)
+    generated_opening: str = ""
 
 
 class ScenarioStore:
-    SCHEMA_VERSION = 1
+    SCHEMA_VERSION = 3
 
     _MIGRATIONS = {
         1: [
@@ -75,8 +80,15 @@ class ScenarioStore:
                 created_at TEXT NOT NULL
             )""",
         ],
-        # Future migrations go here:
-        # 2: ["ALTER TABLE scenarios ADD COLUMN ..."],
+        2: [
+            "ALTER TABLE scenarios ADD COLUMN setup_questions TEXT NOT NULL DEFAULT '[]'",
+            "ALTER TABLE campaigns ADD COLUMN setup_answers TEXT NOT NULL DEFAULT '{}'",
+        ],
+        3: [
+            "ALTER TABLE scenarios ADD COLUMN opening_mode TEXT NOT NULL DEFAULT 'fixed'",
+            "ALTER TABLE scenarios ADD COLUMN ai_opening_directive TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE campaigns ADD COLUMN generated_opening TEXT NOT NULL DEFAULT ''",
+        ],
     }
 
     def __init__(self, db_path: str = "scenarios.db"):
@@ -110,6 +122,12 @@ class ScenarioStore:
                 )
             self._conn.commit()
 
+    _SCENARIO_COLS = (
+        "id, title, description, tone_instructions, opening_narrative, "
+        "language, lore_text, created_at, setup_questions, "
+        "opening_mode, ai_opening_directive"
+    )
+
     def create_scenario(
         self,
         title: str,
@@ -118,6 +136,9 @@ class ScenarioStore:
         opening_narrative: str = "",
         language: str = "en",
         lore_text: str = "",
+        setup_questions: list | None = None,
+        opening_mode: str = "fixed",
+        ai_opening_directive: str = "",
     ) -> Scenario:
         scenario = Scenario(
             id=str(uuid.uuid4()),
@@ -128,30 +149,57 @@ class ScenarioStore:
             language=language,
             lore_text=lore_text,
             created_at=datetime.utcnow().isoformat(),
+            setup_questions=setup_questions or [],
+            opening_mode=opening_mode if opening_mode in ("fixed", "ai") else "fixed",
+            ai_opening_directive=ai_opening_directive,
         )
         with self._lock:
             self._conn.execute(
-                "INSERT INTO scenarios VALUES (?,?,?,?,?,?,?,?)",
+                f"INSERT INTO scenarios ({self._SCENARIO_COLS}) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (scenario.id, scenario.title, scenario.description,
                  scenario.tone_instructions, scenario.opening_narrative,
-                 scenario.language, scenario.lore_text, scenario.created_at),
+                 scenario.language, scenario.lore_text, scenario.created_at,
+                 json.dumps(scenario.setup_questions),
+                 scenario.opening_mode, scenario.ai_opening_directive),
             )
             self._conn.commit()
         return scenario
 
+    @staticmethod
+    def _row_to_scenario(row) -> Scenario:
+        # Columns (in order matching _SCENARIO_COLS):
+        #   id, title, description, tone_instructions, opening_narrative,
+        #   language, lore_text, created_at, setup_questions(JSON),
+        #   opening_mode, ai_opening_directive
+        try:
+            setup_questions = json.loads(row[8]) if row[8] else []
+        except (json.JSONDecodeError, TypeError):
+            setup_questions = []
+        opening_mode = row[9] if len(row) > 9 and row[9] else "fixed"
+        ai_directive = row[10] if len(row) > 10 and row[10] is not None else ""
+        return Scenario(
+            id=row[0], title=row[1], description=row[2],
+            tone_instructions=row[3], opening_narrative=row[4],
+            language=row[5], lore_text=row[6], created_at=row[7],
+            setup_questions=setup_questions,
+            opening_mode=opening_mode,
+            ai_opening_directive=ai_directive,
+        )
+
     def get_scenario(self, scenario_id: str) -> "Scenario | None":
         row = self._conn.execute(
-            "SELECT * FROM scenarios WHERE id=?", (scenario_id,)
+            f"SELECT {self._SCENARIO_COLS} FROM scenarios WHERE id=?", (scenario_id,)
         ).fetchone()
         if not row:
             return None
-        return Scenario(*row)
+        return self._row_to_scenario(row)
 
     def list_scenarios(self) -> "list[Scenario]":
         rows = self._conn.execute(
-            "SELECT * FROM scenarios ORDER BY created_at DESC"
+            f"SELECT {self._SCENARIO_COLS} FROM scenarios ORDER BY created_at DESC"
         ).fetchall()
-        return [Scenario(*r) for r in rows]
+        return [self._row_to_scenario(r) for r in rows]
 
     def add_story_card(
         self,
@@ -187,27 +235,82 @@ class ScenarioStore:
             for r in rows
         ]
 
+    _CAMPAIGN_COLS = (
+        "id, scenario_id, player_name, created_at, setup_answers, generated_opening"
+    )
+
     def create_campaign(self, scenario_id: str, player_name: str) -> Campaign:
         campaign = Campaign(
             id=str(uuid.uuid4()),
             scenario_id=scenario_id,
             player_name=player_name,
             created_at=datetime.utcnow().isoformat(),
+            setup_answers={},
+            generated_opening="",
         )
         with self._lock:
             self._conn.execute(
-                "INSERT INTO campaigns VALUES (?,?,?,?)",
-                (campaign.id, campaign.scenario_id, campaign.player_name, campaign.created_at),
+                f"INSERT INTO campaigns ({self._CAMPAIGN_COLS}) "
+                "VALUES (?,?,?,?,?,?)",
+                (campaign.id, campaign.scenario_id, campaign.player_name,
+                 campaign.created_at, json.dumps(campaign.setup_answers),
+                 campaign.generated_opening),
             )
             self._conn.commit()
         return campaign
 
+    @staticmethod
+    def _row_to_campaign(row) -> Campaign:
+        # Columns (matching _CAMPAIGN_COLS):
+        #   id, scenario_id, player_name, created_at, setup_answers(JSON),
+        #   generated_opening
+        try:
+            setup_answers = json.loads(row[4]) if row[4] else {}
+        except (json.JSONDecodeError, TypeError):
+            setup_answers = {}
+        generated_opening = row[5] if len(row) > 5 and row[5] is not None else ""
+        return Campaign(
+            id=row[0], scenario_id=row[1], player_name=row[2],
+            created_at=row[3], setup_answers=setup_answers,
+            generated_opening=generated_opening,
+        )
+
+    def get_campaign(self, campaign_id: str) -> "Campaign | None":
+        row = self._conn.execute(
+            f"SELECT {self._CAMPAIGN_COLS} FROM campaigns WHERE id=?",
+            (campaign_id,),
+        ).fetchone()
+        if not row:
+            return None
+        return self._row_to_campaign(row)
+
     def get_campaigns(self, scenario_id: str) -> "list[Campaign]":
         rows = self._conn.execute(
-            "SELECT * FROM campaigns WHERE scenario_id=? ORDER BY created_at DESC",
+            f"SELECT {self._CAMPAIGN_COLS} FROM campaigns "
+            "WHERE scenario_id=? ORDER BY created_at DESC",
             (scenario_id,),
         ).fetchall()
-        return [Campaign(*r) for r in rows]
+        return [self._row_to_campaign(r) for r in rows]
+
+    def update_setup_answers(self, campaign_id: str, answers: dict) -> bool:
+        """Persist setup wizard answers for a campaign."""
+        with self._lock:
+            cursor = self._conn.execute(
+                "UPDATE campaigns SET setup_answers=? WHERE id=?",
+                (json.dumps(answers), campaign_id),
+            )
+            self._conn.commit()
+            return cursor.rowcount > 0
+
+    def update_generated_opening(self, campaign_id: str, text: str) -> bool:
+        """Persist an AI-generated opening for the campaign."""
+        with self._lock:
+            cursor = self._conn.execute(
+                "UPDATE campaigns SET generated_opening=? WHERE id=?",
+                (text or "", campaign_id),
+            )
+            self._conn.commit()
+            return cursor.rowcount > 0
 
     def delete_campaign(self, campaign_id: str) -> bool:
         """Delete a campaign by id. Returns True if a row was deleted."""

@@ -1,8 +1,16 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { Settings, Sparkles, Clock, Brain, Gem, Map, Backpack, BookOpen, Undo2 } from 'lucide-react'
+import { Settings, Sparkles, Clock, Brain, Gem, Map, Backpack, BookOpen, Undo2, RefreshCw } from 'lucide-react'
 import { useGameStore } from '../store'
-import { streamAction, fetchJournal, fetchHistory, fetchInventory as fetchInventoryApi, rewindLastAction } from '../api'
+import {
+  streamAction,
+  fetchJournal,
+  fetchHistory,
+  fetchInventory as fetchInventoryApi,
+  rewindLastAction,
+  fetchScenarioView,
+  regenerateOpening,
+} from '../api'
 import ActionInput from './ActionInput'
 import JournalPanel from './JournalPanel'
 import CombatOverlay from './CombatOverlay'
@@ -105,11 +113,32 @@ export default function GameCanvas() {
   const [mapOpen, setMapOpen] = useState(false)
   const [inventoryOpen, setInventoryOpen] = useState(false)
   const [rewinding, setRewinding] = useState(false)
+  const [scenarioView, setScenarioView] = useState(null)
+  const [regenerating, setRegenerating] = useState(false)
 
   // Restore session on mount if state is missing
   useEffect(() => {
     if (!activeCampaignId) restoreSession()
   }, [])
+
+  // Pull the per-campaign resolved scenario surface (interpolated opening,
+  // tone, lore) so we never render raw {var} tokens in-game. Falls back to
+  // the raw activeScenario when the request fails.
+  useEffect(() => {
+    if (!activeCampaignId) {
+      setScenarioView(null)
+      return
+    }
+    let cancelled = false
+    fetchScenarioView(activeCampaignId)
+      .then((view) => {
+        if (!cancelled) setScenarioView(view)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [activeCampaignId])
 
   // Restore chat history from backend when campaign has no local messages
   useEffect(() => {
@@ -128,6 +157,34 @@ export default function GameCanvas() {
       .then((entries) => setJournal(entries))
       .catch(() => {})
   }, [activeCampaignId])
+
+  const resolvedOpening = scenarioView?.opening_narrative ?? activeScenario?.opening_narrative ?? ''
+  const resolvedTone = scenarioView?.tone_instructions ?? activeScenario?.tone_instructions ?? ''
+  const canRerollOpening =
+    !!scenarioView &&
+    scenarioView.opening_mode === 'ai' &&
+    messages.length === 0 &&
+    !isStreaming &&
+    !regenerating
+
+  const handleRerollOpening = async () => {
+    if (!activeCampaignId || !canRerollOpening) return
+    setRegenerating(true)
+    try {
+      const result = await regenerateOpening(activeCampaignId)
+      setScenarioView((prev) => ({
+        ...(prev || {}),
+        opening_narrative: result.opening_narrative,
+        has_generated_opening: true,
+        opening_mode: prev?.opening_mode ?? 'ai',
+      }))
+    } catch (err) {
+      const detail = err?.detail || 'Could not regenerate the opening.'
+      window.alert(detail)
+    } finally {
+      setRegenerating(false)
+    }
+  }
 
   const formatAutoPlotMessage = (plot) => {
     const kind = String(plot?.kind || '').toLowerCase()
@@ -206,10 +263,10 @@ export default function GameCanvas() {
     setStreaming(true)
     streamAction({
       campaignId: activeCampaignId,
-      scenarioTone: activeScenario?.tone_instructions ?? '',
-      language: activeScenario?.language ?? 'en',
+      scenarioTone: resolvedTone,
+      language: scenarioView?.language ?? activeScenario?.language ?? 'en',
       action,
-      openingNarrative: activeScenario?.opening_narrative ?? '',
+      openingNarrative: resolvedOpening,
       maxTokens: maxTokens || 2000,
       provider: llmProvider,
       model: llmModel,
@@ -364,11 +421,21 @@ export default function GameCanvas() {
           {/* Message feed */}
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
             <div className="max-w-4xl mx-auto space-y-8 pb-4">
-              {messages.length === 0 && activeScenario?.opening_narrative && (
-                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 md:p-8 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
+              {messages.length === 0 && resolvedOpening && (
+                <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 md:p-8 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
                   <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:font-light prose-p:text-white font-serif">
-                    <ReactMarkdown components={mentionComponents}>{activeScenario.opening_narrative}</ReactMarkdown>
+                    <ReactMarkdown components={mentionComponents}>{resolvedOpening}</ReactMarkdown>
                   </div>
+                  {canRerollOpening && (
+                    <button
+                      onClick={handleRerollOpening}
+                      title="Re-roll AI-generated opening"
+                      aria-label="Re-roll opening"
+                      className="absolute top-4 right-4 p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white transition-colors disabled:opacity-30"
+                    >
+                      <RefreshCw size={14} className={regenerating ? 'animate-spin' : ''} />
+                    </button>
+                  )}
                 </div>
               )}
 

@@ -194,6 +194,7 @@ class NarratorEngine:
         npc_context: str = "",
         journal_context: str = "",
         story_cards_context: str = "",
+        character_setup: str = "",
     ) -> str:
         lang_instruction = _LANGUAGE_INSTRUCTIONS.get(
             language,
@@ -202,6 +203,8 @@ class NarratorEngine:
         sections = [
             f"You are an AI narrator for an interactive RPG story. {lang_instruction}",
         ]
+        if character_setup:
+            sections.append(f"\n{character_setup}")
         if tone_instructions:
             sections.append(f"\nTONE AND STYLE:\n{tone_instructions}")
         if memory_context:
@@ -234,6 +237,7 @@ class NarratorEngine:
         npc_context: str = "",
         journal_context: str = "",
         story_cards_context: str = "",
+        character_setup: str = "",
     ) -> tuple[str, str]:
         """Build system prompt split into (static, dynamic) parts for prompt caching.
 
@@ -251,6 +255,8 @@ class NarratorEngine:
         static_sections = [
             f"You are an AI narrator for an interactive RPG story. {lang_instruction}",
         ]
+        if character_setup:
+            static_sections.append(f"\n{character_setup}")
         if tone_instructions:
             static_sections.append(f"\nTONE AND STYLE:\n{tone_instructions}")
         static_sections.append(self._build_narrator_rules(max_tokens, language))

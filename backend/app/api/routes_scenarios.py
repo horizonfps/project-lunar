@@ -1,10 +1,21 @@
+import logging
 import os
 from datetime import datetime
+from typing import Literal
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.db.scenario_store import ScenarioStore, StoryCardType
 from app.db.event_store import EventStore
+from app.engines.llm_router import LLMRouter, LLMConfig
+from app.engines.opening_generator import (
+    format_setup_lines,
+    generate_opening,
+    synthesize_sample_answers,
+)
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -21,6 +32,21 @@ def _get_event_store() -> EventStore:
     return EventStore(db_path)
 
 
+class SetupOption(BaseModel):
+    label: str = Field(..., max_length=200)
+    description: str = Field(default="", max_length=4000)
+
+
+class SetupQuestion(BaseModel):
+    id: str = Field(..., min_length=1, max_length=64)
+    var_name: str = Field(..., min_length=1, max_length=64)
+    prompt: str = Field(..., min_length=1, max_length=4000)
+    type: str = Field(..., pattern=r"^(text|choice)$")
+    options: list[SetupOption] = []
+    allow_custom: bool = False
+    required: bool = True
+
+
 class CreateScenarioRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     description: str = Field(default="", max_length=2000)
@@ -28,6 +54,18 @@ class CreateScenarioRequest(BaseModel):
     opening_narrative: str = Field(default="", max_length=50000)
     language: str = Field(default="en", max_length=10)
     lore_text: str = Field(default="", max_length=50000)
+    setup_questions: list[SetupQuestion] = []
+    opening_mode: Literal["fixed", "ai"] = "fixed"
+    ai_opening_directive: str = Field(default="", max_length=4000)
+
+
+class PreviewOpeningRequest(BaseModel):
+    language: str = Field(default="en", max_length=10)
+    tone: str = Field(default="", max_length=50000)
+    lore: str = Field(default="", max_length=50000)
+    directive: str = Field(default="", max_length=4000)
+    setup_questions: list[SetupQuestion] = []
+    sample_answers: dict = Field(default_factory=dict)
 
 
 class AddStoryCardRequest(BaseModel):
@@ -47,8 +85,17 @@ class ImportScenarioRequest(BaseModel):
     campaigns: list[CampaignData] = []
 
 
+def _validate_unique_var_names(questions: list[SetupQuestion]) -> None:
+    seen: set[str] = set()
+    for q in questions:
+        if q.var_name in seen:
+            raise HTTPException(status_code=400, detail=f"Duplicate var_name: {q.var_name}")
+        seen.add(q.var_name)
+
+
 @router.post("/", status_code=201)
 def create_scenario(req: CreateScenarioRequest):
+    _validate_unique_var_names(req.setup_questions)
     with _get_store() as store:
         scenario = store.create_scenario(
             title=req.title,
@@ -57,8 +104,34 @@ def create_scenario(req: CreateScenarioRequest):
             opening_narrative=req.opening_narrative,
             language=req.language,
             lore_text=req.lore_text,
+            setup_questions=[q.model_dump() for q in req.setup_questions],
+            opening_mode=req.opening_mode,
+            ai_opening_directive=req.ai_opening_directive,
         )
     return scenario.__dict__
+
+
+@router.post("/preview-opening")
+async def preview_opening(req: PreviewOpeningRequest):
+    """Render a sample AI opening for the scenario builder.
+
+    Uses ``sample_answers`` if supplied, otherwise synthesizes them from the
+    scenario's setup questions so authors get a usable preview without having
+    to fill in mock data by hand.
+    """
+    questions = [q.model_dump() for q in req.setup_questions]
+    answers = req.sample_answers or synthesize_sample_answers(questions)
+    lines = format_setup_lines(answers, questions)
+    router_ = LLMRouter(LLMConfig())
+    text = await generate_opening(
+        language=req.language,
+        tone=req.tone,
+        lore=req.lore,
+        character_setup_lines=lines,
+        director_note=req.directive,
+        router=router_,
+    )
+    return {"opening": text, "sample_answers": answers}
 
 
 @router.get("/")
@@ -69,6 +142,7 @@ def list_scenarios():
 
 @router.post("/import", status_code=201)
 def import_scenario(req: ImportScenarioRequest):
+    _validate_unique_var_names(req.scenario.setup_questions)
     with _get_store() as store:
         scenario = store.create_scenario(
             title=req.scenario.title,
@@ -77,6 +151,9 @@ def import_scenario(req: ImportScenarioRequest):
             opening_narrative=req.scenario.opening_narrative,
             language=req.scenario.language,
             lore_text=req.scenario.lore_text,
+            setup_questions=[q.model_dump() for q in req.scenario.setup_questions],
+            opening_mode=req.scenario.opening_mode,
+            ai_opening_directive=req.scenario.ai_opening_directive,
         )
         for card in req.story_cards:
             store.add_story_card(scenario.id, card.card_type, card.name, card.content)
@@ -146,13 +223,16 @@ def export_scenario(scenario_id: str):
             "opening_narrative": scenario.opening_narrative,
             "language": scenario.language,
             "lore_text": scenario.lore_text,
+            "setup_questions": scenario.setup_questions,
+            "opening_mode": scenario.opening_mode,
+            "ai_opening_directive": scenario.ai_opening_directive,
         },
         "story_cards": [
             {"card_type": c.card_type.value, "name": c.name, "content": c.content}
             for c in story_cards
         ],
         "campaigns": [
-            {"player_name": c.player_name}
+            {"player_name": c.player_name, "setup_answers": c.setup_answers}
             for c in campaigns
         ],
     }
