@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 import logging
 from dataclasses import dataclass
 from enum import Enum
@@ -52,76 +53,111 @@ class MemoryCrystal:
 
 
 # ── Compression prompts per tier ────────────────────────────────────
-# Each tier gets progressively more compressed.
-# The style: remove vowels, abbreviate, telegraph-style — just enough
-# for an LLM to reconstruct meaning.
+# Each tier consolidates the previous tier into a richer structured-JSON
+# memory entry. The format is fact-preserving — proper names, physical
+# descriptions, mission details, dialogue intent are kept verbatim. The
+# pyramid (SHORT→MEDIUM→LONG→MEMORY) widens scope, not lossiness.
+
+_CRYSTAL_SCHEMA_DOC = (
+    "Return ONLY valid JSON (no markdown fences) with this exact schema:\n"
+    "{\n"
+    '  "ai": {\n'
+    '    "events": [\n'
+    '      {"who": "<actor names>", "action": "<what they did>", "where": "<location>", "result": "<outcome / state change>"}\n'
+    '    ],\n'
+    '    "characters": {\n'
+    '      "<Character Name>": {\n'
+    '        "description": "<physical traits, age, distinguishing features — verbatim from source>",\n'
+    '        "state": "<current condition / what just happened to them>",\n'
+    '        "relationship_to_player": "<ally|enemy|neutral|hired-by|hired-player|family|...>",\n'
+    '        "knows_player_as": "<name/identity the NPC associates with the player>"\n'
+    '      }\n'
+    '    },\n'
+    '    "items": [\n'
+    '      {"name": "<item name>", "owner": "<current owner>", "status": "acquired|used|lost|given|destroyed"}\n'
+    '    ],\n'
+    '    "promises_or_missions": [\n'
+    '      "<verbatim text of any open commitment, deal, quest, or threat — include who promised what to whom>"\n'
+    '    ],\n'
+    '    "world_facts": [\n'
+    '      "<lasting facts revealed this scene: location names, faction info, lore, rules>"\n'
+    '    ]\n'
+    '  },\n'
+    '  "summary": "<short human-readable text for the player UI>"\n'
+    "}\n"
+)
+
+_CRYSTAL_INTEGRITY_RULES = (
+    "INTEGRITY RULES (violations are failures):\n"
+    "- Preserve proper names EXACTLY as in source. Do not normalize, translate, or abbreviate.\n"
+    "- NEVER substitute a character's name with a similar-sounding canonical name from "
+    "popular fiction. If the source says 'Lena', the output says 'Lena' — never 'Nami', "
+    "'Lana', etc. The same applies to every other name.\n"
+    "- Preserve physical descriptions exactly: hair color, eye color, age, height, scars, "
+    "clothing, voice traits. These details are critical for narrative continuity.\n"
+    "- Preserve mission, quest, and promise details exactly: who hired whom, the target, "
+    "the conditions, the payment, the deadline. Open promises must survive consolidation.\n"
+    "- When a character introduces themselves or reveals identity, keep the verbatim phrasing.\n"
+    "- Do NOT invent details that are not in the source.\n"
+    "- Do NOT abbreviate words, drop vowels, or use telegraph-style symbols. Write full words.\n"
+    "- Do NOT remove information just because it seems descriptive — descriptions are facts.\n"
+)
 
 _CRYSTAL_PROMPTS = {
     CrystalTier.SHORT: (
-        "You are a memory compressor for an RPG AI engine.\n"
-        "Return ONLY valid JSON (no markdown): {\"ai\": str, \"summary\": str}\n\n"
-        "CRITICAL: The 'ai' field MUST be under 200 characters. This is a HARD LIMIT.\n"
-        "Going over 200 characters is a FAILURE. Count carefully.\n\n"
-        "COMPRESSION STYLE for 'ai':\n"
-        "- Rmv vwls frm cmmn wrds (kp prpr nms rdbl)\n"
-        "- Abbrvtns: plyr=player, cmbt=combat, mv=move, mt=meet, dscvr=discover, dfnd=defend\n"
-        "- Symbols: →=goes to, +=gains, -=loses, ⚔=combat, ✓=success, ✗=fail, @=name\n"
-        "- Pipes | to separate facts\n"
-        "- ONLY: names, locations, items, decisions, combat results\n"
-        "- DROP: descriptions, atmosphere, movement details, dialogue\n"
-        "- NEVER use numbers as word abbreviations (e.g. 'g8' for 'gate', '2' for 'to')\n"
-        "- Do NOT use category headers like 'RELATIONSHIPS:' or 'KEY_EVENTS:'\n"
-        "- Output FLAT compressed text with pipes, nothing else\n\n"
-        "EXAMPLES:\n"
-        "- \"@Yuuta dscvr bsmnt acdmy→fnd crystl cmpss|@Orla frwll clsd|snsr mp cmplt\"\n"
-        "- \"@Kael ⚔ @Yuuta ✗ FAIL|plyr -HP, lstpstns|@Selene obsrvs frm dstns\"\n"
-        "- \"plyr mt @Voss, by prsnc sprssn|mv→grdns|dfrrd artfct rtrval\"\n\n"
-        "- 'summary': 1 short sentence for player UI (human-readable, normal language)."
+        "You are a structured memory recorder for an RPG AI engine.\n"
+        "Record the recent events into a fact-preserving JSON memory entry.\n\n"
+        + _CRYSTAL_SCHEMA_DOC + "\n"
+        + _CRYSTAL_INTEGRITY_RULES + "\n"
+        "SCOPE for SHORT tier:\n"
+        "- Covers ~4 recent actions in a single scene.\n"
+        "- Include every named character that appears, even briefly.\n"
+        "- Include physical descriptions the first time they are mentioned, and keep them "
+        "if mentioned again with new detail.\n"
+        "- Include short verbatim quotes when they reveal intent, identity, or plot info.\n"
+        "- 'summary': 1-2 short sentences in normal language for the player UI."
     ),
     CrystalTier.MEDIUM: (
-        "You are a memory compressor for an RPG AI engine.\n"
-        "Consolidate these SHORT crystal memories into a MEDIUM-level summary.\n"
-        "Return ONLY valid JSON (no markdown): {\"ai\": str, \"summary\": str}\n\n"
-        "COMPRESSION RULES for 'ai' field:\n"
-        "- Merge overlapping facts, drop redundancies\n"
-        "- Keep the SAME compressed style (no vowels, abbreviations, symbols)\n"
-        "- Focus on: relationships formed, items gained/lost, locations discovered, "
-        "combat outcomes, promises made, power changes\n"
-        "- MAX 300 characters for 'ai' field\n"
-        "- Structure: REL:[relationships] EVT:[key events] ITM:[items] LOC:[locations]\n\n"
-        "CRITICAL for 'summary' field:\n"
-        "- Verify WHO owns each attribute/skill/trait before writing\n"
-        "- Do not mix up character abilities (e.g. if player has lightning magic, "
-        "do not attribute it to an NPC)\n"
-        "- Do not interpret compressed abbreviations as character names "
-        "(e.g. 'g8' is NOT a person)\n"
-        "- 2-3 normal sentences for player UI."
+        "You are a structured memory consolidator for an RPG AI engine.\n"
+        "Merge several SHORT crystal JSON entries into a single MEDIUM-tier consolidated entry.\n"
+        "Same schema. Wider scope (multiple scenes / a sub-arc).\n\n"
+        + _CRYSTAL_SCHEMA_DOC + "\n"
+        + _CRYSTAL_INTEGRITY_RULES + "\n"
+        "CONSOLIDATION RULES for MEDIUM tier:\n"
+        "- Preserve causal order of events. Group closely-related events into one richer "
+        "entry only if they share who/where/result.\n"
+        "- Merge per-character entries: if the same character appears across multiple SHORTs, "
+        "produce a single entry that keeps every distinct descriptor and the latest known state.\n"
+        "- Drop only true duplicates. Do not drop a fact just because it seems minor.\n"
+        "- Keep every open promise/mission until it is explicitly resolved.\n"
+        "- 'summary': 2-3 sentences in normal language for the player UI."
     ),
     CrystalTier.LONG: (
-        "You are a memory compressor for an RPG AI engine.\n"
-        "Consolidate these MEDIUM crystal memories into a LONG-level arc summary.\n"
-        "Return ONLY valid JSON (no markdown): {\"ai\": str, \"summary\": str}\n\n"
-        "COMPRESSION RULES for 'ai' field:\n"
-        "- This covers a MAJOR story arc (dozens of actions)\n"
-        "- Extract only: permanent relationships, major plot points, lasting world changes, "
-        "player power level shifts, faction standings\n"
-        "- Same compressed style but even more selective\n"
-        "- MAX 400 characters for 'ai' field\n"
-        "- Structure: ARC:[story arc summary] REL:[permanent relationships] WRLD:[world state]\n\n"
-        "- 'summary' field: 3-4 normal sentences for player UI."
+        "You are a structured memory consolidator for an RPG AI engine.\n"
+        "Merge MEDIUM crystal JSON entries into a single LONG-tier story-arc entry.\n"
+        "Same schema. Covers a major story arc (dozens of actions).\n\n"
+        + _CRYSTAL_SCHEMA_DOC + "\n"
+        + _CRYSTAL_INTEGRITY_RULES + "\n"
+        "CONSOLIDATION RULES for LONG tier:\n"
+        "- Group events into the major beats of the arc, but keep enough specificity that "
+        "the narrator can reconstruct what happened.\n"
+        "- Keep every named character that appeared, with their key descriptors and final "
+        "state at the end of the arc.\n"
+        "- Keep every open promise/mission. Mark resolved ones with result in 'state'.\n"
+        "- 'summary': 3-4 sentences in normal language for the player UI."
     ),
     CrystalTier.MEMORY: (
-        "You are a memory compressor for an RPG AI engine.\n"
-        "Consolidate these LONG crystal memories into PERMANENT world facts.\n"
-        "Return ONLY valid JSON (no markdown): {\"ai\": str, \"summary\": str}\n\n"
-        "COMPRESSION RULES for 'ai' field:\n"
-        "- PERMANENT FACTS ONLY — things that will NEVER change or are critical backstory\n"
-        "- Who the player IS, their origin, core abilities, permanent allies/enemies\n"
-        "- Major completed arcs (resolved, no need for detail)\n"
-        "- World-altering events that define the current state\n"
-        "- MAX 500 characters for 'ai' field\n"
-        "- Structure: ID:[player identity] HIST:[completed arcs] WRLD:[permanent world state]\n\n"
-        "- 'summary' field: 4-5 normal sentences for player UI — full story recap."
+        "You are a structured memory consolidator for an RPG AI engine.\n"
+        "Merge LONG crystal JSON entries into a single PERMANENT-tier world-facts entry.\n"
+        "Same schema. Covers the player's permanent identity, completed arcs, lasting world state.\n\n"
+        + _CRYSTAL_SCHEMA_DOC + "\n"
+        + _CRYSTAL_INTEGRITY_RULES + "\n"
+        "CONSOLIDATION RULES for MEMORY tier:\n"
+        "- Keep the player's permanent identity, origin, core abilities, and reputation.\n"
+        "- Keep every named character ever met, with their description and final state.\n"
+        "- Keep all completed major arcs as one event entry each, with the resolution.\n"
+        "- Keep all lasting allies, enemies, and faction standings.\n"
+        "- 'summary': 4-5 sentences in normal language for the player UI — full story recap."
     ),
 }
 
@@ -185,7 +221,7 @@ class MemoryEngine:
         ai_content, player_summary = await self._compress_with_llm(
             tier=CrystalTier.SHORT,
             source_text=events_text,
-            max_tokens=256,
+            max_tokens=2048,
             language=language,
         )
         if not ai_content:
@@ -230,10 +266,10 @@ class MemoryEngine:
         source_text = "\n---\n".join(c.ai_content for c in to_merge)
 
         max_tokens = {
-            CrystalTier.MEDIUM: 768,
-            CrystalTier.LONG: 1024,
-            CrystalTier.MEMORY: 1280,
-        }.get(target_tier, 1024)
+            CrystalTier.MEDIUM: 4096,
+            CrystalTier.LONG: 8192,
+            CrystalTier.MEMORY: 12288,
+        }.get(target_tier, 4096)
 
         ai_content, player_summary = await self._compress_with_llm(
             tier=target_tier,
@@ -242,14 +278,14 @@ class MemoryEngine:
             language=language,
         )
         if not ai_content:
-            # Fallback: just concatenate with separator
-            ai_content = " | ".join(c.ai_content for c in to_merge)
-            if len(ai_content) > 500:
-                ai_content = ai_content[:497] + "..."
+            # Fallback when LLM consolidation fails: keep all source ai_content
+            # blobs verbatim as a JSON array so downstream consumers can still
+            # parse / read each one. Lossless beats lossy here.
+            ai_content = json.dumps(
+                [c.ai_content for c in to_merge], ensure_ascii=False,
+            )
         if not player_summary:
             player_summary = " ".join(c.content for c in to_merge)
-            if len(player_summary) > 600:
-                player_summary = player_summary[:597] + "..."
 
         total_events = sum(c.event_count for c in to_merge)
         crystal = MemoryCrystal(
@@ -363,22 +399,34 @@ class MemoryEngine:
 
     # ── LLM compression ────────────────────────────────────────────
 
-    # Hard character limits per tier for ai_content (enforced post-LLM)
+    # Soft character limits per tier for ai_content. With structured-JSON
+    # crystals on a 1M-context provider these are headroom guardrails, not
+    # hard cuts — exceeding them logs a warning but the full JSON is kept,
+    # because mid-cutting JSON corrupts the parse downstream.
     _AI_CHAR_LIMITS = {
-        CrystalTier.SHORT: 250,
-        CrystalTier.MEDIUM: 400,
-        CrystalTier.LONG: 500,
-        CrystalTier.MEMORY: 600,
+        CrystalTier.SHORT: 2_000,
+        CrystalTier.MEDIUM: 5_000,
+        CrystalTier.LONG: 10_000,
+        CrystalTier.MEMORY: 20_000,
     }
 
     async def _compress_with_llm(
-        self, tier: CrystalTier, source_text: str, max_tokens: int = 512,
+        self, tier: CrystalTier, source_text: str, max_tokens: int = 1024,
         language: str = "en",
     ) -> tuple[str, str]:
-        """Compress source text using the tier-specific prompt. Returns (ai_content, summary)."""
+        """Compress source text using the tier-specific prompt. Returns (ai_content, summary).
+
+        ai_content is a JSON string (the serialized 'ai' object from the LLM response),
+        kept verbatim so that downstream consumers (build_context_window, NPC mind,
+        consolidation prompts) can re-parse the structured facts.
+        """
         prompt_text = _CRYSTAL_PROMPTS.get(tier, _CRYSTAL_PROMPTS[CrystalTier.SHORT])
         if language and language != "en":
-            prompt_text += f"\n\nIMPORTANT: Write the 'summary' field in {language}. The 'ai' field can use any language for compression but proper names must match the source text."
+            prompt_text += (
+                f"\n\nLANGUAGE: Write all string values (descriptions, states, summaries, "
+                f"promises, world_facts, summary) in {language}. Proper names stay exactly "
+                f"as in the source."
+            )
         messages = [
             {"role": "system", "content": prompt_text},
             {"role": "user", "content": source_text},
@@ -387,16 +435,18 @@ class MemoryEngine:
             raw = await self._llm.complete(messages=messages, max_tokens=max_tokens)
             parsed = parse_json_dict(raw)
             if parsed:
-                ai = str(parsed.get("ai", parsed.get("ai_memory", ""))).strip()
+                ai_value = parsed.get("ai", parsed.get("ai_memory", ""))
+                if isinstance(ai_value, (dict, list)):
+                    ai = json.dumps(ai_value, ensure_ascii=False)
+                else:
+                    ai = str(ai_value).strip()
                 summary = str(parsed.get("summary", parsed.get("player_summary", ""))).strip()
-                # Hard truncation — LLMs often exceed char limits
-                char_limit = self._AI_CHAR_LIMITS.get(tier, 300)
+                char_limit = self._AI_CHAR_LIMITS.get(tier, 2_000)
                 if len(ai) > char_limit:
                     logger.warning(
-                        "Crystal %s ai_content too long (%d > %d), truncating",
+                        "Crystal %s ai_content exceeds soft limit (%d > %d) — keeping full content",
                         tier.value, len(ai), char_limit,
                     )
-                    ai = ai[:char_limit].rsplit("|", 1)[0]  # cut at last pipe
                 return ai, summary
         except Exception:
             logger.warning("LLM crystal compression failed for tier %s", tier.value, exc_info=True)
@@ -587,10 +637,16 @@ class MemoryEngine:
     # ── Fallbacks ───────────────────────────────────────────────────
 
     def _fallback_short(self, events: list[Event]) -> str:
-        """Fallback SHORT crystal when LLM fails — compact pipe-separated."""
-        compact_lines: list[str] = []
+        """Fallback SHORT crystal when LLM compression fails.
+
+        Produces a minimal structured-JSON entry that matches the crystal
+        schema so downstream consumers parse it the same way as a normal
+        LLM-generated crystal. No lossy truncation — every unique event
+        line survives.
+        """
+        fallback_events: list[dict] = []
         seen: set[str] = set()
-        for event in events[-8:]:
+        for event in events:
             line = self._event_to_compact_line(event)
             if not line:
                 continue
@@ -598,11 +654,20 @@ class MemoryEngine:
             if key in seen:
                 continue
             seen.add(key)
-            compact_lines.append(line)
-        result = "|".join(compact_lines)
-        if len(result) > 300:
-            result = result[-300:]
-        return result or "MEM:EMPTY"
+            fallback_events.append({
+                "who": "",
+                "action": line,
+                "where": getattr(event, "location", "") or "",
+                "result": "",
+            })
+        payload = {
+            "events": fallback_events,
+            "characters": {},
+            "items": [],
+            "promises_or_missions": [],
+            "world_facts": [],
+        }
+        return json.dumps(payload, ensure_ascii=False)
 
     @staticmethod
     def _fallback_player_summary(events: list[Event]) -> str:

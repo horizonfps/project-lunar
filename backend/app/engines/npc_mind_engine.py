@@ -251,8 +251,16 @@ class NpcMindEngine:
         narrative_text: str,
         world_context: str,
         language: str = "en",
+        recent_history: list[dict] | None = None,
     ) -> list[NpcMind]:
-        """Analyze narrative and update NPC thoughts based on recent events."""
+        """Analyze narrative and update NPC thoughts based on recent events.
+
+        Args:
+            recent_history: Optional list of {role, content} message dicts from
+                the immediate conversation. Used so NPCs can reason about what
+                actually happened in recent turns (e.g. that the player was
+                personally hired by the NPC), not just from compressed crystals.
+        """
         _NPC_MIND_PROMPTS = {
             "en": (
                 "You analyze RPG narrative text and extract NPC internal thoughts. "
@@ -303,15 +311,27 @@ class NpcMindEngine:
         if language and language != "en" and language not in _NPC_MIND_PROMPTS:
             prompt_text += f" Write all thought values in the same language as the narrative ({language})."
 
+        history_block = ""
+        if recent_history:
+            lines: list[str] = []
+            for msg in recent_history:
+                role = msg.get("role", "?")
+                content = str(msg.get("content", "")).strip()
+                if not content:
+                    continue
+                speaker = "PLAYER" if role == "user" else ("NARRATOR" if role == "assistant" else role.upper())
+                lines.append(f"[{speaker}] {content}")
+            if lines:
+                history_block = "Recent dialogue and actions (most recent last):\n" + "\n\n".join(lines) + "\n\n"
+
+        user_content = (
+            f"World context (compressed long-term memory):\n{world_context}\n\n"
+            f"{history_block}"
+            f"Latest narrator response (this is the scene to analyze):\n{narrative_text}"
+        )
         messages = [
-            {
-                "role": "system",
-                "content": prompt_text,
-            },
-            {
-                "role": "user",
-                "content": f"World context:\n{world_context}\n\nRecent narrative:\n{narrative_text}",
-            },
+            {"role": "system", "content": prompt_text},
+            {"role": "user", "content": user_content},
         ]
         raw = await self._llm.complete(messages=messages, max_tokens=4096)
         updated = []

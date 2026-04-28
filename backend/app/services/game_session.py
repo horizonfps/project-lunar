@@ -107,11 +107,6 @@ class GameSession:
             context=f"campaign:{campaign_id}:opening",
         ) if opening_narrative else ""
 
-        # If this is a brand-new campaign (no history) and we have an
-        # opening narrative, seed the history so the AI knows the story setup.
-        if not self._history and self._opening_narrative:
-            self._history.append({"role": "assistant", "content": self._opening_narrative})
-
     def _rebuild_history_from_events(self) -> None:
         """Rebuild _history from persisted events so the AI retains context."""
         player_events = self._event_store.get_by_type(
@@ -270,12 +265,6 @@ class GameSession:
         self._rebuild_memory_crystals()
         self._rebuild_player_power()
         self._rebuild_known_opponent_powers()
-
-        # Mirror __init__: if rewind brought us back to a clean slate, seed
-        # the opening as the first assistant message so the next action sees
-        # the same narrative setup a fresh campaign would.
-        if not self._history and self._opening_narrative:
-            self._history.append({"role": "assistant", "content": self._opening_narrative})
 
     def _rebuild_journal_from_events(self) -> None:
         """Rebuild the journal in-memory state from JOURNAL_ENTRY events in the store."""
@@ -1692,11 +1681,17 @@ class GameSession:
                 world_ctx = await self._memory.build_context_window_async(self.campaign_id)
             else:
                 world_ctx = self._memory.build_context_window(self.campaign_id)
+            # Last ~20 messages give the NPC mind enough live context to
+            # remember relationships, deals, and identities established
+            # outside the crystal pyramid's reach (crystals drop conversational
+            # specifics during compression).
+            recent_history = self._history[-20:] if self._history else []
             updated = await self._npc_minds.update_npc_thoughts(
                 campaign_id=self.campaign_id,
                 narrative_text=narrative_text,
                 world_context=world_ctx,
                 language=self.language,
+                recent_history=recent_history,
             )
             # Persist NPC thoughts so they survive server restarts
             for mind in updated:

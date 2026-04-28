@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 import inspect
 import logging
 import os
@@ -8,6 +9,10 @@ from enum import Enum
 from typing import AsyncIterator
 
 import litellm
+
+# Retry delays (seconds) for transient proxy/upstream failures.
+# Total attempts = len(_PROXY_RETRY_DELAYS) + 1.
+_PROXY_RETRY_DELAYS: tuple[float, ...] = (0.5, 1.5)
 
 logger = logging.getLogger(__name__)
 
@@ -189,6 +194,28 @@ class LLMRouter:
             return _ANTHROPIC_PROXY_URL
         return None
 
+    @staticmethod
+    def _sanitize_messages_for_anthropic(messages: list[dict]) -> list[dict]:
+        """Anthropic requires the first non-system message to have role=user.
+
+        Legacy campaigns persisted the AI opening as a leading assistant
+        message; drop any leading assistant messages so the request is
+        accepted. The opening is now injected as system context, so no
+        information is lost.
+        """
+        out: list[dict] = []
+        seen_first_non_system = False
+        for msg in messages:
+            role = msg.get("role")
+            if role == "system":
+                out.append(msg)
+                continue
+            if not seen_first_non_system and role == "assistant":
+                continue
+            seen_first_non_system = True
+            out.append(msg)
+        return out
+
     async def complete(self, messages: list[dict], **kwargs) -> str:
         caller = _get_caller()
         model = self._build_model_string(
@@ -200,6 +227,8 @@ class LLMRouter:
         if api_base:
             call_kwargs["api_base"] = api_base
             call_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
+        if self.config.primary_provider == LLMProvider.ANTHROPIC:
+            messages = self._sanitize_messages_for_anthropic(messages)
         t0 = time.monotonic()
         try:
             response = await litellm.acompletion(
@@ -240,20 +269,45 @@ class LLMRouter:
         max_tokens = kwargs.pop("max_tokens", self.config.max_tokens)
         api_base = self._get_api_base(self.config.primary_provider)
         call_kwargs = {**kwargs}
+        if self.config.primary_provider == LLMProvider.ANTHROPIC:
+            messages = self._sanitize_messages_for_anthropic(messages)
         if api_base:
             call_kwargs["api_base"] = api_base
             call_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
             # CLIProxyAPI streaming adds extra fields that confuse litellm's
             # SSE parser, so fall back to non-streaming and yield the result.
+            # Retry on transient proxy/upstream failures so a single hiccup
+            # doesn't surface the hardcoded English fallback to the player.
             t0 = time.monotonic()
-            response = await litellm.acompletion(
-                model=model,
-                messages=messages,
-                temperature=self.config.temperature,
-                max_tokens=max_tokens,
-                stream=False,
-                **call_kwargs,
-            )
+            last_exc: Exception | None = None
+            response = None
+            total_attempts = len(_PROXY_RETRY_DELAYS) + 1
+            for attempt in range(total_attempts):
+                try:
+                    response = await litellm.acompletion(
+                        model=model,
+                        messages=messages,
+                        temperature=self.config.temperature,
+                        max_tokens=max_tokens,
+                        stream=False,
+                        **call_kwargs,
+                    )
+                    last_exc = None
+                    break
+                except Exception as exc:
+                    last_exc = exc
+                    logger.warning(
+                        "LLM proxy call failed (attempt %d/%d) [%s] err=%s: %s",
+                        attempt + 1, total_attempts, caller, type(exc).__name__, exc,
+                    )
+                    if attempt < len(_PROXY_RETRY_DELAYS):
+                        await asyncio.sleep(_PROXY_RETRY_DELAYS[attempt])
+            if last_exc is not None:
+                logger.error(
+                    "LLM proxy call exhausted %d attempts [%s]; raising %s",
+                    total_attempts, caller, type(last_exc).__name__, exc_info=last_exc,
+                )
+                raise last_exc
             _log_call(caller + "(stream→sync)", messages, max_tokens, response, time.monotonic() - t0)
             content = response.choices[0].message.content
             if content:

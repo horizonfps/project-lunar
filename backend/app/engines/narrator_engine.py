@@ -337,15 +337,17 @@ class NarratorEngine:
     # Hard cap on history messages sent to the LLM.
     # The crystal memory pyramid handles long-term context, so we only need
     # recent exchanges for narrative continuity and tone consistency.
-    MAX_HISTORY_MESSAGES = 25  # ~12 exchanges + 1 user message
+    MAX_HISTORY_MESSAGES = 100  # ~50 exchanges; crystals cover anything older
 
     @staticmethod
     def _dynamic_history_slice(history: list[dict], context_window: int, system_tokens: int) -> list[dict]:
         """Return recent history messages, capped at MAX_HISTORY_MESSAGES.
 
         The crystal memory pyramid (SHORT→MEDIUM→LONG→MEMORY) in the system
-        prompt provides long-term context.  The history slice only needs to
-        cover the most recent exchanges for narrative flow and tone.
+        prompt provides long-term context for actions older than the cap.
+        The cap exists so very long campaigns (200+ actions) don't blow the
+        context window even on 1M-token providers; for shorter sessions the
+        token-budget trim below is the binding constraint.
 
         Budget allocation:
         - Hard cap: MAX_HISTORY_MESSAGES (newest messages)
