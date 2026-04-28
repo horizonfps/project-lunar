@@ -117,15 +117,18 @@ def _ensure_session(campaign_id: str) -> GameSession:
     tone, language, opening = _load_scenario_for_campaign(campaign_id)
     story_cards = _load_story_cards_for_campaign(campaign_id)
     setup_answers = _load_setup_answers_for_campaign(campaign_id)
+    combat_enabled = True
     # If the campaign has an AI-generated opening, prefer it over the
     # scenario template — that's the text the player saw in the UI.
     try:
         with ScenarioStore(_SCENARIO_DB_PATH) as _store:
             _campaign = _store.get_campaign(campaign_id)
-        if _campaign and _campaign.generated_opening:
-            opening = _campaign.generated_opening
+        if _campaign:
+            if _campaign.generated_opening:
+                opening = _campaign.generated_opening
+            combat_enabled = _campaign.combat_enabled
     except Exception:
-        logger.debug("Could not load generated_opening for campaign %s", campaign_id)
+        logger.debug("Could not load campaign metadata for %s", campaign_id)
     graph = _get_graph_engine(campaign_id)
     graphiti = _get_graphiti_engine()
     if graphiti:
@@ -149,6 +152,7 @@ def _ensure_session(campaign_id: str) -> GameSession:
         opening_narrative=opening,
         story_cards=story_cards,
         setup_answers=setup_answers,
+        combat_enabled=combat_enabled,
     )
     return _sessions[campaign_id]
 
@@ -244,6 +248,7 @@ class PlayerActionRequest(BaseModel):
     provider: str = Field(default="deepseek", max_length=20)
     model: str = Field(default="deepseek-v4-flash", max_length=64)
     temperature: float = Field(default=0.85, ge=0.0, le=2.0)
+    combat_enabled: bool | None = None
 
 
 class SettingsRequest(BaseModel):
@@ -283,6 +288,10 @@ class SetupAnswersRequest(BaseModel):
     answers: dict[str, SetupAnswer]
 
 
+class CampaignSettingsRequest(BaseModel):
+    combat_enabled: bool
+
+
 def _get_graph_engine(campaign_id: str):
     """Get or create a GraphEngine for the given campaign."""
     if campaign_id in _graph_engines:
@@ -317,9 +326,10 @@ async def player_action(req: PlayerActionRequest):
     _llm.config.primary_model = req.model
     _llm.config.temperature = req.temperature
     _llm.config.max_tokens = req.max_tokens
+    if req.combat_enabled is not None:
+        session.set_combat_enabled(req.combat_enabled)
 
     async def event_stream():
-        import json as _json
         reset_call_log()
         async for chunk in session.process_action(req.action, max_tokens=req.max_tokens):
             # SSE requires each data line to be prefixed with "data:".
@@ -328,14 +338,12 @@ async def player_action(req: PlayerActionRequest):
             for line in text.split("\n"):
                 yield f"data: {line}\n"
             yield "\n"
-        # Emit token debug summary as a special SSE event
         summary = get_call_summary()
         logger.warning(
             "📊 ACTION COMPLETE: %d LLM calls, %d input tokens, %d output tokens, %.1fs total",
             summary["call_count"], summary["total_input_tokens"],
             summary["total_output_tokens"], summary["total_time_s"],
         )
-        yield f"data: [TOKEN_DEBUG]{_json.dumps(summary)}\n\n"
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
@@ -374,6 +382,7 @@ async def get_scenario_view(campaign_id: str):
         ),
         "opening_mode": scenario.opening_mode,
         "has_generated_opening": bool(campaign.generated_opening),
+        "combat_enabled": campaign.combat_enabled,
     }
 
 
@@ -462,6 +471,19 @@ async def _maybe_generate_opening(
     except Exception:
         logger.debug("Could not log AI_OPENING_GENERATED event", exc_info=True)
     return text
+
+
+@router.patch("/{campaign_id}/settings")
+async def update_campaign_settings(campaign_id: str, req: CampaignSettingsRequest):
+    """Persist campaign-level toggles (e.g. combat mode on/off)."""
+    with ScenarioStore(_SCENARIO_DB_PATH) as store:
+        ok = store.update_combat_enabled(campaign_id, req.combat_enabled)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    session = _sessions.get(campaign_id)
+    if session:
+        session.set_combat_enabled(req.combat_enabled)
+    return {"status": "ok", "combat_enabled": req.combat_enabled}
 
 
 @router.post("/{campaign_id}/setup-answers")

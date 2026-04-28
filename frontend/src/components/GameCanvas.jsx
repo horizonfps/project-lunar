@@ -100,6 +100,8 @@ export default function GameCanvas() {
     llmProvider,
     llmModel,
     temperature,
+    combatEnabled,
+    updateSettings,
     replaceLastAssistantMessage,
     popLastPair,
   } = useGameStore()
@@ -132,7 +134,11 @@ export default function GameCanvas() {
     let cancelled = false
     fetchScenarioView(activeCampaignId)
       .then((view) => {
-        if (!cancelled) setScenarioView(view)
+        if (cancelled) return
+        setScenarioView(view)
+        if (view && typeof view.combat_enabled === 'boolean') {
+          updateSettings({ combatEnabled: view.combat_enabled })
+        }
       })
       .catch(() => {})
     return () => {
@@ -271,6 +277,7 @@ export default function GameCanvas() {
       provider: llmProvider,
       model: llmModel,
       temperature,
+      combatEnabled,
       onChunk: appendToLastMessage,
       onJournal: addJournalEntry,
       onMode: (mode) => {
@@ -421,7 +428,7 @@ export default function GameCanvas() {
           {/* Message feed */}
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
             <div className="max-w-4xl mx-auto space-y-8 pb-4">
-              {messages.length === 0 && resolvedOpening && (
+              {resolvedOpening && (
                 <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 md:p-8 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
                   <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:font-light prose-p:text-white font-serif">
                     <ReactMarkdown components={mentionComponents}>{resolvedOpening}</ReactMarkdown>

@@ -36,10 +36,12 @@ class GameSession:
         opening_narrative: str = "",
         story_cards: list | None = None,
         setup_answers: dict | None = None,
+        combat_enabled: bool = True,
     ):
         self.campaign_id = campaign_id
         self.language = language
         self._setup_answers = setup_answers or {}
+        self._combat_enabled = bool(combat_enabled)
         # Tone may reference {var} placeholders that draw from setup_answers
         # — resolve them once now so the narrator never sees raw template tokens.
         self.scenario_tone = interpolate(
@@ -96,14 +98,19 @@ class GameSession:
         self._rebuild_player_power()
         self._rebuild_known_opponent_powers()
 
+        # Resolve the opening once and keep it on the session so it can be
+        # injected into every system prompt as canonical context (preventing
+        # the narrator from substituting opening NPCs with similarly-described
+        # canonical alternatives from story cards).
+        self._opening_narrative = interpolate(
+            opening_narrative, self._setup_answers,
+            context=f"campaign:{campaign_id}:opening",
+        ) if opening_narrative else ""
+
         # If this is a brand-new campaign (no history) and we have an
         # opening narrative, seed the history so the AI knows the story setup.
-        if not self._history and opening_narrative:
-            resolved_opening = interpolate(
-                opening_narrative, self._setup_answers,
-                context=f"campaign:{campaign_id}:opening",
-            )
-            self._history.append({"role": "assistant", "content": resolved_opening})
+        if not self._history and self._opening_narrative:
+            self._history.append({"role": "assistant", "content": self._opening_narrative})
 
     def _rebuild_history_from_events(self) -> None:
         """Rebuild _history from persisted events so the AI retains context."""
@@ -263,6 +270,12 @@ class GameSession:
         self._rebuild_memory_crystals()
         self._rebuild_player_power()
         self._rebuild_known_opponent_powers()
+
+        # Mirror __init__: if rewind brought us back to a clean slate, seed
+        # the opening as the first assistant message so the next action sees
+        # the same narrative setup a fresh campaign would.
+        if not self._history and self._opening_narrative:
+            self._history.append({"role": "assistant", "content": self._opening_narrative})
 
     def _rebuild_journal_from_events(self) -> None:
         """Rebuild the journal in-memory state from JOURNAL_ENTRY events in the store."""
@@ -441,6 +454,13 @@ class GameSession:
             power = ev.payload.get("opponent_power")
             if name and power is not None:
                 self._known_opponent_powers[name.lower()] = int(power)
+
+    def set_combat_enabled(self, enabled: bool) -> None:
+        self._combat_enabled = bool(enabled)
+
+    @property
+    def combat_enabled(self) -> bool:
+        return self._combat_enabled
 
     async def _ensure_player_power(self) -> None:
         """If player power was never evaluated, run a full-context LLM analysis.
@@ -872,6 +892,8 @@ class GameSession:
             story_ctx += "\n" + power_scale
         mode, meta = await self._narrator.detect_mode(player_input, story_context=story_ctx)
         mode = self._coerce_mode(mode)
+        if mode == NarrativeMode.COMBAT and not self._combat_enabled:
+            mode = NarrativeMode.NARRATIVE
         narrative_time = meta.get("narrative_time_seconds", 60)
         if mode != NarrativeMode.META:
             self._turn_count += 1
@@ -1068,6 +1090,7 @@ class GameSession:
                 journal_context=journal_ctx,
                 story_cards_context=story_cards_ctx,
                 character_setup=self._character_setup_block,
+                opening_narrative=self._opening_narrative,
             )
 
         # Collect full response before sending to frontend (no streaming)
@@ -1085,7 +1108,13 @@ class GameSession:
             continuation_prompt = (
                 "Continue the narrative EXACTLY where you stopped. "
                 "Do NOT repeat any text. Complete the current sentence and paragraph, "
-                "then end at a natural pause point. Keep the same tone and language."
+                "then end at a natural pause point. Keep the same tone and language. "
+                "STRICT: do NOT take any new actions, decisions, dialogue or "
+                "internal thoughts on the player's behalf. If the previous text "
+                "already ended at or near a question/prompt directed at the player, "
+                "just close the current sentence cleanly and stop — do NOT introduce "
+                "new beats, NPC reactions to imagined player actions, or further "
+                "narrative progression."
             )
             continuation_history = self._history + [
                 {"role": "user", "content": player_input},
@@ -1145,6 +1174,8 @@ class GameSession:
             story_ctx += "\n" + power_scale
         mode, meta = await self._narrator.detect_mode(player_input, story_context=story_ctx)
         mode = self._coerce_mode(mode)
+        if mode == NarrativeMode.COMBAT and not self._combat_enabled:
+            mode = NarrativeMode.NARRATIVE
         narrative_time = meta.get("narrative_time_seconds", 60)
         if mode != NarrativeMode.META:
             self._turn_count += 1
@@ -1311,6 +1342,7 @@ class GameSession:
                 recent_narrative=self._history[-1]["content"][:1000] if self._history else "",
             ),
             character_setup=self._character_setup_block,
+            opening_narrative=self._opening_narrative,
         )
 
         # Collect canonical names for entity extraction
@@ -1349,7 +1381,13 @@ class GameSession:
             continuation_prompt = (
                 "Continue the narrative EXACTLY where you stopped. "
                 "Do NOT repeat any text. Complete the current sentence and paragraph, "
-                "then end at a natural pause point. Keep the same tone and language."
+                "then end at a natural pause point. Keep the same tone and language. "
+                "STRICT: do NOT take any new actions, decisions, dialogue or "
+                "internal thoughts on the player's behalf. If the previous text "
+                "already ended at or near a question/prompt directed at the player, "
+                "just close the current sentence cleanly and stop — do NOT introduce "
+                "new beats, NPC reactions to imagined player actions, or further "
+                "narrative progression."
             )
             continuation_history = self._history + [
                 {"role": "user", "content": player_input},
@@ -2110,10 +2148,18 @@ class GameSession:
 
     @staticmethod
     def _is_response_complete(text: str) -> bool:
-        """Check if the LLM response ends with complete sentence punctuation."""
+        """Check if the LLM response ends with complete sentence punctuation.
+
+        Trailing markdown emphasis (``*``/``_``/backticks) and whitespace are
+        stripped before inspecting the final character. Without this, a
+        properly closed ``**question?**`` is mistaken for a truncated
+        response and triggers an unnecessary continuation pass — during
+        which the LLM tends to ignore the just-asked question and narrate
+        further actions on the player's behalf.
+        """
         if not text:
             return True
-        stripped = text.rstrip()
+        stripped = text.rstrip(" \t\r\n*_`")
         if not stripped:
             return True
         return stripped[-1] in '.!?…"\u201d»)'

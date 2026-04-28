@@ -48,10 +48,11 @@ class Campaign:
     created_at: str
     setup_answers: dict = field(default_factory=dict)
     generated_opening: str = ""
+    combat_enabled: bool = True
 
 
 class ScenarioStore:
-    SCHEMA_VERSION = 3
+    SCHEMA_VERSION = 4
 
     _MIGRATIONS = {
         1: [
@@ -88,6 +89,9 @@ class ScenarioStore:
             "ALTER TABLE scenarios ADD COLUMN opening_mode TEXT NOT NULL DEFAULT 'fixed'",
             "ALTER TABLE scenarios ADD COLUMN ai_opening_directive TEXT NOT NULL DEFAULT ''",
             "ALTER TABLE campaigns ADD COLUMN generated_opening TEXT NOT NULL DEFAULT ''",
+        ],
+        4: [
+            "ALTER TABLE campaigns ADD COLUMN combat_enabled INTEGER NOT NULL DEFAULT 1",
         ],
     }
 
@@ -236,7 +240,8 @@ class ScenarioStore:
         ]
 
     _CAMPAIGN_COLS = (
-        "id, scenario_id, player_name, created_at, setup_answers, generated_opening"
+        "id, scenario_id, player_name, created_at, setup_answers, "
+        "generated_opening, combat_enabled"
     )
 
     def create_campaign(self, scenario_id: str, player_name: str) -> Campaign:
@@ -247,32 +252,32 @@ class ScenarioStore:
             created_at=datetime.utcnow().isoformat(),
             setup_answers={},
             generated_opening="",
+            combat_enabled=True,
         )
         with self._lock:
             self._conn.execute(
                 f"INSERT INTO campaigns ({self._CAMPAIGN_COLS}) "
-                "VALUES (?,?,?,?,?,?)",
+                "VALUES (?,?,?,?,?,?,?)",
                 (campaign.id, campaign.scenario_id, campaign.player_name,
                  campaign.created_at, json.dumps(campaign.setup_answers),
-                 campaign.generated_opening),
+                 campaign.generated_opening, 1 if campaign.combat_enabled else 0),
             )
             self._conn.commit()
         return campaign
 
     @staticmethod
     def _row_to_campaign(row) -> Campaign:
-        # Columns (matching _CAMPAIGN_COLS):
-        #   id, scenario_id, player_name, created_at, setup_answers(JSON),
-        #   generated_opening
         try:
             setup_answers = json.loads(row[4]) if row[4] else {}
         except (json.JSONDecodeError, TypeError):
             setup_answers = {}
         generated_opening = row[5] if len(row) > 5 and row[5] is not None else ""
+        combat_enabled = bool(row[6]) if len(row) > 6 and row[6] is not None else True
         return Campaign(
             id=row[0], scenario_id=row[1], player_name=row[2],
             created_at=row[3], setup_answers=setup_answers,
             generated_opening=generated_opening,
+            combat_enabled=combat_enabled,
         )
 
     def get_campaign(self, campaign_id: str) -> "Campaign | None":
@@ -298,6 +303,15 @@ class ScenarioStore:
             cursor = self._conn.execute(
                 "UPDATE campaigns SET setup_answers=? WHERE id=?",
                 (json.dumps(answers), campaign_id),
+            )
+            self._conn.commit()
+            return cursor.rowcount > 0
+
+    def update_combat_enabled(self, campaign_id: str, enabled: bool) -> bool:
+        with self._lock:
+            cursor = self._conn.execute(
+                "UPDATE campaigns SET combat_enabled=? WHERE id=?",
+                (1 if enabled else 0, campaign_id),
             )
             self._conn.commit()
             return cursor.rowcount > 0

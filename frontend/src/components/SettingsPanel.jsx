@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useGameStore } from '../store'
+import { updateCampaignSettings } from '../api'
 import { Settings, X } from 'lucide-react'
 
 const PROVIDERS = [
@@ -9,11 +10,15 @@ const PROVIDERS = [
 ]
 
 export default function SettingsPanel({ open, onClose }) {
-  const { llmProvider, llmModel, temperature, maxTokens, updateSettings } = useGameStore()
+  const {
+    llmProvider, llmModel, temperature, maxTokens, combatEnabled,
+    activeCampaignId, updateSettings,
+  } = useGameStore()
   const [provider, setProvider] = useState(llmProvider)
   const [model, setModel] = useState(llmModel)
   const [temp, setTemp] = useState(temperature)
   const [tokens, setTokens] = useState(maxTokens)
+  const [combat, setCombat] = useState(combatEnabled)
   const [saved, setSaved] = useState(false)
 
   const currentProviderModels = PROVIDERS.find((p) => p.id === provider)?.models || []
@@ -24,13 +29,22 @@ export default function SettingsPanel({ open, onClose }) {
     setModel(providerModels[0] || '')
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     updateSettings({
       llmProvider: provider,
       llmModel: model,
       temperature: temp,
       maxTokens: tokens,
+      combatEnabled: combat,
     })
+    if (activeCampaignId) {
+      try {
+        await updateCampaignSettings(activeCampaignId, { combatEnabled: combat })
+      } catch {
+        // Persistence failure is non-fatal: the per-request flag still
+        // applies for the current session.
+      }
+    }
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -127,6 +141,37 @@ export default function SettingsPanel({ open, onClose }) {
               <span>Short</span>
               <span>Standard</span>
               <span>Extended</span>
+            </div>
+          </div>
+
+          {/* Combat Mode */}
+          <div>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest font-mono text-white/40 mb-1">
+                  Combat Mode
+                </label>
+                <p className="text-[10px] text-white/40 leading-relaxed">
+                  Disable for scenarios without confrontation. Skips combat LLM calls.
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={combat}
+                onClick={() => setCombat((v) => !v)}
+                className={`relative inline-flex shrink-0 items-center w-11 h-6 rounded-full border transition-colors ${
+                  combat
+                    ? 'bg-white/20 border-white/40'
+                    : 'bg-white/[0.03] border-white/10'
+                }`}
+              >
+                <span
+                  className={`inline-block w-4 h-4 rounded-full bg-white transition-transform ${
+                    combat ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
             </div>
           </div>
 

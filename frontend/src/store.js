@@ -22,6 +22,7 @@ export const useGameStore = create((set) => ({
   llmModel: 'deepseek-v4-flash',
   temperature: 0.85,
   maxTokens: 2000,
+  combatEnabled: true,
 
   // Actions
   setScenarios: (scenarios) => set({ scenarios }),
@@ -130,6 +131,7 @@ export const useGameStore = create((set) => ({
         if (s.llmModel) restored.llmModel = s.llmModel
         if (s.temperature != null) restored.temperature = s.temperature
         if (s.maxTokens != null) restored.maxTokens = s.maxTokens
+        if (s.combatEnabled != null) restored.combatEnabled = s.combatEnabled
       }
       if (Object.keys(restored).length > 0) set(restored)
       return Object.keys(restored).length > 0
@@ -158,6 +160,7 @@ export const useGameStore = create((set) => ({
         if (s.llmModel) restored.llmModel = s.llmModel
         if (s.temperature != null) restored.temperature = s.temperature
         if (s.maxTokens != null) restored.maxTokens = s.maxTokens
+        if (s.combatEnabled != null) restored.combatEnabled = s.combatEnabled
         if (Object.keys(restored).length > 0) set(restored)
       }
     } catch {}

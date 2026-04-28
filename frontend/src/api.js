@@ -82,6 +82,7 @@ export function streamAction({
   provider,
   model,
   temperature,
+  combatEnabled,
   onChunk,
   onJournal,
   onMode,
@@ -105,6 +106,7 @@ export function streamAction({
       provider: provider || 'deepseek',
       model: model || 'deepseek-v4-flash',
       temperature: temperature ?? 0.85,
+      combat_enabled: combatEnabled,
     }),
   })
     .then(async (res) => {
@@ -361,6 +363,16 @@ export async function saveSetupAnswers(campaignId, answers) {
 export async function fetchScenarioView(campaignId) {
   const r = await fetch(`${BASE}/game/${campaignId}/scenario-view`)
   if (!r.ok) throw new Error('Failed to fetch scenario view')
+  return r.json()
+}
+
+export async function updateCampaignSettings(campaignId, { combatEnabled }) {
+  const r = await fetch(`${BASE}/game/${campaignId}/settings`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ combat_enabled: combatEnabled }),
+  })
+  if (!r.ok) throw new Error('Failed to update campaign settings')
   return r.json()
 }
 
