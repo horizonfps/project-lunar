@@ -182,6 +182,14 @@ class NarratorEngine:
         template = self._NARRATOR_RULES.get(language, self._NARRATOR_RULES["en"])
         return template.format(length_instruction=length_line)
 
+    _OPENING_CANON_HEADER = (
+        "\nOPENING NARRATIVE (CANONICAL — characters, names, places and facts "
+        "introduced below are TRUE for this campaign. When the player references "
+        "anyone or anything from this opening, REUSE the same names from here "
+        "instead of substituting them with similarly-described entities from the "
+        "story cards):\n"
+    )
+
     def build_system_prompt(
         self,
         tone_instructions: str,
@@ -195,6 +203,7 @@ class NarratorEngine:
         journal_context: str = "",
         story_cards_context: str = "",
         character_setup: str = "",
+        opening_narrative: str = "",
     ) -> str:
         lang_instruction = _LANGUAGE_INSTRUCTIONS.get(
             language,
@@ -207,6 +216,8 @@ class NarratorEngine:
             sections.append(f"\n{character_setup}")
         if tone_instructions:
             sections.append(f"\nTONE AND STYLE:\n{tone_instructions}")
+        if opening_narrative:
+            sections.append(self._OPENING_CANON_HEADER + opening_narrative)
         if memory_context:
             sections.append(f"\nWORLD MEMORY:\n{memory_context}")
         if inventory_context:
@@ -238,6 +249,7 @@ class NarratorEngine:
         journal_context: str = "",
         story_cards_context: str = "",
         character_setup: str = "",
+        opening_narrative: str = "",
     ) -> tuple[str, str]:
         """Build system prompt split into (static, dynamic) parts for prompt caching.
 
@@ -259,6 +271,8 @@ class NarratorEngine:
             static_sections.append(f"\n{character_setup}")
         if tone_instructions:
             static_sections.append(f"\nTONE AND STYLE:\n{tone_instructions}")
+        if opening_narrative:
+            static_sections.append(self._OPENING_CANON_HEADER + opening_narrative)
         static_sections.append(self._build_narrator_rules(max_tokens, language))
         static_part = "\n".join(static_sections)
 
@@ -402,6 +416,7 @@ class NarratorEngine:
                 full_response += chunk
                 yield chunk
         except Exception:
+            logger.exception("stream_narrative LLM call failed; emitting fallback")
             yield self._fallback_narrative(player_input)
 
         # Debug logging: log full response
