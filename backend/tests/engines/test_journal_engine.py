@@ -121,3 +121,42 @@ def test_log_player_action_relationship(engine):
     entry = engine.log_player_action("c1", "I ask the guard for safe passage.")
     assert entry is not None
     assert entry.category == JournalCategory.RELATIONSHIP_CHANGE
+
+
+# ── Camada 3 — witnessed_by propagation ────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_evaluate_and_log_records_witnesses(engine, mock_llm):
+    mock_llm.complete = AsyncMock(return_value=(
+        '{"relevant": true, "category": "RELATIONSHIP_CHANGE", '
+        '"summary": "Rin promised to protect the player."}'
+    ))
+    entry = await engine.evaluate_and_log(
+        campaign_id="c1",
+        narrative_text="Rin clasped the player's arm and made an oath.",
+        witnessed_by=["Rin"],
+    )
+    assert entry is not None
+    assert entry.witnessed_by == ["Rin"]
+
+
+def test_log_player_action_records_witnesses(engine):
+    entry = engine.log_player_action(
+        "c1", "I decide to accept the guard's terms.",
+        witnessed_by=["Captain Halen"],
+    )
+    assert entry is not None
+    assert entry.witnessed_by == ["Captain Halen"]
+
+
+def test_journal_entry_default_witnesses_is_empty():
+    """Direct construction without witnesses defaults to empty list."""
+    from datetime import datetime
+    entry = JournalEntry(
+        campaign_id="c1",
+        category=JournalCategory.DISCOVERY,
+        summary="Found a cave.",
+        created_at=datetime.utcnow().isoformat(),
+    )
+    assert entry.witnessed_by == []

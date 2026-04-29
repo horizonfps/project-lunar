@@ -1,13 +1,50 @@
 from __future__ import annotations
 import json
 import logging
-from dataclasses import dataclass
+import os
+import re
+from dataclasses import dataclass, field
 from enum import Enum
 
 from app.db.event_store import EventStore, Event, EventType
 from app.utils.json_parsing import parse_json_dict
 
 logger = logging.getLogger(__name__)
+
+
+# ── Stop words for keyword extraction (EN + PT) ─────────────────────
+# Mirrors the set used in game_session._extract_context_keywords so that
+# crystal scoring stays consistent with story-card scoring.
+_STOP_WORDS: set[str] = {
+    "the", "and", "for", "that", "this", "with", "you", "your", "are",
+    "was", "were", "has", "have", "had", "been", "will", "not", "but",
+    "from", "they", "she", "his", "her", "its", "our", "que", "para",
+    "com", "uma", "por", "ele", "ela", "seu", "sua", "dos", "das",
+    "nos", "nas", "mais", "como", "não", "está", "isso", "esse",
+    "essa", "são", "tem", "foi", "ser", "ter", "mas", "quando",
+    "sobre", "entre", "depois", "antes", "muito", "pode", "seus",
+    "suas", "ainda", "também", "apenas", "cada", "outro", "outra",
+}
+
+
+def _extract_keywords(text: str) -> set[str]:
+    """Lowercase non-stop tokens of length >=3 from arbitrary text."""
+    if not text:
+        return set()
+    words = re.findall(r"[a-zA-ZÀ-ÿ]{3,}", text.lower())
+    return {w for w in words if w not in _STOP_WORDS and len(w) > 2}
+
+
+def _rag_crystals_enabled() -> bool:
+    """Feature flag — defaults ON. Set LUNAR_FEATURE_RAG_CRYSTALS=0/false to disable."""
+    raw = os.environ.get("LUNAR_FEATURE_RAG_CRYSTALS", "1").strip().lower()
+    return raw not in ("0", "false", "no", "off")
+
+
+def estimate_tokens_for_crystal(crystal: "MemoryCrystal") -> int:
+    """Rough token estimate for a crystal's ai_content payload (~4 chars/token)."""
+    text = crystal.ai_content or ""
+    return max(1, len(text) // 4)
 
 
 class CrystalTier(str, Enum):
@@ -50,6 +87,10 @@ class MemoryCrystal:
     consumed: bool = False  # True when consolidated into a higher tier
     source_start_created_at: str | None = None
     source_end_created_at: str | None = None
+    # Camada 3 — perspective filter. Union of NPC names that witnessed any of
+    # the source events / source crystals. MEMORY tier ignores this list
+    # (canonical world facts are accessible to every NPC).
+    witnessed_by: list[str] = field(default_factory=list)
 
 
 # ── Compression prompts per tier ────────────────────────────────────
@@ -229,6 +270,18 @@ class MemoryEngine:
         if not player_summary:
             player_summary = self._fallback_player_summary(events)
 
+        # Union of every NPC that witnessed any source event. Order doesn't
+        # matter — readers will treat this as a set. Player presence is
+        # implicit and never recorded.
+        witnessed_by_union: list[str] = []
+        seen_witnesses: set[str] = set()
+        for ev in events:
+            for name in (ev.witnessed_by or []):
+                key = name.strip().lower()
+                if key and key not in seen_witnesses:
+                    seen_witnesses.add(key)
+                    witnessed_by_union.append(name.strip())
+
         crystal = MemoryCrystal(
             campaign_id=campaign_id,
             tier=CrystalTier.SHORT,
@@ -237,13 +290,15 @@ class MemoryEngine:
             event_count=len(events),
             source_start_created_at=events[0].created_at,
             source_end_created_at=events[-1].created_at,
+            witnessed_by=witnessed_by_union,
         )
         self._crystals.setdefault(campaign_id, []).append(crystal)
         self._persist_crystal(campaign_id, crystal)
         self._last_crystal_cursor[campaign_id] = events[-1].created_at
         logger.info(
-            "SHORT crystal created: %d events → %d chars ai_content (campaign %s)",
-            len(events), len(ai_content), campaign_id,
+            "SHORT crystal created: %d events → %d chars ai_content "
+            "(campaign %s, witnesses=%s)",
+            len(events), len(ai_content), campaign_id, witnessed_by_union,
         )
         return crystal
 
@@ -288,6 +343,21 @@ class MemoryEngine:
             player_summary = " ".join(c.content for c in to_merge)
 
         total_events = sum(c.event_count for c in to_merge)
+
+        # Union of witnesses from source crystals — broader scope at higher
+        # tiers (more NPCs will have witnessed the union of all those scenes),
+        # but the perspective filter is still useful: a tier-LONG arc summary
+        # of the player's solo journey through a forest legitimately has 0
+        # witnesses, and no NPC should learn its contents.
+        witnessed_by_union: list[str] = []
+        seen_witnesses: set[str] = set()
+        for c in to_merge:
+            for name in (c.witnessed_by or []):
+                key = name.strip().lower()
+                if key and key not in seen_witnesses:
+                    seen_witnesses.add(key)
+                    witnessed_by_union.append(name.strip())
+
         crystal = MemoryCrystal(
             campaign_id=campaign_id,
             tier=target_tier,
@@ -296,6 +366,7 @@ class MemoryEngine:
             event_count=total_events,
             source_start_created_at=to_merge[0].source_start_created_at,
             source_end_created_at=to_merge[-1].source_end_created_at,
+            witnessed_by=witnessed_by_union,
         )
         self._crystals.setdefault(campaign_id, []).append(crystal)
         self._persist_crystal(campaign_id, crystal)
@@ -452,19 +523,177 @@ class MemoryEngine:
             logger.warning("LLM crystal compression failed for tier %s", tier.value, exc_info=True)
         return "", ""
 
+    # ── Crystal scoring (RAG) ──────────────────────────────────────
+    # Bonus weights mirror the story-card RAG in game_session so that
+    # both retrieval layers rank facts the same way.
+    _ACTIVE_NPC_BONUS = 50      # crystal mentions an NPC currently in scene
+    _LOCATION_BONUS = 30        # crystal mentions current location
+    _KEYWORD_MATCH_SCORE = 5    # per query-keyword hit in ai_content
+    _RECENCY_BONUS_MAX = 10     # newest unconsumed crystal of its tier gets this
+
+    # Tier base scores: higher tier means broader (and usually older) context,
+    # so without query signal we still bias toward recent/specific tiers but
+    # never let a tier dominate purely by being old. These are tiebreakers.
+    _TIER_BASE_SCORE = {
+        CrystalTier.SHORT: 4.0,
+        CrystalTier.MEDIUM: 3.0,
+        CrystalTier.LONG: 2.0,
+    }
+
+    def _score_crystal(
+        self,
+        crystal: MemoryCrystal,
+        rank_within_tier: int,
+        tier_size: int,
+        query_keywords: set[str],
+        active_npc_names: set[str],
+        location_keywords: set[str],
+    ) -> float:
+        """Score a crystal's relevance to the current scene.
+
+        Score combines:
+        - Keyword overlap between query and crystal ai_content (weight 5/hit).
+        - Active NPC names appearing in the crystal (weight 50/match).
+        - Location keywords appearing in the crystal (weight 30/match).
+        - Recency within tier: most-recent crystal of its tier gets a small
+          bonus, decaying linearly toward 0 for the oldest in that tier.
+        - Tier base: small constant per tier as a tiebreaker.
+
+        MEMORY tier crystals are NEVER scored — they are always included in
+        full as canonical world facts. This method is only called for
+        SHORT/MEDIUM/LONG.
+        """
+        ai = (crystal.ai_content or "").lower()
+        if not ai:
+            return 0.0
+
+        score = self._TIER_BASE_SCORE.get(crystal.tier, 0.0)
+
+        # Keyword overlap. We tokenize the crystal's ai_content the same way
+        # the query is tokenized so that quoted JSON keys ("characters",
+        # "events", etc.) become noise-immune via the stop list.
+        if query_keywords:
+            crystal_words = set(re.findall(r"[a-zA-ZÀ-ÿ]{3,}", ai))
+            hits = len(query_keywords & crystal_words)
+            score += hits * self._KEYWORD_MATCH_SCORE
+
+        # Active NPC presence: substring match (NPC names can be multi-word).
+        if active_npc_names:
+            for name in active_npc_names:
+                name = name.strip().lower()
+                if name and name in ai:
+                    score += self._ACTIVE_NPC_BONUS
+
+        # Location overlap.
+        if location_keywords:
+            for loc in location_keywords:
+                loc = loc.strip().lower()
+                if loc and loc in ai:
+                    score += self._LOCATION_BONUS
+
+        # Recency within tier: linearly decay from RECENCY_BONUS_MAX (newest)
+        # to 0 (oldest). rank_within_tier is 0-based from oldest → newest.
+        if tier_size > 1:
+            recency = (rank_within_tier / (tier_size - 1)) * self._RECENCY_BONUS_MAX
+        else:
+            recency = self._RECENCY_BONUS_MAX
+        score += recency
+
+        return score
+
+    # ── Context window budget ──────────────────────────────────────
+    # Allocate ~10% of provider context window to crystal recall (separate
+    # from story cards' 15%). Floor / ceiling keep behavior sane on small
+    # providers and prevent runaway on 1M-token windows.
+    _CRYSTALS_CONTEXT_FRACTION = 0.10
+    _CRYSTALS_MIN_BUDGET_TOKENS = 4_000
+    _CRYSTALS_MAX_BUDGET_TOKENS = 100_000
+
+    def _compute_crystals_budget(self, context_window: int) -> int:
+        if context_window <= 0:
+            return self._CRYSTALS_MIN_BUDGET_TOKENS
+        budget = int(context_window * self._CRYSTALS_CONTEXT_FRACTION)
+        return max(
+            self._CRYSTALS_MIN_BUDGET_TOKENS,
+            min(self._CRYSTALS_MAX_BUDGET_TOKENS, budget),
+        )
+
+    def _select_ranked_crystals(
+        self,
+        campaign_id: str,
+        tier: CrystalTier,
+        query_keywords: set[str],
+        active_npc_names: set[str],
+        location_keywords: set[str],
+        token_budget: int,
+    ) -> list[MemoryCrystal]:
+        """Score unconsumed crystals of `tier` and return top-N within budget.
+
+        Crystals are ranked by `_score_crystal`, then included greedily until
+        the per-tier token budget runs out. Ordering of the returned list is
+        chronological (oldest → newest) so the narrator sees the natural arc.
+        """
+        unconsumed = self._unconsumed_crystals(campaign_id, tier)
+        if not unconsumed:
+            return []
+
+        tier_size = len(unconsumed)
+        scored: list[tuple[float, int, MemoryCrystal]] = []
+        for rank, crystal in enumerate(unconsumed):
+            score = self._score_crystal(
+                crystal=crystal,
+                rank_within_tier=rank,
+                tier_size=tier_size,
+                query_keywords=query_keywords,
+                active_npc_names=active_npc_names,
+                location_keywords=location_keywords,
+            )
+            scored.append((score, rank, crystal))
+
+        # Highest score first; ties broken by recency (higher rank = newer).
+        scored.sort(key=lambda x: (-x[0], -x[1]))
+
+        selected: list[tuple[int, MemoryCrystal]] = []
+        used_tokens = 0
+        for score, rank, crystal in scored:
+            cost = estimate_tokens_for_crystal(crystal)
+            if used_tokens + cost > token_budget and selected:
+                break
+            selected.append((rank, crystal))
+            used_tokens += cost
+
+        # Restore chronological order for narrator readability.
+        selected.sort(key=lambda x: x[0])
+        return [c for _, c in selected]
+
     # ── Context window builder ──────────────────────────────────────
 
-    def build_context_window(self, campaign_id: str) -> str:
+    def build_context_window(
+        self,
+        campaign_id: str,
+        query_text: str = "",
+        active_npc_names: set[str] | None = None,
+        location: str = "",
+        context_window: int = 0,
+    ) -> str:
         """Build the WORLD MEMORY section for the narrator's system prompt.
 
         Pyramid structure — each tier provides progressively broader context:
-        - MEMORY: permanent world facts (all)
-        - LONG: story arc summaries (unconsumed, up to 3)
-        - MEDIUM: consolidated summaries (unconsumed, up to 3)
-        - SHORT: recent recaps (unconsumed, up to 3)
-        - DELTA: raw uncrystallized events (last few)
+        - MEMORY: permanent world facts (all — canonical, never filtered).
+        - LONG / MEDIUM / SHORT: ranked by relevance to (query, NPCs, location)
+          when those are provided AND the RAG flag is on. Otherwise falls back
+          to the legacy "last 3 unconsumed" behavior (preserves old tests and
+          callers that don't have query context, e.g. routes_game generation).
+        - DELTA: raw uncrystallized events (last few).
         """
         parts: list[str] = []
+
+        rag_on = _rag_crystals_enabled() and bool(
+            query_text or active_npc_names or location
+        )
+        active_npc_names = {n.lower() for n in (active_npc_names or set()) if n}
+        query_keywords = _extract_keywords(query_text)
+        location_keywords = _extract_keywords(location)
 
         # MEMORY tier: permanent facts (show all)
         memory_crystals = [
@@ -476,26 +705,35 @@ class MemoryEngine:
             for c in memory_crystals:
                 parts.append(c.ai_content)
 
-        # LONG tier: arc summaries (unconsumed only)
-        long_crystals = self._unconsumed_crystals(campaign_id, CrystalTier.LONG)
-        if long_crystals:
-            parts.append("=== ARC_MEM ===")
-            for c in long_crystals[-3:]:
-                parts.append(c.ai_content)
-
-        # MEDIUM tier: consolidated (unconsumed only)
-        medium_crystals = self._unconsumed_crystals(campaign_id, CrystalTier.MEDIUM)
-        if medium_crystals:
-            parts.append("=== MID_MEM ===")
-            for c in medium_crystals[-3:]:
-                parts.append(c.ai_content)
-
-        # SHORT tier: recent recaps (unconsumed only)
-        short_crystals = self._unconsumed_crystals(campaign_id, CrystalTier.SHORT)
-        if short_crystals:
-            parts.append("=== RCNT_MEM ===")
-            for c in short_crystals[-3:]:
-                parts.append(c.ai_content)
+        if rag_on:
+            tier_budget = self._compute_crystals_budget(context_window) // 3
+            for tier, header in (
+                (CrystalTier.LONG, "=== ARC_MEM ==="),
+                (CrystalTier.MEDIUM, "=== MID_MEM ==="),
+                (CrystalTier.SHORT, "=== RCNT_MEM ==="),
+            ):
+                ranked = self._select_ranked_crystals(
+                    campaign_id, tier,
+                    query_keywords=query_keywords,
+                    active_npc_names=active_npc_names,
+                    location_keywords=location_keywords,
+                    token_budget=tier_budget,
+                )
+                if ranked:
+                    parts.append(header)
+                    for c in ranked:
+                        parts.append(c.ai_content)
+        else:
+            for tier, header in (
+                (CrystalTier.LONG, "=== ARC_MEM ==="),
+                (CrystalTier.MEDIUM, "=== MID_MEM ==="),
+                (CrystalTier.SHORT, "=== RCNT_MEM ==="),
+            ):
+                tier_crystals = self._unconsumed_crystals(campaign_id, tier)
+                if tier_crystals:
+                    parts.append(header)
+                    for c in tier_crystals[-3:]:
+                        parts.append(c.ai_content)
 
         # Raw uncrystallized events (the freshest context)
         raw_tail = self._get_uncrystallized_events(campaign_id, limit=10)
@@ -508,11 +746,24 @@ class MemoryEngine:
 
         return "\n".join(parts)
 
-    async def build_context_window_async(self, campaign_id: str) -> str:
-        """Async version with optional Graphiti fact retrieval."""
+    async def build_context_window_async(
+        self,
+        campaign_id: str,
+        query_text: str = "",
+        active_npc_names: set[str] | None = None,
+        location: str = "",
+        context_window: int = 0,
+    ) -> str:
+        """Async version with optional Graphiti fact retrieval. Same RAG semantics."""
         parts: list[str] = []
 
-        # Same pyramid as sync version
+        rag_on = _rag_crystals_enabled() and bool(
+            query_text or active_npc_names or location
+        )
+        active_npc_names = {n.lower() for n in (active_npc_names or set()) if n}
+        query_keywords = _extract_keywords(query_text)
+        location_keywords = _extract_keywords(location)
+
         memory_crystals = [
             c for c in self._crystals.get(campaign_id, [])
             if c.tier == CrystalTier.MEMORY
@@ -522,23 +773,35 @@ class MemoryEngine:
             for c in memory_crystals:
                 parts.append(c.ai_content)
 
-        long_crystals = self._unconsumed_crystals(campaign_id, CrystalTier.LONG)
-        if long_crystals:
-            parts.append("=== ARC_MEM ===")
-            for c in long_crystals[-3:]:
-                parts.append(c.ai_content)
-
-        medium_crystals = self._unconsumed_crystals(campaign_id, CrystalTier.MEDIUM)
-        if medium_crystals:
-            parts.append("=== MID_MEM ===")
-            for c in medium_crystals[-3:]:
-                parts.append(c.ai_content)
-
-        short_crystals = self._unconsumed_crystals(campaign_id, CrystalTier.SHORT)
-        if short_crystals:
-            parts.append("=== RCNT_MEM ===")
-            for c in short_crystals[-3:]:
-                parts.append(c.ai_content)
+        if rag_on:
+            tier_budget = self._compute_crystals_budget(context_window) // 3
+            for tier, header in (
+                (CrystalTier.LONG, "=== ARC_MEM ==="),
+                (CrystalTier.MEDIUM, "=== MID_MEM ==="),
+                (CrystalTier.SHORT, "=== RCNT_MEM ==="),
+            ):
+                ranked = self._select_ranked_crystals(
+                    campaign_id, tier,
+                    query_keywords=query_keywords,
+                    active_npc_names=active_npc_names,
+                    location_keywords=location_keywords,
+                    token_budget=tier_budget,
+                )
+                if ranked:
+                    parts.append(header)
+                    for c in ranked:
+                        parts.append(c.ai_content)
+        else:
+            for tier, header in (
+                (CrystalTier.LONG, "=== ARC_MEM ==="),
+                (CrystalTier.MEDIUM, "=== MID_MEM ==="),
+                (CrystalTier.SHORT, "=== RCNT_MEM ==="),
+            ):
+                tier_crystals = self._unconsumed_crystals(campaign_id, tier)
+                if tier_crystals:
+                    parts.append(header)
+                    for c in tier_crystals[-3:]:
+                        parts.append(c.ai_content)
 
         # Graphiti world facts (if available)
         if self._graphiti:
@@ -565,6 +828,73 @@ class MemoryEngine:
 
         return "\n".join(parts)
 
+    # ── NPC perspective filter (Camada 3) ──────────────────────────
+
+    def build_npc_knowledge_window(
+        self,
+        campaign_id: str,
+        npc_name: str,
+    ) -> str:
+        """Return the subset of WORLD MEMORY this NPC could plausibly know.
+
+        Rules:
+        - MEMORY tier crystals are ALWAYS included (canonical world facts —
+          public lore that everyone in the world treats as true).
+        - LONG / MEDIUM / SHORT crystals are included only if `npc_name`
+          appears in their `witnessed_by` list.
+        - Raw uncrystallized events are included only if the NPC is in the
+          event's `witnessed_by` list.
+
+        Empty string when nothing is accessible. Used by the narrator-prompt
+        NPC KNOWLEDGE BOUNDARIES block and by `update_npc_thoughts` so that
+        each NPC's reasoning stays consistent with what they could have seen.
+        """
+        if not npc_name:
+            return ""
+        name_key = npc_name.strip().lower()
+        crystals = self._crystals.get(campaign_id, [])
+
+        parts: list[str] = []
+
+        # MEMORY tier — always canon, never filtered.
+        memory_crystals = [c for c in crystals if c.tier == CrystalTier.MEMORY]
+        if memory_crystals:
+            parts.append("=== PRMNT_MEM (canon — known to everyone) ===")
+            for c in memory_crystals:
+                parts.append(c.ai_content)
+
+        # LONG/MEDIUM/SHORT — only those this NPC witnessed.
+        for tier, header in (
+            (CrystalTier.LONG, "=== ARC_MEM (witnessed) ==="),
+            (CrystalTier.MEDIUM, "=== MID_MEM (witnessed) ==="),
+            (CrystalTier.SHORT, "=== RCNT_MEM (witnessed) ==="),
+        ):
+            tier_crystals = [
+                c for c in crystals
+                if c.tier == tier
+                and not c.consumed
+                and any(w.strip().lower() == name_key for w in (c.witnessed_by or []))
+            ]
+            if tier_crystals:
+                parts.append(header)
+                for c in tier_crystals:
+                    parts.append(c.ai_content)
+
+        # Raw uncrystallized events — only those this NPC witnessed.
+        raw_tail = self._get_uncrystallized_events(campaign_id, limit=20)
+        witnessed_raw = [
+            ev for ev in raw_tail
+            if any(w.strip().lower() == name_key for w in (ev.witnessed_by or []))
+        ]
+        if witnessed_raw:
+            parts.append("=== DELTA (witnessed) ===")
+            for event in witnessed_raw:
+                compact = self._event_to_compact_line(event)
+                if compact:
+                    parts.append(compact)
+
+        return "\n".join(parts)
+
     # ── Persistence ─────────────────────────────────────────────────
 
     def _persist_crystal(self, campaign_id: str, crystal: MemoryCrystal) -> None:
@@ -578,6 +908,7 @@ class MemoryEngine:
                     "ai_content": crystal.ai_content,
                     "event_count": crystal.event_count,
                     "consumed": crystal.consumed,
+                    "witnessed_by": list(crystal.witnessed_by or []),
                 },
                 narrative_time_delta=0,
                 location="memory",

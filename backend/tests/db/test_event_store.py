@@ -50,3 +50,37 @@ def test_events_are_immutable(store):
     event = store.append("c1", EventType.PLAYER_ACTION, {"text": "hi"}, 0, "loc", [])
     with pytest.raises(Exception):
         object.__setattr__(event, "payload", {"text": "modified"})
+
+
+# ── Camada 3 — witnessed_by perspective filter ─────────────────────
+
+
+def test_append_defaults_witnessed_by_to_empty_list(store):
+    event = store.append("c1", EventType.PLAYER_ACTION, {"text": "hi"}, 0, "loc", [])
+    assert event.witnessed_by == []
+
+
+def test_append_persists_witnessed_by(store):
+    event = store.append(
+        "c1", EventType.NARRATOR_RESPONSE, {"text": "scene"}, 0, "loc", [],
+        witnessed_by=["Rin", "Kai"],
+    )
+    assert event.witnessed_by == ["Rin", "Kai"]
+    # Round-trip through the store
+    fetched = store.get_recent("c1", limit=1)[0]
+    assert fetched.witnessed_by == ["Rin", "Kai"]
+
+
+def test_update_witnessed_by_overwrites_existing(store):
+    event = store.append("c1", EventType.NARRATOR_RESPONSE, {}, 0, "loc", [])
+    assert event.witnessed_by == []
+
+    ok = store.update_witnessed_by(event.id, ["Rin"])
+    assert ok
+
+    fetched = store.get_recent("c1", limit=1)[0]
+    assert fetched.witnessed_by == ["Rin"]
+
+
+def test_update_witnessed_by_unknown_event_returns_false(store):
+    assert not store.update_witnessed_by("nonexistent-id", ["Rin"])

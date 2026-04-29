@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 from dataclasses import asdict
 from typing import AsyncIterator
 
@@ -13,6 +14,30 @@ from app.services.scenario_interpolation import interpolate
 from app.utils.json_parsing import parse_json_dict
 
 logger = logging.getLogger(__name__)
+
+
+def _perspective_filter_enabled() -> bool:
+    """Camada 3 feature flag — defaults ON.
+
+    Set LUNAR_FEATURE_PERSPECTIVE_FILTER=0/false to disable witness
+    extraction and per-NPC filtering entirely. When off, all events keep
+    empty witnessed_by lists and the NPC mind / narrator pipelines fall
+    back to their pre-Camada-3 (omniscient) behavior.
+    """
+    raw = os.environ.get("LUNAR_FEATURE_PERSPECTIVE_FILTER", "1").strip().lower()
+    return raw not in ("0", "false", "no", "off")
+
+
+def _npc_decay_enabled() -> bool:
+    """Camada 4 feature flag — defaults ON.
+
+    Set LUNAR_FEATURE_NPC_DECAY=0/false to disable transient-thought decay,
+    the factual/narrative context split, and personality-anchor injection.
+    When off, the NPC mind pipeline falls back to its pre-Camada-4
+    (single context, thoughts never expire) behavior.
+    """
+    raw = os.environ.get("LUNAR_FEATURE_NPC_DECAY", "1").strip().lower()
+    return raw not in ("0", "false", "no", "off")
 
 
 class GameSession:
@@ -127,6 +152,17 @@ class GameSession:
                 self._history.append({"role": "assistant", "content": text})
         self._turn_count = len(player_events)
 
+    def _serialize_thoughts(self, mind) -> dict:
+        """Camada 4 — persist value plus decay metadata so timing survives restarts."""
+        out: dict[str, dict] = {}
+        for k, t in mind.thoughts.items():
+            out[k] = {
+                "value": t.value,
+                "created_at_turn": t.created_at_turn,
+                "decay_after_turns": t.decay_after_turns,
+            }
+        return out
+
     def _rebuild_npc_minds_from_events(self) -> None:
         """Rebuild NPC minds from persisted NPC_THOUGHT events."""
         if not self._npc_minds:
@@ -142,15 +178,26 @@ class GameSession:
             name = ev.payload.get("name", "")
             if name:
                 latest_per_npc[name] = ev.payload
-        # Reconstruct minds
+        # Reconstruct minds — accept both legacy (str value) and Camada-4
+        # (dict with value + decay metadata) thought shapes.
         for name, payload in latest_per_npc.items():
             mind = self._npc_minds._ensure_mind(self.campaign_id, name)
             for alias in payload.get("aliases", []):
                 if alias.lower() not in [a.lower() for a in mind.aliases]:
                     mind.aliases.append(alias)
-            for key, value in payload.get("thoughts", {}).items():
-                if value:
-                    mind.set_thought(key, str(value))
+            for key, raw in payload.get("thoughts", {}).items():
+                if isinstance(raw, dict):
+                    value = raw.get("value")
+                    if not value:
+                        continue
+                    mind.set_thought(
+                        key,
+                        str(value),
+                        current_turn=int(raw.get("created_at_turn", 0) or 0),
+                        decay_after_turns=raw.get("decay_after_turns"),
+                    )
+                elif raw:
+                    mind.set_thought(key, str(raw))
         logger.info(
             "Rebuilt %d NPC minds from events for campaign %s",
             len(latest_per_npc), self.campaign_id,
@@ -283,11 +330,16 @@ class GameSession:
         for ev in journal_events:
             try:
                 category = JournalCategory(ev.payload.get("category", ""))
+                # Prefer the row-level witnessed_by (set on row insert);
+                # fall back to payload for forward-compat with rows whose
+                # witnessed_by lives only in the JSON blob.
+                witnesses = list(ev.witnessed_by or ev.payload.get("witnessed_by", []))
                 entries.append(JournalEntry(
                     campaign_id=self.campaign_id,
                     category=category,
                     summary=ev.payload.get("summary", ""),
                     created_at=ev.created_at,
+                    witnessed_by=witnesses,
                 ))
             except (ValueError, KeyError):
                 continue
@@ -319,6 +371,11 @@ class GameSession:
                 if tier_str == "LONG" and "consumed" not in ev.payload:
                     tier_str = "MEDIUM"
                 tier = CrystalTier(tier_str)
+                # witnessed_by may live in the payload (newer crystals) or be
+                # missing entirely (legacy crystals from before Camada 3).
+                # Missing → empty list, which means "not witnessed by anyone"
+                # — safe default that excludes the crystal from per-NPC views.
+                witnesses = list(ev.payload.get("witnessed_by", []))
                 crystals.append(MemoryCrystal(
                     campaign_id=self.campaign_id,
                     tier=tier,
@@ -328,6 +385,7 @@ class GameSession:
                     consumed=False,  # Inferred below from tier counts
                     source_start_created_at=None,
                     source_end_created_at=ev.created_at,
+                    witnessed_by=witnesses,
                 ))
             except Exception:
                 continue
@@ -651,8 +709,8 @@ class GameSession:
     # The rest is split between system prompt, chat history, and output.
     _STORY_CARDS_CONTEXT_FRACTION = 0.15  # 15% of context window
     _STORY_CARDS_MIN_BUDGET = 4_000       # floor: always allow at least 4k tokens
-    _STORY_CARDS_MAX_BUDGET = 40_000      # ceiling: never exceed 40k even on 1M windows
-    _STORY_CARDS_MAX_COUNT = 50           # hard cap on number of cards regardless of budget
+    _STORY_CARDS_MAX_BUDGET = 200_000     # ceiling sized for 1M context window
+    _STORY_CARDS_MAX_COUNT = 300          # hard cap on number of cards regardless of budget
 
     # Bonus scores for card relevance ranking
     _LORE_BONUS = 100         # LORE cards (world rules) always rank highest
@@ -842,14 +900,14 @@ class GameSession:
             if self._npc_minds:
                 mind = self._npc_minds._ensure_mind(self.campaign_id, npc_name)
                 npc = self._pending_npc_seed
-                mind.set_thought("feeling", npc.get("personality", "observing"))
-                mind.set_thought("goal", npc.get("goal", "unknown"))
+                mind.set_thought("feeling", npc.get("personality", "observing"), current_turn=self._turn_count)
+                mind.set_thought("goal", npc.get("goal", "unknown"), current_turn=self._turn_count)
                 self._event_store.append(
                     campaign_id=self.campaign_id,
                     event_type=EventType.NPC_THOUGHT,
                     payload={
                         "name": mind.name,
-                        "thoughts": {k: t.value for k, t in mind.thoughts.items()},
+                        "thoughts": self._serialize_thoughts(mind),
                         "aliases": mind.aliases,
                     },
                     narrative_time_delta=0,
@@ -875,7 +933,7 @@ class GameSession:
                 yield chunk
             return
 
-        story_ctx = self._history[-1]["content"][:300] if self._history else ""
+        story_ctx = self._history[-1]["content"] if self._history else ""
         power_scale = self._build_power_scale_reference()
         if power_scale:
             story_ctx += "\n" + power_scale
@@ -887,7 +945,7 @@ class GameSession:
         if mode != NarrativeMode.META:
             self._turn_count += 1
 
-        self._event_store.append(
+        player_event = self._event_store.append(
             campaign_id=self.campaign_id,
             event_type=EventType.PLAYER_ACTION,
             payload={"text": player_input, "mode": mode.value},
@@ -895,6 +953,10 @@ class GameSession:
             location="current",
             entities=["player"],
         )
+        # Tracked so _async_side_effects can stamp witnesses onto this turn's
+        # PLAYER_ACTION + NARRATOR_RESPONSE events after extraction.
+        self._last_player_event_id = player_event.id
+        self._last_narrator_event_id = ""
 
         player_entry = None
         try:
@@ -984,10 +1046,29 @@ class GameSession:
             return ""
 
     async def _handle_narrative(self, player_input: str, mode: NarrativeMode = NarrativeMode.NARRATIVE, combat_outcome: str = "", combat_opponent_name: str = "", combat_npc_power: int = 5) -> AsyncIterator[str]:
+        # RAG inputs for crystal selection: scene query + active NPC names.
+        recent_narrative = self._history[-1]["content"] if self._history else ""
+        rag_query = f"{player_input}\n{recent_narrative}"
+        active_npc_names: set[str] = set()
+        if self._npc_minds:
+            for mind in self._npc_minds.get_all_minds(self.campaign_id):
+                active_npc_names.add(mind.name)
+        rag_context_window = self._get_context_window()
+
         if self._graphiti:
-            memory_ctx = await self._memory.build_context_window_async(self.campaign_id)
+            memory_ctx = await self._memory.build_context_window_async(
+                self.campaign_id,
+                query_text=rag_query,
+                active_npc_names=active_npc_names,
+                context_window=rag_context_window,
+            )
         else:
-            memory_ctx = self._memory.build_context_window(self.campaign_id)
+            memory_ctx = self._memory.build_context_window(
+                self.campaign_id,
+                query_text=rag_query,
+                active_npc_names=active_npc_names,
+                context_window=rag_context_window,
+            )
 
         # Gather world context (shared by all modes)
         inventory_ctx = ""
@@ -996,15 +1077,7 @@ class GameSession:
 
         graph_ctx = await self.get_graph_relationship_summary()
 
-        npc_ctx = ""
-        if self._npc_minds:
-            minds = self._npc_minds.get_all_minds(self.campaign_id)
-            if minds:
-                lines = ["NPC STATES (what each NPC is currently thinking/feeling):"]
-                for m in minds[:10]:
-                    thoughts = ", ".join(f"{k}={t.value}" for k, t in list(m.thoughts.items())[:4])
-                    lines.append(f"- {m.name}: {thoughts}")
-                npc_ctx = "\n".join(lines)
+        npc_ctx = self._format_npc_states_context()
 
         journal_ctx = ""
         if self._journal:
@@ -1012,7 +1085,7 @@ class GameSession:
                 entries = self._journal.get_journal(self.campaign_id)
                 if entries:
                     lines = ["STORY LOG (key events so far):"]
-                    for e in entries[-8:]:
+                    for e in entries[-40:]:
                         lines.append(f"- {e.summary}")
                     journal_ctx = "\n".join(lines)
             except Exception:
@@ -1020,7 +1093,7 @@ class GameSession:
 
         story_cards_ctx = self._format_story_cards_context(
             player_input=player_input,
-            recent_narrative=self._history[-1]["content"][:1000] if self._history else "",
+            recent_narrative=self._history[-1]["content"] if self._history else "",
         )
 
         if mode == NarrativeMode.META:
@@ -1066,6 +1139,13 @@ class GameSession:
                     opponent_power=combat_npc_power,
                     player_power=self._player_power,
                 )
+
+            # Camada 3 — append per-NPC knowledge boundaries so the narrator
+            # writes NPC dialogue / actions consistent with what each NPC
+            # could actually know.
+            knowledge_block = self._build_npc_knowledge_boundaries_block(active_npc_names)
+            if knowledge_block:
+                narrator_hints += knowledge_block
 
             system_prompt = self._narrator.build_system_prompt(
                 tone_instructions=self.scenario_tone,
@@ -1137,7 +1217,7 @@ class GameSession:
         # Record in history and event store
         self._history.append({"role": "user", "content": player_input})
         self._history.append({"role": "assistant", "content": clean_response})
-        self._event_store.append(
+        narrator_event = self._event_store.append(
             campaign_id=self.campaign_id,
             event_type=EventType.NARRATOR_RESPONSE,
             payload={"text": clean_response},
@@ -1145,6 +1225,7 @@ class GameSession:
             location="current",
             entities=[],
         )
+        self._last_narrator_event_id = narrator_event.id
 
         # Fire side-effects async (non-blocking) — journal, NPC minds, graph,
         # crystallization, power update all run after the narrative is sent.
@@ -1157,7 +1238,7 @@ class GameSession:
     async def _process_action_single_call(self, player_input: str, max_tokens: int) -> AsyncIterator[str]:
         """Single LLM call mode for Anthropic: narrative + mode + NPCs + entities in one request."""
         # Detect mode first so combat pipeline runs before the main LLM call
-        story_ctx = self._history[-1]["content"][:300] if self._history else ""
+        story_ctx = self._history[-1]["content"] if self._history else ""
         power_scale = self._build_power_scale_reference()
         if power_scale:
             story_ctx += "\n" + power_scale
@@ -1170,7 +1251,7 @@ class GameSession:
             self._turn_count += 1
 
         # Persist player action (same as streaming path)
-        self._event_store.append(
+        player_event = self._event_store.append(
             campaign_id=self.campaign_id,
             event_type=EventType.PLAYER_ACTION,
             payload={"text": player_input, "mode": mode.value},
@@ -1178,6 +1259,8 @@ class GameSession:
             location="current",
             entities=["player"],
         )
+        self._last_player_event_id = player_event.id
+        self._last_narrator_event_id = ""
 
         # Journal for player action
         try:
@@ -1250,11 +1333,30 @@ class GameSession:
             except Exception:
                 logger.warning("Combat engine failed in single-call path", exc_info=True)
 
-        # Build context (same as _handle_narrative)
+        # Build context (same as _handle_narrative) — pass RAG query so crystals
+        # are ranked by relevance to the current scene instead of mere recency.
+        recent_narrative = self._history[-1]["content"] if self._history else ""
+        rag_query = f"{player_input}\n{recent_narrative}"
+        active_npc_names: set[str] = set()
+        if self._npc_minds:
+            for mind in self._npc_minds.get_all_minds(self.campaign_id):
+                active_npc_names.add(mind.name)
+        rag_context_window = self._get_context_window()
+
         if self._graphiti:
-            memory_ctx = await self._memory.build_context_window_async(self.campaign_id)
+            memory_ctx = await self._memory.build_context_window_async(
+                self.campaign_id,
+                query_text=rag_query,
+                active_npc_names=active_npc_names,
+                context_window=rag_context_window,
+            )
         else:
-            memory_ctx = self._memory.build_context_window(self.campaign_id)
+            memory_ctx = self._memory.build_context_window(
+                self.campaign_id,
+                query_text=rag_query,
+                active_npc_names=active_npc_names,
+                context_window=rag_context_window,
+            )
 
         inventory_ctx = ""
         if self._inventory:
@@ -1292,17 +1394,14 @@ class GameSession:
                 player_power=self._player_power,
             )
 
+        # Camada 3 — append NPC knowledge boundaries (mirrors streaming path).
+        knowledge_block = self._build_npc_knowledge_boundaries_block(active_npc_names)
+        if knowledge_block:
+            narrator_hints += knowledge_block
+
         graph_ctx = await self.get_graph_relationship_summary()
 
-        npc_ctx = ""
-        if self._npc_minds:
-            minds = self._npc_minds.get_all_minds(self.campaign_id)
-            if minds:
-                lines = ["NPC STATES (what each NPC is currently thinking/feeling):"]
-                for m in minds[:10]:
-                    thoughts = ", ".join(f"{k}={t.value}" for k, t in list(m.thoughts.items())[:4])
-                    lines.append(f"- {m.name}: {thoughts}")
-                npc_ctx = "\n".join(lines)
+        npc_ctx = self._format_npc_states_context()
 
         journal_ctx = ""
         if self._journal:
@@ -1310,7 +1409,7 @@ class GameSession:
                 entries = self._journal.get_journal(self.campaign_id)
                 if entries:
                     lines = ["STORY LOG (key events so far):"]
-                    for e in entries[-8:]:
+                    for e in entries[-40:]:
                         lines.append(f"- {e.summary}")
                     journal_ctx = "\n".join(lines)
             except Exception:
@@ -1328,7 +1427,7 @@ class GameSession:
             journal_context=journal_ctx,
             story_cards_context=self._format_story_cards_context(
                 player_input=player_input,
-                recent_narrative=self._history[-1]["content"][:1000] if self._history else "",
+                recent_narrative=self._history[-1]["content"] if self._history else "",
             ),
             character_setup=self._character_setup_block,
             opening_narrative=self._opening_narrative,
@@ -1414,7 +1513,7 @@ class GameSession:
         # Record in history and event store
         self._history.append({"role": "user", "content": player_input})
         self._history.append({"role": "assistant", "content": clean_response})
-        self._event_store.append(
+        narrator_event = self._event_store.append(
             campaign_id=self.campaign_id,
             event_type=EventType.NARRATOR_RESPONSE,
             payload={"text": clean_response},
@@ -1422,9 +1521,20 @@ class GameSession:
             location="current",
             entities=[],
         )
+        self._last_narrator_event_id = narrator_event.id
+
+        # Camada 3 — extract witnesses synchronously here so the journal
+        # evaluation (which runs immediately below) and the auto-crystallize
+        # below pick up the perspective-stamped events.
+        witnesses = await self._extract_witnesses(clean_response)
+        self._apply_witnesses_to_recent_turn(witnesses)
 
         # Journal evaluation for narrative
-        entry = await self._journal.evaluate_and_log(self.campaign_id, clean_response, language=self.language)
+        entry = await self._journal.evaluate_and_log(
+            self.campaign_id, clean_response,
+            language=self.language,
+            witnessed_by=witnesses,
+        )
         if self._is_journal_entry(entry):
             yield f"[JOURNAL]{json.dumps({'category': entry.category.value, 'summary': entry.summary, 'created_at': entry.created_at})}"
 
@@ -1458,13 +1568,13 @@ class GameSession:
                         mind = await self._npc_minds._ensure_mind_async(self.campaign_id, name)
                         for key, value in npc_data.get("thoughts", {}).items():
                             if value:
-                                mind.set_thought(key, str(value))
+                                mind.set_thought(key, str(value), current_turn=self._turn_count)
                         self._event_store.append(
                             campaign_id=self.campaign_id,
                             event_type=EventType.NPC_THOUGHT,
                             payload={
                                 "name": mind.name,
-                                "thoughts": {k: t.value for k, t in mind.thoughts.items()},
+                                "thoughts": self._serialize_thoughts(mind),
                                 "aliases": mind.aliases,
                             },
                             narrative_time_delta=0,
@@ -1575,6 +1685,119 @@ class GameSession:
         elif action == "lose":
             self._inventory.lose_item(self.campaign_id, inv_event["name"])
 
+    # ── Camada 3 — witness extraction (perspective filter) ─────────
+
+    async def _extract_witnesses(self, narrative_text: str) -> list[str]:
+        """Run a small LLM call to extract NPCs physically present in the scene.
+
+        Returns the list of NPC names that the model judged to be in the same
+        physical location as the player and able to see / hear what just
+        happened. Excludes the player. Excludes NPCs that are merely
+        remembered, mentioned, or referenced from elsewhere.
+
+        Returns an empty list when the feature flag is off, when the LLM
+        fails, or when the scene has no other characters present.
+        """
+        if not _perspective_filter_enabled():
+            return []
+        if not narrative_text:
+            return []
+
+        # Anchor the model on canonical names so it doesn't invent new ones
+        # for characters that already exist in the campaign. We pull from
+        # NPC minds (active in this campaign) and NPC story cards.
+        candidates: list[str] = []
+        seen_lower: set[str] = set()
+        if self._npc_minds:
+            for mind in self._npc_minds.get_all_minds(self.campaign_id):
+                key = mind.name.lower()
+                if key not in seen_lower:
+                    seen_lower.add(key)
+                    candidates.append(mind.name)
+        for card in self._story_cards:
+            ct = getattr(card, "card_type", None)
+            ct_val = ct.value if hasattr(ct, "value") else str(ct)
+            if ct_val.upper() == "NPC":
+                key = card.name.lower()
+                if key not in seen_lower:
+                    seen_lower.add(key)
+                    candidates.append(card.name)
+
+        candidates_hint = ""
+        if candidates:
+            candidates_hint = (
+                "\n\nKNOWN NPC NAMES (use these EXACT names when any of these "
+                "characters are present — do not invent new spellings): "
+                + ", ".join(candidates[:60])
+            )
+
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You analyze a single RPG scene and identify which NPCs are "
+                    "PHYSICALLY PRESENT in the scene with the player. "
+                    "An NPC is 'physically present' only if they are in the same "
+                    "location as the player and could plausibly see or hear the "
+                    "events being narrated. "
+                    "EXCLUDE: the player; NPCs only mentioned in dialogue, "
+                    "memories, flashbacks, or third-party reports; NPCs in another "
+                    "place; abstract entities (factions, deities, generic crowds). "
+                    "Return ONLY valid JSON (no markdown): "
+                    '{"npcs_present": ["FullName1", "FullName2"]}. '
+                    "Use full canonical names when available. If nobody is "
+                    "present besides the player, return an empty list."
+                    + candidates_hint
+                ),
+            },
+            {"role": "user", "content": narrative_text},
+        ]
+        try:
+            raw = await self._narrator._llm.complete(messages=messages, max_tokens=256)
+            data = parse_json_dict(raw) or {}
+            names = data.get("npcs_present", [])
+            if not isinstance(names, list):
+                return []
+            cleaned: list[str] = []
+            seen: set[str] = set()
+            for n in names:
+                if not isinstance(n, str):
+                    continue
+                name = n.strip().lstrip("@").strip()
+                if not name:
+                    continue
+                key = name.lower()
+                if key in seen:
+                    continue
+                seen.add(key)
+                cleaned.append(name)
+            logger.info(
+                "Witness extraction for campaign %s — npcs_present=%s",
+                self.campaign_id, cleaned,
+            )
+            return cleaned
+        except Exception:
+            logger.warning("Witness extraction failed", exc_info=True)
+            return []
+
+    def _apply_witnesses_to_recent_turn(self, witnesses: list[str]) -> None:
+        """Stamp the just-appended PLAYER_ACTION + NARRATOR_RESPONSE rows
+        with the witness list so downstream consumers (journal,
+        crystallization, perspective filter) read the right value.
+        """
+        if not witnesses:
+            return
+        for event_id in (self._last_player_event_id, self._last_narrator_event_id):
+            if not event_id:
+                continue
+            try:
+                self._event_store.update_witnessed_by(event_id, witnesses)
+            except Exception:
+                logger.warning(
+                    "Failed to update witnessed_by for event %s", event_id,
+                    exc_info=True,
+                )
+
     async def _async_side_effects(self, clean_response: str) -> None:
         """Fire-and-forget side effects that run after the narrative is sent to the player.
 
@@ -1584,16 +1807,25 @@ class GameSession:
         try:
             logger.info("_async_side_effects: starting (response %d chars)", len(clean_response))
 
-            # Journal evaluation (lightweight LLM call)
-            await self._async_journal(clean_response)
+            # Camada 3 — perspective filter. Run FIRST so every downstream
+            # side-effect (journal, NPC mind update, crystallization) sees
+            # the witnessed_by stamp on this turn's PLAYER_ACTION /
+            # NARRATOR_RESPONSE events.
+            witnesses = await self._extract_witnesses(clean_response)
+            self._apply_witnesses_to_recent_turn(witnesses)
 
-            # NPC mind updates
-            await self._update_npc_minds(clean_response)
+            # Journal evaluation (lightweight LLM call)
+            await self._async_journal(clean_response, witnessed_by=witnesses)
+
+            # NPC mind updates — restricted to NPCs actually present in scene.
+            await self._update_npc_minds(clean_response, npcs_present=witnesses)
 
             # Graph entity extraction
             await self._extract_to_graph(clean_response)
 
-            # Memory crystallization (may cascade to higher tiers)
+            # Memory crystallization (may cascade to higher tiers).
+            # Runs after witness stamping so source events carry the right
+            # witnessed_by — the consolidation step takes the union.
             await self._try_auto_crystallize()
 
             # Graphiti ingestion
@@ -1639,10 +1871,18 @@ class GameSession:
         except Exception:
             logger.error("_async_world_tick failed", exc_info=True)
 
-    async def _async_journal(self, clean_response: str) -> None:
+    async def _async_journal(
+        self,
+        clean_response: str,
+        witnessed_by: list[str] | None = None,
+    ) -> None:
         """Fire-and-forget journal evaluation."""
         try:
-            await self._journal.evaluate_and_log(self.campaign_id, clean_response, language=self.language)
+            await self._journal.evaluate_and_log(
+                self.campaign_id, clean_response,
+                language=self.language,
+                witnessed_by=witnessed_by,
+            )
         except Exception:
             logger.warning("Async journal evaluation failed", exc_info=True)
 
@@ -1669,13 +1909,205 @@ class GameSession:
         if power_change:
             yield f"[POWER]{json.dumps(power_change)}"
 
-    async def _update_npc_minds(self, narrative_text: str) -> None:
+    def _format_npc_states_context(self) -> str:
+        """Build the NPC STATES context block, applying Camada 4 decay first.
+
+        Drops expired transient thoughts based on `self._turn_count`, renders
+        each NPC's current thoughts as `key=value` pairs, and (when decay is
+        enabled) inlines per-NPC personality anchors so the narrator stays
+        anchored in the NPC's identity.
+        """
+        if not self._npc_minds:
+            return ""
+        if _npc_decay_enabled():
+            dropped = self._npc_minds.apply_decay_all(self.campaign_id, self._turn_count)
+            if dropped:
+                logger.info(
+                    "Camada 4 decay dropped thoughts at turn %d: %s",
+                    self._turn_count, dropped,
+                )
+        minds = self._npc_minds.get_all_minds(self.campaign_id)
+        if not minds:
+            return ""
+        anchors_by_name = (
+            self._build_personality_anchors([m.name for m in minds])
+            if _npc_decay_enabled() else {}
+        )
+        lines = ["NPC STATES (what each NPC is currently thinking/feeling):"]
+        for m in minds:
+            thoughts = ", ".join(f"{k}={t.value}" for k, t in m.thoughts.items())
+            lines.append(f"- {m.name}: {thoughts}")
+            anchor = anchors_by_name.get(m.name)
+            if anchor:
+                anchor_inline = anchor.replace("\n", " | ").strip()
+                lines.append(f"    anchors: {anchor_inline}")
+        return "\n".join(lines)
+
+    def _build_personality_anchors(self, npc_names: list[str] | None = None) -> dict[str, str]:
+        """Camada 4 — collect personality anchors for the requested NPCs.
+
+        An NPC story card may carry an optional `personality_anchors` dict in
+        its content (e.g. `{"core_trait": "...", "speech_pattern": "...",
+        "do_not_drift_to": "..."}`). This helper returns those anchors keyed
+        by NPC name, formatted as a multi-line block per NPC. Cards without
+        anchors are omitted; the result may be empty.
+
+        When `npc_names` is provided, only anchors for those NPCs are
+        returned. When None, anchors for every NPC card in the scenario are
+        returned (used by NPC STATES context).
+        """
+        if not self._story_cards:
+            return {}
+        wanted: set[str] | None = None
+        if npc_names is not None:
+            wanted = {n.strip().lower() for n in npc_names if isinstance(n, str) and n.strip()}
+        out: dict[str, str] = {}
+        for card in self._story_cards:
+            ct = getattr(card, "card_type", None)
+            ct_val = ct.value if hasattr(ct, "value") else str(ct)
+            if ct_val != "NPC":
+                continue
+            content = card.content if isinstance(card.content, dict) else {}
+            anchors = content.get("personality_anchors")
+            if not isinstance(anchors, dict) or not anchors:
+                continue
+            name = (card.name or "").strip()
+            if not name:
+                continue
+            if wanted is not None and name.lower() not in wanted:
+                continue
+            lines: list[str] = []
+            for k, v in anchors.items():
+                if v is None:
+                    continue
+                lines.append(f"  {k}: {v}")
+            if lines:
+                out[name] = "\n".join(lines)
+        return out
+
+    def _build_factual_context(self) -> str:
+        """Camada 4 — build the immutable canon block for NPC mind prompts.
+
+        Combines MEMORY tier crystals (canonical world facts), the player
+        inventory (canonical item facts), and a brief setup-answer summary
+        when present. Excludes any narrator-mutable scene description so the
+        LLM cannot rewrite canon to fit a single scene's flavor.
+        """
+        sections: list[str] = []
+
+        # MEMORY tier crystals are canon. Re-use memory_engine's projection
+        # but strip out the mutable LONG/MEDIUM/SHORT/DELTA tiers — we want
+        # only the permanent facts.
+        try:
+            crystals = self._memory._crystals.get(self.campaign_id, [])
+            from app.engines.memory_engine import CrystalTier
+            memory_lines: list[str] = []
+            for c in crystals:
+                if c.tier == CrystalTier.MEMORY:
+                    memory_lines.append(c.ai_content)
+            if memory_lines:
+                sections.append("=== PRMNT_MEM (canon) ===\n" + "\n".join(memory_lines))
+        except Exception:
+            logger.debug("Failed to extract MEMORY tier crystals for factual context", exc_info=True)
+
+        if self._inventory:
+            inv = self._inventory.format_for_prompt(self.campaign_id)
+            if inv and inv.strip():
+                sections.append(inv.strip())
+
+        return "\n\n".join(sections)
+
+    def _format_story_cards_for_npc(self, npc_name: str) -> str:
+        """Return story cards visible to a specific NPC.
+
+        Camada 3 — story cards may declare an optional `known_by` list in
+        their content dict. When present, only NPCs in that list (or NPCs
+        whose card name matches the card itself) treat the card as known
+        knowledge. When absent, the card is public — every NPC may
+        reference it (default behavior, scenario-agnostic).
+        """
+        if not npc_name or not self._story_cards:
+            return ""
+        npc_lower = npc_name.strip().lower()
+        lines: list[str] = []
+        for card in self._story_cards:
+            content = card.content if isinstance(card.content, dict) else {}
+            known_by = content.get("known_by")
+            if isinstance(known_by, list) and known_by:
+                allowed = {str(n).strip().lower() for n in known_by if isinstance(n, str)}
+                # An NPC always knows their own card.
+                if card.name.strip().lower() == npc_lower:
+                    pass
+                elif npc_lower not in allowed:
+                    continue
+            ct = getattr(card, "card_type", None)
+            ct_val = ct.value if hasattr(ct, "value") else str(ct)
+            parts = [f"[{ct_val}] {card.name}"]
+            for k, v in content.items():
+                if k == "known_by":
+                    continue
+                if v:
+                    parts.append(f"  {k}: {v}")
+            lines.append("\n".join(parts))
+        return "\n".join(lines)
+
+    def _build_npc_knowledge_boundaries_block(
+        self,
+        active_npc_names: set[str],
+    ) -> str:
+        """Build a NARRATOR-facing knowledge-boundary block for the system prompt.
+
+        For each active NPC in the scene, lists what that NPC could plausibly
+        know — canonical world facts (MEMORY tier) plus any past scenes the
+        NPC actually witnessed. The narrator stays omniscient for general
+        narration, but uses this block to constrain dialogue: NPC X's lines
+        and actions must not reference facts X could not know.
+
+        Returns empty string when the perspective filter is off or no
+        active NPC has any knowledge to bound.
+        """
+        if not _perspective_filter_enabled() or not active_npc_names:
+            return ""
+
+        sections: list[str] = []
+        for name in sorted(active_npc_names):
+            if not name:
+                continue
+            crystal_knowledge = self._memory.build_npc_knowledge_window(self.campaign_id, name)
+            card_knowledge = self._format_story_cards_for_npc(name)
+            combined_parts: list[str] = []
+            if crystal_knowledge:
+                combined_parts.append(crystal_knowledge)
+            if card_knowledge:
+                combined_parts.append("=== STORY CARDS (accessible) ===\n" + card_knowledge)
+            if combined_parts:
+                sections.append(f"\n--- {name} knows ---\n" + "\n".join(combined_parts))
+
+        if not sections:
+            return ""
+
+        return (
+            "\nNPC KNOWLEDGE BOUNDARIES (CRITICAL — restricts what each NPC can "
+            "reference in dialogue / inner thought; the narrator itself stays "
+            "omniscient): when writing dialogue or actions for an NPC listed "
+            "below, that NPC may ONLY reference the facts under their own "
+            "section. They may NOT mention facts from other NPCs' sections, "
+            "from scenes they did not witness, or about player details they "
+            "never observed."
+            + "".join(sections)
+        )
+
+    async def _update_npc_minds(
+        self,
+        narrative_text: str,
+        npcs_present: list[str] | None = None,
+    ) -> None:
         if not self._npc_minds or not narrative_text:
             logger.warning("_update_npc_minds skipped: npc_minds=%s, narrative_len=%d",
                            bool(self._npc_minds), len(narrative_text) if narrative_text else 0)
             return
-        logger.info("_update_npc_minds: starting for campaign %s (narrative %d chars)",
-                    self.campaign_id, len(narrative_text))
+        logger.info("_update_npc_minds: starting for campaign %s (narrative %d chars, present=%s)",
+                    self.campaign_id, len(narrative_text), npcs_present or [])
         try:
             if self._graphiti:
                 world_ctx = await self._memory.build_context_window_async(self.campaign_id)
@@ -1686,12 +2118,48 @@ class GameSession:
             # outside the crystal pyramid's reach (crystals drop conversational
             # specifics during compression).
             recent_history = self._history[-20:] if self._history else []
+
+            # Camada 3 — build per-NPC knowledge windows from witnessed
+            # crystals + canon + accessible story cards. Falls back to
+            # omniscient world_ctx for the general scene description.
+            npc_knowledge: dict[str, str] = {}
+            if _perspective_filter_enabled() and npcs_present:
+                for name in npcs_present:
+                    if not isinstance(name, str) or not name.strip():
+                        continue
+                    crystal_knowledge = self._memory.build_npc_knowledge_window(
+                        self.campaign_id, name,
+                    )
+                    card_knowledge = self._format_story_cards_for_npc(name)
+                    parts: list[str] = []
+                    if crystal_knowledge:
+                        parts.append(crystal_knowledge)
+                    if card_knowledge:
+                        parts.append("=== STORY CARDS (accessible) ===\n" + card_knowledge)
+                    if parts:
+                        npc_knowledge[name] = "\n".join(parts)
+
+            # Camada 4 — split immutable canon from mutable scene context and
+            # surface per-NPC personality anchors so the model anchors thought
+            # generation in stable identity rather than fresh narrative flavor.
+            factual_ctx = ""
+            anchors: dict[str, str] = {}
+            if _npc_decay_enabled():
+                factual_ctx = self._build_factual_context()
+                anchor_targets = npcs_present if npcs_present else None
+                anchors = self._build_personality_anchors(anchor_targets)
+
             updated = await self._npc_minds.update_npc_thoughts(
                 campaign_id=self.campaign_id,
                 narrative_text=narrative_text,
                 world_context=world_ctx,
                 language=self.language,
                 recent_history=recent_history,
+                npcs_present=npcs_present,
+                npc_knowledge=npc_knowledge,
+                factual_context=factual_ctx,
+                personality_anchors=anchors,
+                current_turn=self._turn_count,
             )
             # Persist NPC thoughts so they survive server restarts
             for mind in updated:
@@ -1700,7 +2168,7 @@ class GameSession:
                     event_type=EventType.NPC_THOUGHT,
                     payload={
                         "name": mind.name,
-                        "thoughts": {k: t.value for k, t in mind.thoughts.items()},
+                        "thoughts": self._serialize_thoughts(mind),
                         "aliases": mind.aliases,
                     },
                     narrative_time_delta=0,

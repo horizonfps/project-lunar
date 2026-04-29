@@ -25,12 +25,22 @@ class EventType(str, Enum):
 
 _EventBase = namedtuple(
     "Event",
-    ["id", "campaign_id", "event_type", "payload", "narrative_time_delta", "location", "entities", "created_at"],
+    [
+        "id", "campaign_id", "event_type", "payload",
+        "narrative_time_delta", "location", "entities",
+        "created_at", "witnessed_by",
+    ],
 )
 
 
 class Event(_EventBase):
-    """Immutable event record backed by a namedtuple. All mutation raises AttributeError."""
+    """Immutable event record backed by a namedtuple. All mutation raises AttributeError.
+
+    `witnessed_by` is a list of NPC names physically present in the scene this
+    event represents (Camada 3 — perspective filter). Empty list means either
+    "no NPCs present" or "witness extraction has not run yet". Player presence
+    is implicit and never recorded here.
+    """
 
     __slots__ = ()
 
@@ -42,7 +52,7 @@ class Event(_EventBase):
 
 
 class EventStore:
-    SCHEMA_VERSION = 1
+    SCHEMA_VERSION = 2
 
     # Each migration is a list of SQL statements to run for that version.
     # Key = target version, value = list of SQL to apply.
@@ -60,8 +70,9 @@ class EventStore:
             )""",
             "CREATE INDEX IF NOT EXISTS idx_campaign ON events(campaign_id, created_at)",
         ],
-        # Future migrations go here:
-        # 2: ["ALTER TABLE events ADD COLUMN ..."],
+        2: [
+            "ALTER TABLE events ADD COLUMN witnessed_by TEXT NOT NULL DEFAULT '[]'",
+        ],
     }
 
     def __init__(self, db_path: str = "events.db"):
@@ -103,6 +114,7 @@ class EventStore:
         narrative_time_delta: int,
         location: str,
         entities: list,
+        witnessed_by: list[str] | None = None,
     ) -> Event:
         event = Event(
             id=str(uuid.uuid4()),
@@ -113,10 +125,11 @@ class EventStore:
             location=location,
             entities=entities,
             created_at=datetime.utcnow().isoformat(),
+            witnessed_by=list(witnessed_by or []),
         )
         with self._lock:
             self._conn.execute(
-                "INSERT INTO events VALUES (?,?,?,?,?,?,?,?)",
+                "INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?)",
                 (
                     event.id,
                     event.campaign_id,
@@ -126,10 +139,26 @@ class EventStore:
                     event.location,
                     json.dumps(event.entities),
                     event.created_at,
+                    json.dumps(event.witnessed_by),
                 ),
             )
             self._conn.commit()
         return event
+
+    def update_witnessed_by(self, event_id: str, witnessed_by: list[str]) -> bool:
+        """Update the witnessed_by list for an existing event.
+
+        Used by the perspective-filter pipeline (Camada 3): the witness LLM
+        call runs after the narrator response is persisted, then writes back
+        the extracted NPC list onto the just-appended event.
+        """
+        with self._lock:
+            cursor = self._conn.execute(
+                "UPDATE events SET witnessed_by=? WHERE id=?",
+                (json.dumps(list(witnessed_by or [])), event_id),
+            )
+            self._conn.commit()
+            return cursor.rowcount > 0
 
     def get_recent(self, campaign_id: str, limit: int = 20) -> list:
         rows = self._conn.execute(
@@ -183,6 +212,13 @@ class EventStore:
         return row[0] or 0
 
     def _row_to_event(self, row) -> Event:
+        # witnessed_by is the 9th column (index 8). Older rows that predate
+        # migration 2 will have it filled with the default '[]' by the
+        # ALTER TABLE statement, so this is always safe to parse.
+        try:
+            witnessed_by = json.loads(row[8]) if len(row) > 8 and row[8] else []
+        except (TypeError, json.JSONDecodeError):
+            witnessed_by = []
         return Event(
             id=row[0],
             campaign_id=row[1],
@@ -192,6 +228,7 @@ class EventStore:
             location=row[5],
             entities=json.loads(row[6]),
             created_at=row[7],
+            witnessed_by=witnessed_by,
         )
 
     def delete_last_pair(self, campaign_id: str) -> int:

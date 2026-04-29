@@ -1,6 +1,6 @@
 from __future__ import annotations
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
@@ -21,6 +21,10 @@ class JournalEntry:
     category: JournalCategory
     summary: str
     created_at: str
+    # Camada 3 — perspective filter. NPCs that witnessed the scene this entry
+    # summarizes. Inherited from the originating narrator response. Empty list
+    # = no NPC present (or witness extraction skipped).
+    witnessed_by: list[str] = field(default_factory=list)
 
 
 class JournalEngine:
@@ -34,6 +38,7 @@ class JournalEngine:
         campaign_id: str,
         narrative_text: str,
         language: str = "en",
+        witnessed_by: list[str] | None = None,
     ) -> JournalEntry | None:
         lang_hint = ""
         if language and language != "en":
@@ -89,7 +94,7 @@ class JournalEngine:
         if not summary:
             summary = inferred_summary
 
-        return self._append_entry(campaign_id, category, summary)
+        return self._append_entry(campaign_id, category, summary, witnessed_by)
 
     def get_journal(self, campaign_id: str) -> list[JournalEntry]:
         return self._journals.get(campaign_id, [])
@@ -102,13 +107,18 @@ class JournalEngine:
             if e.category == category
         ]
 
-    def log_player_action(self, campaign_id: str, action_text: str) -> JournalEntry | None:
+    def log_player_action(
+        self,
+        campaign_id: str,
+        action_text: str,
+        witnessed_by: list[str] | None = None,
+    ) -> JournalEntry | None:
         """Deterministic lightweight logging for explicit player intent actions."""
         category = self._infer_category(action_text)
         if category not in {JournalCategory.DECISION, JournalCategory.RELATIONSHIP_CHANGE}:
             return None
         summary = self._fallback_summary(action_text)
-        return self._append_entry(campaign_id, category, summary)
+        return self._append_entry(campaign_id, category, summary, witnessed_by)
 
     @staticmethod
     def _infer_category(text: str) -> JournalCategory | None:
@@ -173,12 +183,15 @@ class JournalEngine:
         campaign_id: str,
         category: JournalCategory,
         summary: str,
+        witnessed_by: list[str] | None = None,
     ) -> JournalEntry:
+        witnesses = list(witnessed_by or [])
         entry = JournalEntry(
             campaign_id=campaign_id,
             category=category,
             summary=summary,
             created_at=datetime.utcnow().isoformat(),
+            witnessed_by=witnesses,
         )
         if campaign_id not in self._journals:
             self._journals[campaign_id] = []
@@ -192,9 +205,11 @@ class JournalEngine:
                 payload={
                     "category": category.value,
                     "summary": summary,
+                    "witnessed_by": witnesses,
                 },
                 narrative_time_delta=0,
                 location="journal",
                 entities=[],
+                witnessed_by=witnesses,
             )
         return entry

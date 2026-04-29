@@ -145,6 +145,13 @@ class NarratorEngine:
             "- End each response at a natural pause, not mid-action.\n"
             "- ALWAYS finish your response with a complete sentence. Never stop mid-word or mid-sentence.\n"
             "{length_instruction}"
+            "\nCOHERENCE RULES (CRITICAL):\n"
+            "- NEVER contradict facts established in PLAYER INVENTORY or in MEMORY tier crystals (WORLD MEMORY).\n"
+            "- An item's \"source\" / origin reason in INVENTORY is canonical. NPCs may interpret or speculate, but cannot rewrite the item's documented purpose.\n"
+            "- If a fact appears in MEMORY tier crystals, treat it as immutable canon. If a player asks about it again, reuse the same explanation — do not invent a new one.\n"
+            "- An NPC may only reference information they could plausibly know: things they witnessed on-screen, things told to them on-screen, or public lore from their region. Never have an NPC mention a player detail (vehicle, item, lineage, route, prior location) that the player did not reveal in dialogue or that the NPC did not visibly observe.\n"
+            "- Avoid recycling sensory phrases. If a sensory image (a recurring weather beat, a recurring eye-color line, a recurring artifact pulse) appeared in any recent narrator response, pick a different one. Repetition breaks immersion.\n"
+            "- Tone must match TONE AND STYLE. Do not inject solemn / mysterious / ominous framing for ordinary requests unless the lore explicitly marks the topic as sacred or dangerous.\n"
             "- When the player ACQUIRES an item, emit: [ITEM_ADD:item_name|category|source_description]\n"
             "- When an item is CONSUMED or EXPENDED, emit: [ITEM_USE:item_name]\n"
             "- When an item is LOST, STOLEN, or DESTROYED, emit: [ITEM_LOSE:item_name]\n"
@@ -165,6 +172,13 @@ class NarratorEngine:
             "- Termine cada resposta em uma pausa natural, não no meio de uma ação.\n"
             "- SEMPRE termine sua resposta com uma frase completa. Nunca pare no meio de uma palavra ou frase.\n"
             "{length_instruction}"
+            "\nREGRAS DE COERÊNCIA (CRÍTICAS):\n"
+            "- NUNCA contradiga fatos estabelecidos em PLAYER INVENTORY ou em crystals do tier MEMORY (WORLD MEMORY).\n"
+            "- A \"source\" / razão de origem de um item no INVENTORY é canônica. NPCs podem interpretar ou especular, mas não podem reescrever o propósito documentado do item.\n"
+            "- Se um fato aparece em crystals do tier MEMORY, trate-o como cânone imutável. Se o jogador perguntar sobre ele de novo, reaproveite a mesma explicação — não invente uma nova.\n"
+            "- Um NPC só pode referenciar informação que ele plausivelmente saberia: coisas que ele testemunhou em cena, coisas que lhe foram ditas em cena, ou lore pública da região dele. NUNCA faça um NPC mencionar um detalhe do jogador (veículo, item, linhagem, rota, localização anterior) que o jogador não revelou em diálogo ou que o NPC não observou visivelmente.\n"
+            "- Evite reciclar frases sensoriais. Se uma imagem sensorial (uma batida recorrente do clima, uma linha recorrente sobre cor de olhos, um pulso recorrente de artefato) já apareceu em respostas recentes do narrador, escolha outra. Repetição quebra imersão.\n"
+            "- O tom deve seguir TONE AND STYLE. Não injete enquadramento solene / misterioso / ameaçador para pedidos comuns, a menos que a lore marque explicitamente o tópico como sagrado ou perigoso.\n"
             "- Quando o jogador ADQUIRIR um item, emita: [ITEM_ADD:nome_item|categoria|descrição_origem]\n"
             "- Quando um item for CONSUMIDO ou GASTO, emita: [ITEM_USE:nome_item]\n"
             "- Quando um item for PERDIDO, ROUBADO ou DESTRUÍDO, emita: [ITEM_LOSE:nome_item]\n"
@@ -334,14 +348,24 @@ class NarratorEngine:
             sections.append(f"\n{story_cards_context}")
         return "\n".join(sections)
 
-    # Hard cap on history messages sent to the LLM.
-    # The crystal memory pyramid handles long-term context, so we only need
-    # recent exchanges for narrative continuity and tone consistency.
-    MAX_HISTORY_MESSAGES = 100  # ~50 exchanges; crystals cover anything older
+    @staticmethod
+    def _max_history_for_window(context_window: int) -> int:
+        """Hard cap on history messages, scaled to provider context window.
+
+        The crystal memory pyramid handles anything older; this cap only
+        prevents an enormous campaign from blowing the window. On 1M-token
+        providers we keep ~300 exchanges in raw form, which eliminates the
+        cliché-recycling that small windows force.
+        """
+        if context_window >= 1_000_000:
+            return 600
+        if context_window >= 200_000:
+            return 200
+        return 100
 
     @staticmethod
     def _dynamic_history_slice(history: list[dict], context_window: int, system_tokens: int) -> list[dict]:
-        """Return recent history messages, capped at MAX_HISTORY_MESSAGES.
+        """Return recent history messages, capped at the window-scaled max.
 
         The crystal memory pyramid (SHORT→MEDIUM→LONG→MEMORY) in the system
         prompt provides long-term context for actions older than the cap.
@@ -350,11 +374,11 @@ class NarratorEngine:
         token-budget trim below is the binding constraint.
 
         Budget allocation:
-        - Hard cap: MAX_HISTORY_MESSAGES (newest messages)
+        - Hard cap: _max_history_for_window(context_window) (newest messages)
         - Then: fit within (context_window - system_tokens - output_reserve)
         - Minimum: 4 messages (2 exchanges) for coherence
         """
-        max_msgs = NarratorEngine.MAX_HISTORY_MESSAGES
+        max_msgs = NarratorEngine._max_history_for_window(context_window)
         output_reserve = 2500
         budget = context_window - system_tokens - output_reserve
         if budget <= 0:

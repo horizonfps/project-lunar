@@ -5,11 +5,31 @@ from datetime import datetime
 from app.utils.json_parsing import parse_json_dict
 
 
+# Camada 4 — decay defaults per thought key. None means the thought never
+# decays (persistent). Transient emotional state should fade so an NPC who
+# became "anxious" at turn 12 doesn't stay anxious at turn 80; long-term
+# motivation (goals, opinions, secret plans) stays put until rewritten.
+THOUGHT_DECAY_DEFAULTS: dict[str, int | None] = {
+    "feeling": 5,
+    "mood": 5,
+    "emotion": 5,
+    "goal": None,
+    "opinion_of_player": None,
+    "secret_plan": None,
+}
+
+# Sentinel used by set_thought to distinguish "caller did not specify decay"
+# (look up the default for the key) from "caller passed None" (never decay).
+_DECAY_UNSET = object()
+
+
 @dataclass
 class NpcThought:
     key: str
     value: str
     updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at_turn: int = 0
+    decay_after_turns: int | None = None  # None = never expires
 
 
 @dataclass
@@ -19,8 +39,21 @@ class NpcMind:
     thoughts: dict[str, NpcThought] = field(default_factory=dict)
     aliases: list[str] = field(default_factory=list)
 
-    def set_thought(self, key: str, value: str):
-        self.thoughts[key] = NpcThought(key=key, value=value)
+    def set_thought(
+        self,
+        key: str,
+        value: str,
+        current_turn: int = 0,
+        decay_after_turns: int | None = _DECAY_UNSET,  # type: ignore[assignment]
+    ):
+        if decay_after_turns is _DECAY_UNSET:
+            decay_after_turns = THOUGHT_DECAY_DEFAULTS.get(key)
+        self.thoughts[key] = NpcThought(
+            key=key,
+            value=value,
+            created_at_turn=current_turn,
+            decay_after_turns=decay_after_turns,
+        )
 
     def get_thought(self, key: str) -> str | None:
         t = self.thoughts.get(key)
@@ -32,7 +65,12 @@ class NpcMind:
             "campaign_id": self.campaign_id,
             "aliases": self.aliases,
             "thoughts": {
-                k: {"value": t.value, "updated_at": t.updated_at}
+                k: {
+                    "value": t.value,
+                    "updated_at": t.updated_at,
+                    "created_at_turn": t.created_at_turn,
+                    "decay_after_turns": t.decay_after_turns,
+                }
                 for k, t in self.thoughts.items()
             },
         }
@@ -231,7 +269,7 @@ class NpcMindEngine:
                 return True
         return False
 
-    def update_thought(self, campaign_id: str, npc_name: str, thought_key: str, value: str) -> NpcMind | None:
+    def update_thought(self, campaign_id: str, npc_name: str, thought_key: str, value: str, current_turn: int = 0) -> NpcMind | None:
         """Update a single thought for an NPC. Returns the updated mind or None."""
         mind = self.get_mind(campaign_id, npc_name)
         if not mind:
@@ -242,8 +280,41 @@ class NpcMindEngine:
                     mind = m
                     break
         if mind:
-            mind.set_thought(thought_key, value)
+            mind.set_thought(thought_key, value, current_turn=current_turn)
         return mind
+
+    def apply_decay(self, mind: NpcMind, current_turn: int) -> list[str]:
+        """Camada 4 — drop transient thoughts that have expired.
+
+        A thought expires when its `decay_after_turns` is set (not None) and
+        the difference between `current_turn` and `created_at_turn` reaches
+        or exceeds that window. Persistent keys (goal, opinion_of_player,
+        secret_plan) carry decay_after_turns=None and survive forever.
+
+        Returns the list of keys that were dropped (useful for logging).
+        """
+        if not mind or current_turn <= 0:
+            return []
+        expired: list[str] = []
+        for key, thought in list(mind.thoughts.items()):
+            decay = thought.decay_after_turns
+            if decay is None or decay <= 0:
+                continue
+            age = current_turn - thought.created_at_turn
+            if age >= decay:
+                expired.append(key)
+        for key in expired:
+            del mind.thoughts[key]
+        return expired
+
+    def apply_decay_all(self, campaign_id: str, current_turn: int) -> dict[str, list[str]]:
+        """Apply decay to every NPC mind in a campaign. Returns map name -> dropped keys."""
+        dropped: dict[str, list[str]] = {}
+        for mind in self.get_all_minds(campaign_id):
+            keys = self.apply_decay(mind, current_turn)
+            if keys:
+                dropped[mind.name] = keys
+        return dropped
 
     async def update_npc_thoughts(
         self,
@@ -252,6 +323,11 @@ class NpcMindEngine:
         world_context: str,
         language: str = "en",
         recent_history: list[dict] | None = None,
+        npcs_present: list[str] | None = None,
+        npc_knowledge: dict[str, str] | None = None,
+        factual_context: str = "",
+        personality_anchors: dict[str, str] | None = None,
+        current_turn: int = 0,
     ) -> list[NpcMind]:
         """Analyze narrative and update NPC thoughts based on recent events.
 
@@ -260,6 +336,29 @@ class NpcMindEngine:
                 the immediate conversation. Used so NPCs can reason about what
                 actually happened in recent turns (e.g. that the player was
                 personally hired by the NPC), not just from compressed crystals.
+            npcs_present: Camada 3 — list of NPC names physically present in
+                the scene. When provided AND non-empty, the LLM is restricted
+                to producing thoughts ONLY for these characters. Prevents
+                off-screen NPCs from getting state updates from a scene they
+                couldn't have witnessed.
+            npc_knowledge: Camada 3 — per-NPC knowledge boundary block. Maps
+                NPC name → string describing what that NPC could plausibly
+                know (canon facts + scenes they witnessed). Injected into the
+                prompt so the LLM keeps each NPC's reasoning consistent with
+                their real perspective rather than the omniscient world view.
+            factual_context: Camada 4 — immutable canon (MEMORY tier crystals,
+                inventory facts, character setup). Passed separately from
+                `world_context` (which is the mutable scene description) so
+                the LLM is told these facts cannot be reinterpreted by a
+                stray narrator phrase. Prevents narrator drift from rewriting
+                NPC core traits.
+            personality_anchors: Camada 4 — per-NPC personality anchors keyed
+                by NPC name. Each value is a free-form string (typically
+                core_trait / speech_pattern / do_not_drift_to). Anchors are
+                surfaced in the prompt as immutable identity, scoped per NPC
+                so the model can use the right one when writing each thought.
+            current_turn: Camada 4 — turn counter used to stamp new thoughts
+                with `created_at_turn`, enabling later decay via apply_decay.
         """
         _NPC_MIND_PROMPTS = {
             "en": (
@@ -311,6 +410,50 @@ class NpcMindEngine:
         if language and language != "en" and language not in _NPC_MIND_PROMPTS:
             prompt_text += f" Write all thought values in the same language as the narrative ({language})."
 
+        # Camada 4 — distinguish factual canon from mutable scene description.
+        # The LLM must treat FACTUAL CONTEXT as immutable (no rewriting core
+        # traits or canonical facts based on a single scene's flavor) and
+        # only adjust transient reactions in NARRATIVE CONTEXT.
+        canon_block = (
+            "\n\nCANON RULES (CRITICAL):\n"
+            "- FACTUAL CONTEXT below is canonical world truth. Do NOT rewrite "
+            "personality, motivation, or known facts based on a single scene. "
+            "Only the transient reactions (feeling, mood) should reflect this "
+            "specific scene; goals, opinions, and secret plans evolve slowly "
+            "and only when the narrative explicitly justifies a change.\n"
+            "- PERSONALITY ANCHORS define each NPC's core identity. When you "
+            "write thoughts for a named NPC, your output must remain "
+            "consistent with their anchor — never produce a feeling/goal that "
+            "directly contradicts their core_trait or drifts toward the "
+            "do_not_drift_to traits listed in the anchor."
+        )
+        prompt_text = prompt_text + canon_block
+
+        # Camada 3 — restrict the model to NPCs actually present in the scene
+        # and inject per-NPC knowledge boundaries so each NPC's reasoning
+        # stays consistent with what they could have witnessed.
+        present_filter: set[str] = set()
+        if npcs_present:
+            present_filter = {n.strip().lower() for n in npcs_present if isinstance(n, str) and n.strip()}
+            present_block = (
+                "\n\nSCENE PRESENCE (CRITICAL): Only these NPCs are physically "
+                "present in this scene: "
+                + ", ".join(npcs_present)
+                + ". Do NOT generate thoughts for any other character — silently "
+                "skip them, even if they appear in the world context."
+            )
+            prompt_text = prompt_text + present_block
+
+        knowledge_block = ""
+        if npc_knowledge:
+            knowledge_lines = ["NPC KNOWLEDGE BOUNDARIES (each NPC reasons only from what they could know):"]
+            for name, knowledge in npc_knowledge.items():
+                if not knowledge:
+                    continue
+                knowledge_lines.append(f"\n--- {name} ---\n{knowledge}")
+            if len(knowledge_lines) > 1:
+                knowledge_block = "\n".join(knowledge_lines) + "\n\n"
+
         history_block = ""
         if recent_history:
             lines: list[str] = []
@@ -324,8 +467,33 @@ class NpcMindEngine:
             if lines:
                 history_block = "Recent dialogue and actions (most recent last):\n" + "\n\n".join(lines) + "\n\n"
 
+        # Camada 4 — split factual canon from mutable scene context.
+        factual_block = ""
+        if factual_context and factual_context.strip():
+            factual_block = (
+                "FACTUAL CONTEXT (canon — immutable, do NOT contradict):\n"
+                f"{factual_context.strip()}\n\n"
+            )
+
+        anchor_block = ""
+        if personality_anchors:
+            anchor_lines: list[str] = []
+            for name, anchor in personality_anchors.items():
+                if not isinstance(anchor, str) or not anchor.strip():
+                    continue
+                anchor_lines.append(f"--- {name} ---\n{anchor.strip()}")
+            if anchor_lines:
+                anchor_block = (
+                    "PERSONALITY ANCHORS (per-NPC immutable identity):\n"
+                    + "\n\n".join(anchor_lines)
+                    + "\n\n"
+                )
+
         user_content = (
-            f"World context (compressed long-term memory):\n{world_context}\n\n"
+            f"{factual_block}"
+            f"{anchor_block}"
+            f"NARRATIVE CONTEXT (mutable scene state — compressed long-term memory):\n{world_context}\n\n"
+            f"{knowledge_block}"
             f"{history_block}"
             f"Latest narrator response (this is the scene to analyze):\n{narrative_text}"
         )
@@ -341,6 +509,10 @@ class NpcMindEngine:
             if not name:
                 continue
             if _is_generic_npc_name(name):
+                continue
+            # Camada 3 — drop NPCs the model produced that weren't actually
+            # in the scene (LLMs sometimes ignore the SCENE PRESENCE rule).
+            if present_filter and name.lower() not in present_filter:
                 continue
 
             # Check for known alias first (no LLM call needed)
@@ -371,6 +543,6 @@ class NpcMindEngine:
 
             for key, value in npc_data.get("thoughts", {}).items():
                 if value:
-                    mind.set_thought(key, str(value))
+                    mind.set_thought(key, str(value), current_turn=current_turn)
             updated.append(mind)
         return updated
