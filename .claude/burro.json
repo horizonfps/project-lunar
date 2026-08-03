@@ -1,0 +1,10 @@
+{
+  "verify": "cd frontend && npm run build",
+  "test": "cd backend && venv/Scripts/python.exe -m pytest",
+  "start": "start.bat",
+  "url": "http://localhost:5173",
+  "branchPrincipal": "master",
+  "ticketsDir": "docs/tickets",
+  "maxTickets": 6,
+  "baselineQuebrado": false
+}
