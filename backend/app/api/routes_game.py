@@ -24,6 +24,7 @@ from app.engines.opening_generator import (
 )
 from app.db.event_store import EventStore, EventType
 from app.db.scenario_store import ScenarioStore
+from app.db.trace_store import TraceStore
 from app.services.scenario_interpolation import interpolate
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,7 @@ if not os.environ.get("OPENAI_API_KEY") and settings.openai_api_key:
 
 _BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 _event_store = EventStore(os.environ.get("EVENT_DB_PATH", os.path.join(_BACKEND_DIR, "events.db")))
+_trace_store = TraceStore(os.environ.get("LLM_TRACE_DB_PATH", os.path.join(_BACKEND_DIR, "traces.db")))
 _llm = LLMRouter(LLMConfig())
 _narrator = NarratorEngine(llm=_llm)
 _memory = MemoryEngine(event_store=_event_store, llm=_llm)
@@ -355,7 +357,13 @@ async def player_action(req: PlayerActionRequest):
         # Full per-call trace (input sections + output) so the devtools panel can
         # show exactly what each synchronous call sent. json.dumps escapes newlines,
         # so the whole payload stays on one SSE data line.
-        yield f"data: [TRACE]{json.dumps(get_call_trace(), ensure_ascii=False)}\n\n"
+        trace = get_call_trace()
+        if trace:
+            try:
+                _trace_store.append(req.campaign_id, action=req.action, entries=trace, summary=summary)
+            except Exception:
+                logger.exception("Failed to persist LLM trace for campaign %s", req.campaign_id)
+        yield f"data: [TRACE]{json.dumps(trace, ensure_ascii=False)}\n\n"
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
@@ -572,6 +580,22 @@ async def get_history(campaign_id: str):
         else:
             messages.append({"role": "assistant", "content": text})
     return {"messages": messages}
+
+
+@router.get("/{campaign_id}/traces")
+async def get_traces(campaign_id: str, limit: int = 25):
+    """Return persisted LLM call traces for the devtools panel."""
+    try:
+        return {"traces": _trace_store.get_recent(campaign_id, limit)}
+    except Exception:
+        logger.exception("Failed to load LLM traces for campaign %s", campaign_id)
+        return {"traces": []}
+
+
+@router.delete("/{campaign_id}/traces")
+async def delete_traces(campaign_id: str):
+    """Delete all persisted LLM call traces for a campaign."""
+    return {"deleted": _trace_store.delete_for_campaign(campaign_id)}
 
 
 @router.post("/{campaign_id}/rewind")
