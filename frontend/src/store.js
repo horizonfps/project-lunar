@@ -45,13 +45,14 @@ export const useGameStore = create((set) => ({
   pushTrace: (entries) =>
     set((s) => {
       if (!entries?.length) return {}
-      const key = `tr${s.traces.length + 1}`
+      const key = `tr${Date.now()}-${s.traces.length + 1}`
       const label = `turn ${s.traces.length + 1}`
       const next = [...s.traces, { key, label, entries }]
       // Cap history; traces carry full prompt bodies.
       return { traces: next.slice(-25) }
     }),
   clearTraces: () => set({ traces: [] }),
+  setTraces: (traces) => set({ traces: Array.isArray(traces) ? traces.slice(-25) : [] }),
 
   appendMessage: (msg) =>
     set((s) => {

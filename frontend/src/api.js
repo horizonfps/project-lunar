@@ -268,6 +268,27 @@ export async function fetchInventory(campaignId) {
   return r.json()
 }
 
+export async function fetchTraces(campaignId, limit = 25) {
+  try {
+    const r = await fetch(`${BASE}/game/${campaignId}/traces?limit=${limit}`)
+    if (!r.ok) return []
+    const data = await r.json()
+    return data.traces
+  } catch {
+    return []
+  }
+}
+
+export async function deleteTraces(campaignId) {
+  try {
+    const r = await fetch(`${BASE}/game/${campaignId}/traces`, { method: 'DELETE' })
+    if (!r.ok) return { deleted: 0 }
+    return r.json()
+  } catch {
+    return { deleted: 0 }
+  }
+}
+
 export async function updateInventoryItem(campaignId, name, action) {
   const r = await fetch(`${BASE}/game/${campaignId}/inventory`, {
     method: 'POST',
