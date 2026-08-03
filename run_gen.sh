@@ -1,0 +1,3 @@
+#!/bin/bash
+~/.local/bin/infsh app run google/gemini-3-1-flash-image-preview --input '{"prompt": "monochrome dark landscape with sharp mountain ridges, a bright glowing white neon thin ring like an eclipse in the dark sky, minimalist, abstract, dark aesthetic, extremely high quality, 4k", "aspect_ratio": "16:9", "resolution": "4K"}' > bg_result.json
+~/.local/bin/infsh app run google/gemini-3-1-flash-image-preview --input '{"prompt": "Minimalist clean flat logo design of a white crescent moon on a pure black background, similar to the lunar client logo, highly detailed, perfect circle framing, esports style, pure black and white", "aspect_ratio": "1:1", "resolution": "4K"}' > logo_result.json

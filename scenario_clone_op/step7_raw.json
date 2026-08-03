@@ -1,0 +1,329 @@
+{
+  "step": "Step 7\n of 14",
+  "heading": "Choose your Starting Weapon",
+  "inputType": null,
+  "radios": [],
+  "cardCount": 80,
+  "cards": [
+    {
+      "title": "Uranus",
+      "description": "A mysterious ancient weapon shrouded in legend, rumored to rival Pluton and Poseidon in influence. Its true power is unknown, and many believe it can alter the tides of history itself."
+    },
+    {
+      "title": "Poseidon",
+      "description": "Not a traditional weapon, but you bear the legacy of an Ancient Weapon, granting you a unique connection to Sea Kings. How you use this power will shape your journey across the seas."
+    },
+    {
+      "title": "Pluton",
+      "description": "An ancient warship of legendary power, said to possess advanced technology far beyond modern vessels. Its blueprints are coveted across the seas for the strategic advantage they could bring."
+    },
+    {
+      "title": "Ragnir",
+      "description": "You wield a giant warhammer brought to life by a Zoan-type Devil Fruit, which can even transform into a giant squirrel. Once a guardian of Elbaph’s national Devil Fruit treasure for centuries, it has chosen you as its rightful wielder. In your hands, it strikes with incredible power, able to smash armor, shake the ground, and overwhelm enemies."
+    },
+    {
+      "title": "Yoru",
+      "description": "A legendary black blade of the world, Yoru is a massive nodachi with a broad nose and a jet-black blade that gleams with an ominous sheen. As one of the 12 Supreme Grade swords, it possesses incredible cutting power and durability. Its presence alone commands fear, capable of slicing through thick armor and nearly any material with ease."
+    },
+    {
+      "title": "Ame no Habakiri",
+      "description": "Ame no Habakiri is a legendary katana said to have the power to split even the heavens. Its blade represents unmatched strength and mastery, able to cut through almost anything with ease. Wielding this sword marks a fighter as elite, commanding respect and recognition across the world. In battle, Ame no Habakiri allows its user to face even the strongest foes, leaving a lasting legacy with every strike."
+    },
+    {
+      "title": "Nidai Kitetsu",
+      "description": "Nidai Kitetsu is the second-generation Kitetsu sword, famous for its sharpness, balance, and reliability in battle. Its purple-edge blade and golden tsuba make it both deadly and elegant. Like all Kitetsu swords, it carries a curse that tests the luck and skill of its wielder. In the hands of a capable fighter, Nidai Kitetsu is a legendary weapon that is still feared for its cutting ability and deadly precision."
+    },
+    {
+      "title": "Shodai Kitetsu",
+      "description": "Shodai Kitetsu is a cursed, legendary katana of the highest quality, known for its incredible cutting power and precision. Its flame-shaped hamon and four-lobed guard make it instantly recognizable. While wielded by a skilled swordsman, it can slice through almost anything, but its curse brings danger to anyone not strong enough to control it. Those who take up Shodai Kitetsu gain immense power, but must also face the risk of the sword’s dark fate if they fail to master it. SHOW MORE"
+    },
+    {
+      "title": "Funkfreed",
+      "description": "A sword that has been animated by the Zou Zou no Mi, allowing it to transform into an elephant or a large elephant-sword hybrid. In battle, Funkfreed can stretch its trunk, stomp the ground, or swing its body like a massive metal club. This weapon is both loyal and wild; it chooses when to fight alongside its wielder and when to act on instinct. Warriors who earn its respect gain a partner stronger than most beasts."
+    },
+    {
+      "title": "Cerberus Sword",
+      "description": "A brutal blade what was animated by a Mythical Zoan Devil Fruit to take the form of a three headed Dog. The sword’s spine splits into three sharpened fangs near the guard, giving every swing a ripping, tearing effect. When the user channels their fighting spirit into it, the heads roar with a burst of energy, creating shockwaves that feel like a monster lunging forward. This weapon is feared because every strike feels like being attacked by multiple blades at once. SHOW MORE"
+    },
+    {
+      "title": "Sorcery Clima‑Tact",
+      "description": "Sorcery Clima‑Tact A further evolution of the weather‑staff that combines Weatheria technology with compact design and immense versatility. It can extend and contract at will, form varied weather phenomena, and even perform utility tasks beyond combat. This version transforms the staff into a true magic‑wand of climate manipulation."
+    },
+    {
+      "title": "Perfect Clima‑Tact",
+      "description": "Perfect Clima‑Tact This upgraded weather‑staff was forged from the original Clima‑Tact with advanced Dial‑technology and refined design, making it far more powerful and precise. It allows the wielder to call forth heat, cold, electricity and storms with greater destructive force and control than before."
+    },
+    {
+      "title": "Nakiri Swords",
+      "description": "Nakiri Swords are twin blades crafted for fast, coordinated strikes. Their design allows seamless combos and precise attacks in close combat. The swords' balanced construction ensures fluid movements, enabling the user to execute rapid sequences of strikes with accuracy and efficiency."
+    },
+    {
+      "title": "Raiu",
+      "description": "Raiu is a sword named thunderstrike, built to deliver swift and powerful attacks. Its design emphasizes speed and impact, making it good for aggressive combat. The sword's construction allows for rapid strikes that can overwhelm opponents, reflecting the force and unpredictability of a thunderstorm."
+    },
+    {
+      "title": "Shirauo",
+      "description": "Shirauo is a sleek, narrow sword designed for quick, fluid strikes. Its streamlined form allows for precision attacks and nimble handling. The sword's design emphasizes speed and agility, enabling the user to execute rapid maneuvers and outpace opponents in combat."
+    },
+    {
+      "title": "Shusui",
+      "description": "Shusui is a legendary black blade classified as one of the 21 Great Grade swords. Renowned for its durability and cutting power, it is a symbol of tradition and mastery in swordsmanship. The sword's dark hue and craftsmanship make it a prized possession, reflecting the rich history and skill of its creators."
+    },
+    {
+      "title": "Soto Muso",
+      "description": "Soto Muso is a large, simple sword consisting only of a blade, hilt, and scabbard, with no handguard. The hilt features dark diamond patterns, emphasizing practicality over ornamentation. Its minimalist design allows for unhindered movement and swift strikes, focusing on the user's skill and precision rather than the weapon's adornments."
+    },
+    {
+      "title": "Terry Sword",
+      "description": "Terry Sword is a uniquely designed sword that combines strength and tradition. Its construction allows for powerful strikes while maintaining balance and agility. The sword's design reflects a blend of durability and elegance, making it suitable for both offensive and defensive maneuvers in combat."
+    },
+    {
+      "title": "Kogatana",
+      "description": "Kogatana is a small, cross-shaped knife pendant worn as a necklace. Despite its compact size, it serves as a functional weapon, allowing for quick strikes in close-quarters combat. The knife's design emphasizes portability and concealability, enabling the user to carry it discreetly while maintaining readiness for sudden confrontations."
+    },
+    {
+      "title": "Kosho",
+      "description": "Kosho is a finely crafted katana classified as one of the 50 Skillful Grade swords. Designed for swift, precise attacks, it emphasizes balance, cutting power, and reliability in combat. The sword's craftsmanship ensures durability and sharpness, allowing the user to execute rapid strikes with confidence and effectiveness."
+    },
+    {
+      "title": "Yakuza Kasen",
+      "description": "Yakuza Kasen is a high-quality shikomizue crafted with good skill. Combining elegance with lethal precision, it features a balanced blade perfect for swift and deadly strikes. The sword's design allows it to function good as both a cane for support and a concealed weapon for combat."
+    },
+    {
+      "title": "Bruiser Axe",
+      "description": "The Bruiser Axe is a massive, heavy battle axe renowned for its raw power and devastating impact. Its sheer size and weight make it formidable in combat, capable of delivering crushing blows that can shatter defenses and incapacitate opponents. The axe's design emphasizes brute strength, allowing the user to cleave through obstacles and enemies alike with overwhelming force."
+    },
+    {
+      "title": "Kirisame",
+      "description": "Kirisame is a curved blade shaped like a shark's dorsal fin, optimized for underwater combat. Its design allows for swift, lethal strikes, making it effective in aquatic environments. The blade's unique curvature aids in cutting through water resistance, enabling the user to move and attack with enhanced speed and efficiency beneath the surface."
+    },
+    {
+      "title": "Peacock Slashers",
+      "description": "The Peacock Slashers are unique weapons consisting of small, sharp jewels attached to wires. Resembling the eye spots on a peacock's tail feathers, they are designed for precise and rapid attacks. The user loops one end of the wire around a finger and swings the jewel to create a slicing, spinning disk. This allows for swift, graceful strikes that can entangle or cut through opponents with remarkable accuracy."
+    },
+    {
+      "title": "Ace Cutlass",
+      "description": "Forged in the fires of a forgotten island and tempered by time, Ace Cutlass is a legendary saber once wielded by the Pirate King himself. Its golden hilt is wrapped in aged, crimson cloth, and its slightly curved blade gleams with a brilliance that seems to hum with power."
+    },
+    {
+      "title": "Warabide Sword",
+      "description": "The Warabide Sword is a special longsword with a blade made from straw. It can be extended and shaped in combat, giving it great versatility. Considered a Meito, it is a high-quality blade known for its unique design and adaptability."
+    },
+    {
+      "title": "Tsuji Shibai",
+      "description": "Tsuji Shibai looks like a giant ink brush but functions as a katana. It lets the user create drawings and illusions to confuse opponents, while delivering swift and unpredictable strikes. Its creativity and versatility make it deadly in skilled hands."
+    },
+    {
+      "title": "Punishers",
+      "description": "Punishers are a pair of gauntlets equipped with curved, sickle-like blades mounted on axles. you can spin them rapidly, creating shockwaves at the speed of sound, causing internal damage to opponents. These weapons are versatile, capable of both offensive and defensive maneuvers."
+    },
+    {
+      "title": "Shark guitar",
+      "description": "A shikomizue-style weapon that resembles a shark and serves as both a musical instrument and a weapon. It can be used to perform sound-based attacks and in combat."
+    },
+    {
+      "title": "Chakram",
+      "description": "A circular throwing weapon with a sharpened outer edge, used on a string in combination with techniques like hypnosis."
+    },
+    {
+      "title": "Cat Claws",
+      "description": "A pair of black-furred gloves equipped with full-length katana blades at the end of each finger. They are used for swift and lethal attacks."
+    },
+    {
+      "title": "Hand Axe",
+      "description": "A hand axe, perfectly balanced for close combat, can be an incredibly deadly weapon. When wielded with skill and precision, it has the power to take down even the most formidable opponents"
+    },
+    {
+      "title": "Morning Star",
+      "description": "A spiked ball on a stick. Heavy and dangerous."
+    },
+    {
+      "title": "Spiked Club",
+      "description": "A wooden club with nails. More deadly than plain wood."
+    },
+    {
+      "title": "Hook Hand",
+      "description": "A pirate’s metal hook. Works as both weapon and tool."
+    },
+    {
+      "title": "Halberd",
+      "description": "A pole with an axe head and spike. Long reach, powerful."
+    },
+    {
+      "title": "War Hammer",
+      "description": "A large hammer. Can crush, but very heavy."
+    },
+    {
+      "title": "Trident",
+      "description": "A three-pronged spear. Good for stabbing and fishing."
+    },
+    {
+      "title": "Dagger",
+      "description": "A small knife. Easy to hide, fast in close fights."
+    },
+    {
+      "title": "Sickle",
+      "description": "A curved farm blade. Can slash or hook in close combat."
+    },
+    {
+      "title": "Iron Chain",
+      "description": "A chain used for hitting or grabbing. Hard to control."
+    },
+    {
+      "title": "Spiked Knuckles",
+      "description": "Metal on fists. Makes punches stronger and painful."
+    },
+    {
+      "title": "Short Bow",
+      "description": "A small bow. Not very strong, but good for hunting."
+    },
+    {
+      "title": "Crossbow",
+      "description": "A bow with strong shots but slow reload. Good for defense."
+    },
+    {
+      "title": "Wooden Club",
+      "description": "A plain piece of wood. Cheap and easy to use."
+    },
+    {
+      "title": "Throwing Knives",
+      "description": "Small knives made to throw. Weak, but quick and sneaky."
+    },
+    {
+      "title": "Battle Axe",
+      "description": "A big axe. Strong, but slow and heavy."
+    },
+    {
+      "title": "Machete",
+      "description": "A heavy blade. Cuts through plants and enemies alike."
+    },
+    {
+      "title": "Pitchfork",
+      "description": "A farm tool used like a spear. Clumsy, but works in a fight."
+    },
+    {
+      "title": "Iron Spear",
+      "description": "A long weapon with a sharp tip. Good for keeping distance."
+    },
+    {
+      "title": "Wooden Staff",
+      "description": "A long stick. Simple, light, and good for defense."
+    },
+    {
+      "title": "Rapier",
+      "description": "A thin sword used for stabbing. Fast, but not very strong."
+    },
+    {
+      "title": "Cutlass",
+      "description": "A short pirate sword. Easy to swing on ships, good for quick fights."
+    },
+    {
+      "title": "Germa 66 Raid Canister",
+      "description": "A specialized high-tech device used by the Germa 66 military force, these canisters are equipped with offensive and defensive weaponry. They can deploy traps, emit energy blasts, or release smoke screens to disorient opponents. Designed for versatility and tactical advantage, the Raid Canisters enhance Germa 66’s combat efficiency."
+    },
+    {
+      "title": "Hiru",
+      "description": "A uniquely designed sword with a curved blade optimized for swift cutting and close-quarters combat. The Hiru sword’s balanced build allows the user to deliver quick, fluid attacks, making it a favorite among agile swordsmen."
+    },
+    {
+      "title": "Shigure",
+      "description": "Known as the “Rain Cutter,” Shigure is a finely crafted katana reputed for its elegance and sharpness. Its blade is said to glide through the air like a gentle rain, allowing for swift and precise strikes. It is treasured by those who combine artful technique with deadly efficiency."
+    },
+    {
+      "title": "Kikoku",
+      "description": "An imposing nodachi sword characterized by its exceptional length and weight. Kikoku’s heavy blade is capable of delivering devastating slashes, often used to intimidate and overpower foes. It is wielded with expert skill to maximize reach and cutting power."
+    },
+    {
+      "title": "Kashu",
+      "description": "A large, heavy cleaver-type sword that emphasizes brute strength and overwhelming force over finesse. Kashu’s wide blade can cleave through tough materials and opponents alike, making it a favored weapon for those who fight with raw power."
+    },
+    {
+      "title": "Yubashiri",
+      "description": "A lightweight and exceptionally durable sword forged with great craftsmanship. Known for its sleek design and ease of handling, Yubashiri is favored by those who value speed and precision. Though it was lost early in the story, it remains a symbol of skilled swordsmanship."
+    },
+    {
+      "title": "Sandai Kitetsu",
+      "description": "The third generation in the cursed Kitetsu sword lineage, Sandai Kitetsu is a sharp, single-edged katana renowned for its deadly edge and cursed nature. Its blade is said to bring misfortune and death to its wielder, yet it is highly sought after by skilled swordsmen for its razor-sharp cutting ability and balance in battle."
+    },
+    {
+      "title": "Kiribachi",
+      "description": "A massive, jagged saw-like sword that embodies the brutal and savage fighting style. The Kiribachi’s serrated blade can tear through wood, flesh, and bone with ease, and its heavy weight allows the person to deliver powerful, crushing blows."
+    },
+    {
+      "title": "Clima-Tact",
+      "description": "A slender, extendable baton imbued with advanced weather-manipulating technology. this weapon has the ability to summon and control weather phenomena like lightning, wind, and rain in battle. Its lightweight design allows for swift strikes, while its hidden compartments unleash devastating electric and climatic attacks that leave enemies off balance."
+    },
+    {
+      "title": "Jitte",
+      "description": "A heavy, large jutte with a thick metal shaft and a hook-like prong near the handle. This weapon is specially designed to counter Devil Fruit users, as the prong contains Seastone, which nullifies Devil Fruit powers on contact."
+    },
+    {
+      "title": "Gryphon",
+      "description": "A sleek, red-hilted saber with a slightly curved blade, Gryphon is a remarkable sword known for its unmatched sharpness and strength. The blade can cut through almost anything with ease and is further enhanced by the mastery of Haki."
+    },
+    {
+      "title": "Musket Rifles",
+      "description": "Long-barreled firearms designed for longer-range shots. They require time to reload but offer improved accuracy over pistols."
+    },
+    {
+      "title": "Flintlock Pistol",
+      "description": "Single-shot pistols that use flint and gunpowder to fire lead bullets. They have slow reload times but are effective at close range."
+    },
+    {
+      "title": "Hiraikotsu",
+      "description": "A giant war hammer known for crushing power. Its weight and force make it a weapon of destruction."
+    },
+    {
+      "title": "Bisento",
+      "description": "A traditional polearm with a broad curved blade, delivering powerful thrusts and slashes capable of cleaving multiple enemies."
+    },
+    {
+      "title": "Chains",
+      "description": "Flexible weapons used to entangle, trip, or strike from a distance. Require skill but offer reach and control."
+    },
+    {
+      "title": "Throwing Stars",
+      "description": "Small, throwable blades useful for distraction or injuring foes from a distance."
+    },
+    {
+      "title": "Mace",
+      "description": "Blunt weapons designed to deal crushing blows. Often made of wood or metal, effective against armored foes."
+    },
+    {
+      "title": "Slingshot",
+      "description": "Simple projectile weapons that can launch stones or small ammo. Usually used for distraction or minor damage."
+    },
+    {
+      "title": "Bows and Arrows",
+      "description": "Ranged weapons useful for silent and precise strikes from afar. Limited by ammunition but valuable for sniping."
+    },
+    {
+      "title": "Spear",
+      "description": "Long-range melee weapons with pointed tips for thrusting attacks. Basic but effective in keeping enemies at a distance."
+    },
+    {
+      "title": "Soul-Based Sword",
+      "description": "A hidden blade within a cane. Combined with soul manipulation, it allows chilling cuts, soundwave-based attacks, and freezing soul energy strikes."
+    },
+    {
+      "title": "Rumble Ball Transformation",
+      "description": "Transforms the user’s body into different monstrous or hybrid forms, each with unique combat styles like horns, claws, or brute strength. A form-changing powerhouse."
+    },
+    {
+      "title": "Kabuto",
+      "description": "A long-range slingshot-like weapon enhanced with Dials and Pop Greens. Capable of firing exploding plants, projectiles, and unique ammunition with immense precision."
+    },
+    {
+      "title": "Enma",
+      "description": "A legendary sword that draws out its wielder’s Haki involuntarily. Requires great control, but offers immense cutting force capable of scarring even the mighty."
+    },
+    {
+      "title": "Three-Sword Style",
+      "description": "You wield not one, but three blades one in each hand, and one held firmly in your mouth. This unorthodox style, forged through relentless discipline, blends precision, power, and unpredictability into a whirlwind of steel."
+    },
+    {
+      "title": "None",
+      "description": "You decided that you don’t need a weapon relying instead on your skills, instincts, and perhaps Haki or Devil Fruit powers to face any challenge. Ready to prove that sometimes, the greatest strength comes from within."
+    }
+  ]
+}

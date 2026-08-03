@@ -1,0 +1,61 @@
+{
+  "step": "Step 13\n of 14",
+  "heading": "Choose your starting bounty",
+  "inputType": null,
+  "radios": [],
+  "cardCount": 13,
+  "cards": [
+    {
+      "title": "5 Crowns",
+      "description": "This bounty is for the Marine Fleet Admiral, the top target of the Cross Guild. Even the bravest pirates are afraid to go after them, because they are the symbol of Marine power and can destroy fleets easily. Only the strongest Pirates would try to fight them, risking everything for a reward that could make them legendary, but very few who try ever come back."
+    },
+    {
+      "title": "3 Crowns",
+      "description": "These Bounties were Placed on Admirals by the cross Guild. They are feared across the seas by Pirates and can change wars by themselves. Fighting one is almost certain death, but the riches and glory tempt pirates and hunters alike. Only the boldest dare to try."
+    },
+    {
+      "title": "5 Star",
+      "description": "These bounties were set on marine Vice Admirals by the Cross Guild, though even lower-ranking Marines who have made a name for themselves can be marked. They are feared across the seas, known for their strength and skill in battle. Taking one down is a challenge, but the reward and fame are legendary. Pirates and bounty hunters alike see them as prized targets, yet few who dare to hunt them ever live to tell the tale."
+    },
+    {
+      "title": "2 Star",
+      "description": "These bounties were given to Marine Rear Admirals by the Cross Guild. These Marines are experienced and known for leading tough battles. Hunting them is difficult, but the rewards are greater. Pirates also pursue them, hoping to take down respected leaders and make a name for themselves."
+    },
+    {
+      "title": "1 Star",
+      "description": "These bounties were placed on Marine Captains and Commodores by the Cross Guild. They lead small fleets or bases and are not the strongest, but they are still skilled fighters. Many new hunters and pirates target them first to prove themselves and earn quick rewards."
+    },
+    {
+      "title": "5B - 6B+",
+      "description": "This bounty range is reserved for individuals whose power, influence, and danger level rival or surpass the likes of the former Yonko. These are titanic figures who shake the balance of the worldeither by brute strength, world-altering Devil Fruits, legendary combat prowess, or fearsome ideologies that threaten the very foundation of the World Government."
+    },
+    {
+      "title": "2B+ – 3B+ Bounty",
+      "description": "You are no longer just a legend—you are a living calamity. Your name is written into the fate of islands. Whether you're a liberator or conqueror, your existence sends ripples through time. Entire dimensions whisper of your coming. Only the strongest dare speak your name."
+    },
+    {
+      "title": "1B+ – 2B+ Bounty",
+      "description": "You are feared by governments, gods, and galaxies. Your power bends landscapes, and your choices shape nations. Armies prepare when you appear, and entire factions may fall by your will. You are a threat to world stability itself."
+    },
+    {
+      "title": "700M – 1B+ Bounty",
+      "description": "You’ve changed the course of wars or wiped out powerful enemies. Your strength rivals captains, emperors, or faction leaders. The world either wants to kill you… or crown you. You're too big to ignore, and too dangerous to control."
+    },
+    {
+      "title": "400M – 700M Bounty",
+      "description": "Nations whisper your name in council rooms. Heroes prepare for your arrival; villains want you as an ally or target. You're either a notorious warrior, a major rebel, or the wildest card alive. Wherever you go, balance breaks."
+    },
+    {
+      "title": "100M – 300M Bounty",
+      "description": "You're considered a serious threat. Your actions have shaken regions, destroyed enemy camps, or defied powerful figures. Governments and warlords alike are keeping tabs. Your power is undeniable, and you're climbing fast."
+    },
+    {
+      "title": "50M – 100M Bounty",
+      "description": "You're making noise. Small towns whisper your name. Whether hero or menace, people have begun to take notice. A few minor factions might even fear you. You're officially on the world’s watchlist."
+    },
+    {
+      "title": "0 Bounty",
+      "description": "You haven’t made a ripple in the world. You're either just starting out or purposely flying under the radar. To the world, you're harmless for now. But every legend starts with silence."
+    }
+  ]
+}

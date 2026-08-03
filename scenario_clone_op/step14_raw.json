@@ -1,0 +1,22 @@
+{
+  "step": "Step 14\n of 14",
+  "heading": "Are you starting as an Adult, Teen or Child?",
+  "inputType": null,
+  "radios": [],
+  "cardCount": 3,
+  "cards": [
+    {
+      "title": "Child",
+      "description": "You are a Child, overlooked and underestimated by the world. But your journey has just begun. With wide eyes and untapped spirit, you’ll rise through hardship, discovering strength, allies, and purpose one step at a time. Every legend starts small."
+    },
+    {
+      "title": "Teen",
+      "description": "You are a Teen, full of fire, dreams, and raw potential. You're just beginning to carve your mark on the world. Whether you're chasing adventure or justice, your future is unwritten, and your will is strong enough to split the seas."
+    },
+    {
+      "title": "Adult",
+      "description": "You are an Adult, seasoned by life and hardened by the sea. Your path has already taken shape, shaped by choices, battles, and scars. Whether pirate, marine, or wanderer your experience is your greatest weapon, and the world already knows your name... or soon will."
+    }
+  ],
+  "bodyTextSnippet": "w_social_aidungeon\nOne Piece: Adventures\nStep 14\n of 14\nAre you starting as an Adult, Teen or Child?\nw_arrow_left\nBACK\nw_play\nSTART\nChild\nYou are a Child, overlooked and underestimated by the world. But your journey has just begun. With wide eyes and untapped spirit, you’ll rise through hardship, discovering strength, allies, and purpose one step at a time. Every legend starts small.\nTeen\nYou are a Teen, full of fire, dreams, and raw potential. You're just beginning to carve your mark on the world. Whether you're chasing adventure or justice, your future is unwritten, and your will is strong enough to split the seas.\nAdult\nYou are an Adult, seasoned by life and hardened by the sea. Your path has already taken shape, shaped by choices, battles, and scars. Whether pirate, marine, or wanderer your experience is your greatest weapon, and the world already knows your name... or soon will.\n\nAI Dungeon"
+}

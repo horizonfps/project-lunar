@@ -1,0 +1,29 @@
+{
+  "step": "Step 10\n of 14",
+  "heading": "What's your status?",
+  "inputType": null,
+  "radios": [],
+  "cardCount": 5,
+  "cards": [
+    {
+      "title": "The World Government",
+      "description": "You currently work for the World Government perhaps as a Cipher Pol agent, one of the Five Elders, one of the God Knights, or one of their associated officials. Serving the World Government grants you powerful benefits and immense privileges that place you far above ordinary citizens."
+    },
+    {
+      "title": "Bounty Hunters",
+      "description": "You are a Bounty Hunter, a skilled hunter that targets pirates with a Beli bounty on their heads. You track any pirates with a bounty across seas and lands, capturing them for the World Government or sometimes killing them to claim the reward, though this can lower the prize. You often work alone, using any weapons, tools, or abilities you can find, but sometimes you team up to take on dangerous enemies. Feared by pirates and known for your skill, you fight without hesitation. SHOW MORE"
+    },
+    {
+      "title": "Civilian",
+      "description": "You walk the world untethered by oath or flag neither sworn to justice nor bound by chaos. As a Civilian, you are one of the many who dwell in the shadows of pirates and marines alike. You may be a merchant, craftsman, bounty board informant, rogue scholar, or simply someone surviving in a dangerous world. But beware... in a world ruled by power, staying neutral is not always safe."
+    },
+    {
+      "title": "Marines",
+      "description": "Sworn to justice, discipline, and the authority of the World Government, you sail the seas as a beacon of order. Whether you pursue Absolute or Moral Justice, your duty is to bring criminals to their knees, uphold the law, and protect the innocent even if it means bending your ideals to the will of your superiors. Your uniform is your pride, and your name carries the weight of authority. The world may not always see you as a hero, but in your heart, you believe in peace through strength SHOW MORE"
+    },
+    {
+      "title": "Pirates",
+      "description": "Untamed, unshackled, and free your heart beats with the rhythm of the sea. You answer to no one but your own dream. Whether you plunder cities, protect your crew, or chase the legendary One Piece, your path is yours alone. The world may call you a criminal, but you call yourself free. With a Jolly Roger flying high and a crew at your back, you carve your legacy into the tides of history."
+    }
+  ]
+}

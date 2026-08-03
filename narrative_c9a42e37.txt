@@ -1,0 +1,1482 @@
+
+
+=== PLAYER ACTION [2026-04-28T04:41:48.734745] ===
+[SAY] Pode deixar, velhote, até! / Do: Subir na jangada e partir
+
+--- NARRATOR RESPONSE [2026-04-28T04:42:08.505822] ---
+O vento da manhã sopra suave sobre a Vila Foosha quando @Ryuu D. se despede com um aceno despreocupado, um sorriso largo no rosto. A jangada — improvisada, honesta, cheirando a madeira verde e corda molhada — balança levemente no cais enquanto ele sobe a bordo com passos firmes. @Woop Slap fica parado na beira do píer, braços cruzados, sobrancelhas franzidas com aquela expressão que mistura preocupação genuína e resignação de quem sabe que não vai mudar nada.
+
+— Garoto idiota... — o velho resmunga, mas sua voz some no barulho das ondas.
+
+@Ryuu D. empurra a jangada com o pé, e o East Blue o abraça. A água azul-esverdeada reluz sob o sol da manhã, e a silhueta da Ilha Dawn vai lentamente encolhendo atrás dele. As colinas verdes, o telhado vermelho da taverna de @Makino, o píer de madeira gasta — tudo vai ficando menor, menor, até se tornar apenas uma mancha no horizonte.
+
+Ele está sozinho no mar agora. Sem tripulação. Sem bússola. Sem mapa. Apenas a jangada, o vento, e uma eletricidade silenciosa que formiga nas pontas dos dedos — o poder da Fruta Rumble-Rumble pulsando dentro dele como um coração de tempestade.
+
+O East Blue se estende infinito à sua frente. Diz-se que é o mar mais calmo dos quatro Blues, mas até os mares calmos guardam surpresas. Não muito longe dali, uma fumaça fina sobe no horizonte — poderia ser uma ilha, poderia ser um navio. E em algum lugar à esquerda, um cardume de peixes saltitantes faz a superfície dançar como chuva ao contrário.
+
+**O que @Ryuu D. faz?**@Ryuu D. entrecerra os olhos contra o brilho do sol, estudando aquela fumaça no horizonte. Pode ser uma ilha com comida — o estômago já começa a reclamar da aventura — ou pode ser problema. Mas problema, convenhamos, nunca afastou ninguém com o D. no nome.
+
+A jangada desliza devagar demais para o seu gosto.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T05:14:21.797248] ===
+[DO] Ir até a ilha com fumaça
+
+--- NARRATOR RESPONSE [2026-04-28T05:14:37.513446] ---
+@Ryuu D. ajusta a vela remendada com mãos experientes, direcionando a proa da jangada diretamente para a coluna de fumaça. O vento coopera — ou talvez seja só a vontade dele empurrando o mundo na direção certa. A jangada ganha velocidade, cortando as ondas pequenas do East Blue com um ritmo satisfatório.
+
+Conforme se aproxima, os detalhes vão surgindo. A ilha é pequena, rochosa, com areia escura que parece cinza sob o sol. Não tem porto — apenas uma praia acidentada onde as ondas batem com força. A fumaça vem de uma fogueira perto da linha d'água, e ao redor dela @Ryuu D. consegue distinguir figuras. Três homens grandes, de aparência rude, em pé. E um mais velho, curvado, sentado na areia.
+
+Ele amarra a jangada numa rocha saliente e salta para a praia. A areia escura range estranha sob seus pés.
+
+Conforme se aproxima, a cena fica clara demais. Os três homens — valentões de aspecto fedorento, um com uma cicatriz no queixo, outro com tatuagens nos braços, o terceiro simplesmente enorme — estão em volta de um pescador velho que abraça uma cesta de peixes como se fosse a última coisa que possui.
+
+— Deixa a cesta, vovô, e a gente não quebra mais nada além dos seus anzóis — ri o Valentão da Cicatriz, chutando restos de equipamento de pesca espalhados pela areia.
+
+O velho pescador levanta os olhos — e encontra os de @Ryuu D.
+
+Um silêncio curto. O Valentão Tatuado nota a chegada e cospe na areia.
+
+— Olha isso. Um garoto perdido. Continua andando, moleque, isso não é problema seu.
+
+A eletricidade formiga nos dedos de @Ryuu D. A brisa salgada traz o cheiro de fumaça e peixe. O velho pescador não diz nada, mas seus olhos dizem tudo.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T05:53:58.667414] ===
+[SAY] *Coçando o ouvido enquanto fala* / Deixa o velhote em paz, vou dar uma chance pra vocês vazarem daqui. (Bem tranquilo, já que eu sou logia e eles não tem haki)
+
+--- NARRATOR RESPONSE [2026-04-28T05:54:10.257040] ---
+@Ryuu D. para no meio da praia, coça o ouvido com um dedo como se estivesse discutindo o tempo, e solta aquilo com a tranquilidade de quem comenta sobre o vento.
+
+— Deixa o velhote em paz. Vou dar uma chance pra vocês vazarem daqui.
+
+O silêncio que se segue dura exatamente dois segundos.
+
+Depois, os três valentões explodem em gargalhadas. O @Valentão da Cicatriz se dobra, batendo no joelho. O @Valentão Tatuado aponta para @Ryuu D. com uma expressão de pura incredulidade. Até o @Valentão Enorme, que claramente não processa piadas rápido, deixa escapar um ronco grosso que deve ser uma risada.
+
+— *Uma chance?!* — repete o @Valentão da Cicatriz, enxugando um olho. — Olha o tamanho desse moleque! Tá ouvindo isso, Dargo?
+
+— Ouvi — responde o @Valentão Tatuado, o sorriso sumindo e dando lugar a algo mais frio. — Tá bem, garoto. Última vez: vira as costas e vai embora. A gente esquece que você existiu.
+
+O @Valentão Enorme já deu um passo à frente, punhos do tamanho de presuntos cerrados, sombra enorme cobrindo a areia escura.
+
+O velho pescador segura a cesta com força, olhos indo de @Ryuu D. para os três homens, claramente sem saber se deve ter esperança ou entrar em pânico.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T05:55:11.116148] ===
+[DO] Deixar eles me atacarem, para ver que não há alternativa para eles
+
+--- NARRATOR RESPONSE [2026-04-28T05:55:24.197298] ---
+@Ryuu D. não recua um milímetro. Fica parado, braços soltos ao lado do corpo, expressão tão serena que parece entediante. O vento passa entre ele e os três valentões como se o mundo estivesse aguardando.
+
+O @Valentão Tatuado — Dargo — estreita os olhos. Algo naquela calma o incomoda de um jeito que ele não consegue nomear. Mas o @Valentão Enorme já não espera mais sinal nenhum.
+
+— AAAARGH!
+
+O chão treme levemente quando ele avança. Um passo, dois, e o punho enorme vem em arco largo — um soco que provavelmente já derrubou paredes — direto para o rosto de @Ryuu D.
+
+Na areia molhada, um peixe da cesta do velho pescador dá uma guinada súbita e cai no chão, batendo a cauda com força desproporcional, como se algo invisível o tivesse assustado. O velho recua instintivamente.
+
+O soco chega.
+
+E atravessa @Ryuu D. como se ele fosse névoa.
+
+O corpo inteiro de @Ryuu D. se dissolve em eletricidade azul-branca por uma fração de segundo — faíscas dançam onde seu torso estava, o cheiro de ozônio corta o ar salgado — e o @Valentão Enorme passa direto, tropeçando na própria inércia e quase caindo de joelhos na areia.
+
+O silêncio que se segue é de outro tipo. Pesado. Elétrico.
+
+@Dargo deu um passo atrás sem perceber. O @Valentão da Cicatriz abriu a boca, mas nenhuma palavra saiu. Até o peixe na areia parou de se debater.
+
+@Ryuu D. se rematerializa tranquilamente, coçando o pescoço com o mesmo dedo de antes.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T05:59:09.475327] ===
+[SAY] Por que vocês são tão teimosos? Eu ainda dei uma chance de vocês sairem / Do: Fazer um sinal de uma arma / SAY: BANG! BANG! / Do: Atirar 2 choques, um em cada bandido, apenas para incapacitá-los
+
+--- NARRATOR RESPONSE [2026-04-28T05:59:23.432948] ---
+@Ryuu D. balança a cabeça com um suspiro de quem está genuinamente decepcionado com a situação, olhando para os três como se fossem crianças teimosas.
+
+— Por que vocês são tão teimosos? Eu *ainda* dei uma chance de vocês saírem.
+
+Ele levanta a mão direita, aponta o dedo indicador para o @Valentão da Cicatriz como se fosse uma arma imaginária. O canto da boca esboça algo entre um sorriso e um aviso.
+
+— Bang.
+
+Um raio azul-branco dispara do dedo com um *CRACK* ensurdecedor que ecoa pela praia rochosa. O @Valentão da Cicatriz voa para trás como se tivesse sido chutado por um gigante, aterrissando pesado na areia escura, os músculos travados pelos espasmos elétricos, inconsciente antes de parar de rolar.
+
+@Ryuu D. já virou o dedo para o @Valentão Enorme.
+
+— Bang.
+
+Outro *CRACK*. Outro corpo no chão. O @Valentão Enorme cai como uma árvore derrubada, sacudindo a areia ao redor, os olhos revirados para o branco.
+
+O cheiro de ozônio domina a praia inteira. Duas colunas finas de fumaça sobem dos pontos de impacto.
+
+Só @Dargo continua de pé — imóvel, os olhos indo dos dois companheiros caídos para @Ryuu D., o rosto finalmente sem nenhuma máscara de arrogância.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T06:02:31.626251] ===
+[DO] Chegar perto de @Dargo / SAY: Você parece útil, preciso de um navio / DO: Apontar com o dedão para sua jangada / SAY: Aquela jangada não serve muito pra mim, sabe?
+
+--- NARRATOR RESPONSE [2026-04-28T06:02:41.641550] ---
+@Ryuu D. caminha devagar em direção a @Dargo, pisando ao lado dos dois corpos inconscientes com a naturalidade de quem desvia de poças d'água. Para a menos de um metro do valentão tatuado, as mãos enfiadas nos bolsos, e inclina levemente a cabeça.
+
+— Você parece útil.
+
+Pausa. O vento balança as tatuagens nos braços de @Dargo como se até o ar estivesse rindo.
+
+— Preciso de um navio.
+
+@Ryuu D. vira o dedão por cima do ombro, apontando preguiçosamente para a jangada amarrada na rocha saliente. A pobre embarcação range contra a pedra como se soubesse que estava sendo julgada.
+
+— Aquela jangada não serve muito pra mim, sabe?
+
+@Dargo engole em seco. Os olhos dele percorrem os dois companheiros caídos, a fumaça ainda subindo da areia, e voltam para o adolescente na sua frente que fala sobre navios com a mesma energia de quem pede direções numa vila pacata.
+
+O velho pescador, ainda abraçado à sua cesta, observa a cena com a boca levemente aberta — claramente sem saber se deve agradecer ou simplesmente correr.
+
+@Dargo abre a boca. Fecha. Abre de novo.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T06:03:24.112773] ===
+[SAY] Desembucha cara, não me faz perder tempo
+
+--- NARRATOR RESPONSE [2026-04-28T06:03:33.956368] ---
+@Ryuu D. estreita levemente os olhos, o indicador ainda farejando o ar na direção de @Dargo com aquela energia casual de quem já demonstrou o suficiente.
+
+— Desembucha, cara. Não me faz perder tempo.
+
+@Dargo pisca duas vezes. Três. A adrenalina ainda corre nas veias dele, mas as pernas estão bambas e o cérebro finalmente processou a matemática da situação — dois companheiros no chão, um adolescente que vira relâmpago, e zero chances de fuga digna.
+
+— Eu... — a voz sai rouca, ele limpa a garganta. — Eu tenho um navio. Pequeno, mas navega. Está ancorado do outro lado da ilha, numa enseada. — Os olhos de @Dargo percorrem @Ryuu D. de cima a baixo, ainda tentando encaixar o que viu com o que está vendo agora. — É seu. Fica com ele. Só... não me dê um choque desses, pelo amor de tudo.
+
+O velho pescador solta um suspiro longo e trêmulo, abraçando a cesta de peixes contra o peito como se fosse um tesouro.
+
+A brisa salgada traz o cheiro do mar aberto. Em algum lugar além das rochas, um navio espera.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T06:05:04.866407] ===
+[DO] Colocar a mão no ombro do @Dargo / SAY: Que legal! Sabia que você podia ser útil / *Com cara de sério*, dizer: Agora vaza.
+
+--- NARRATOR RESPONSE [2026-04-28T06:05:19.523724] ---
+@Ryuu D. coloca a mão no ombro de @Dargo com uma palmada amigável que faz o valentão tatuado engolir seco mais uma vez — porque agora ele sabe exatamente o que aquela mão é capaz de fazer.
+
+— Que legal! Sabia que você podia ser útil.
+
+O sorriso some instantaneamente. @Ryuu D. olha direto nos olhos de @Dargo com uma expressão tão séria que o ar ao redor parece esfriar dois graus.
+
+— Agora vaza.
+
+@Dargo não precisa ouvir duas vezes. Ele recua um passo, dois, tropeça no próprio pé, se endireita com o que resta da dignidade e sai caminhando rápido pela praia — sem correr, porque correr seria admitir o pânico, mas claramente na velocidade máxima que um homem consegue atingir sem tecnicamente estar correndo.
+
+Ele some atrás das rochas sem olhar para trás uma única vez.
+
+O velho pescador observa tudo em silêncio por um momento longo. Depois levanta os olhos para @Ryuu D. com uma expressão que mistura gratidão genuína com pura perplexidade.
+
+— Você é... da Vila Foosha, não é? — ele pergunta, a voz ainda trêmula. — Tem cara de garoto da Vila Foosha.
+
+A enseada fica do outro lado da ilha. O navio espera.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T06:06:22.801375] ===
+[SAY] Sim, acabei de sair de lá em busca do One Piece! Mais importante, o senhor está bem?
+
+--- NARRATOR RESPONSE [2026-04-28T06:06:34.275398] ---
+@Ryuu D. abre um sorriso largo, genuíno, daqueles que ocupam o rosto inteiro.
+
+— Sim, acabei de sair de lá em busca do One Piece! — declara sem nenhum traço de vergonha ou hesitação, como se estivesse anunciando que vai comprar pão. Depois o sorriso amolece um pouco e ele inclina a cabeça para o velho. — Mais importante, o senhor está bem?
+
+O velho pescador pisca. Pisca de novo. Depois solta uma risada curta e rouca — o tipo de risada que sai quando a tensão abandona o corpo de uma vez só.
+
+— O One Piece, hein? — ele murmura, sacudindo a cabeça com um sorriso cansado. — Igual ao Gol D. Roger... — os olhos velhos faíscam com algo entre nostalgia e admiração. — Estou bem, garoto. Graças a você. Esses três me seguiram desde o porto, queriam minha carga e meu barco.
+
+Ele se levanta devagar, os joelhos estralando, e aperta a cesta de peixes contra o peito com mãos calejadas.
+
+— Meu nome é @Taro. Pescador há cinquenta anos nesse East Blue. — Ele estende uma mão áspera para @Ryuu D. — E você, garoto? Qual é o nome do futuro Rei dos Piratas?
+
+As ondas batem suaves nas rochas. Do outro lado da ilha, um navio espera.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T06:07:58.873140] ===
+[SAY] Meu nome é Scar D. Ryuu, me deram esse nome quando eu recebi essa cicatriz logo após comer a Goro Goro no Mi!
+
+--- NARRATOR RESPONSE [2026-04-28T06:08:09.868660] ---
+@Ryuu D. aperta a mão de @Taro com firmeza e bate no próprio peito com o punho livre, bem em cima da cicatriz em forma de raio que atravessa a pele sob a camisa.
+
+— Meu nome é Scar D. Ryuu! — declara, os olhos brilhando. — Me deram esse nome quando eu recebi essa cicatriz, logo após comer a Goro Goro no Mi!
+
+@Taro aperta a mão devagar, os olhos indo para o peito de @Ryuu D. com uma expressão que vai mudando camada por camada — surpresa, reconhecimento, e por último algo que só aparece no rosto de quem viveu o suficiente para saber quando está diante de algo raro.
+
+— Scar D. Ryuu... — o velho repete o nome baixinho, saboreando cada sílaba. — O D. no nome. — Ele solta uma risada suave, quase para si mesmo. — Minha esposa não vai acreditar quando eu contar isso.
+
+@Taro solta a mão e olha para o horizonte por um momento, o vento branco bagunçando os cabelos ralos.
+
+— Cuide-se no mar, Ryuu. O East Blue parece manso, mas guarda dentes. — Ele vira o olhar de volta, firme e caloroso ao mesmo tempo. — E quando seu nome estiver em todos os jornais do mundo, eu quero poder dizer que apertei essa mão.
+
+O sol já está mais alto. A enseada — e o navio de @Dargo — espera do outro lado das rochas.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T06:09:18.364445] ===
+[SAY] Valeu velhote! Até mais! *Se despedir dele enquanto vai em direção ao navio*
+
+--- NARRATOR RESPONSE [2026-04-28T06:09:28.271525] ---
+@Ryuu D. acena com a mão por cima do ombro sem nem olhar para trás, o sorriso ainda no rosto, passos firmes cortando a areia escura em direção às rochas.
+
+— Valeu, velhote! Até mais!
+
+@Taro observa o garoto partir com aquele sorriso cansado e caloroso de quem acabou de testemunhar o primeiro capítulo de algo grande. Ele levanta a mão devagar em despedida, segurando a cesta de peixes com a outra.
+
+@Ryuu D. contorna as rochas e a enseada se abre à sua frente. O navio de @Dargo está lá — pequeno, de madeira escurecida pelo sal e pelo tempo, com uma vela única dobrada no mastro. Não é bonito. Não é imponente. Mas flutua, e tem casco suficiente para enfrentar o East Blue.
+
+Ele para na beira da água por um segundo, olhando para a embarcação. A eletricidade formiga nos dedos como sempre, ansiosa. O horizonte lá fora é imenso, azul, cheio de promessas e problemas.
+
+@Ryuu D. sobe a bordo. A madeira range sob seus pés. O mastro balança levemente com o vento. 
+
+O East Blue espera.
+
+**Para onde você navega?
+
+
+=== PLAYER ACTION [2026-04-28T06:10:57.256519] ===
+[DO] Navegar para onde a maré me leva, já que não tenho nenhum log pose
+
+--- NARRATOR RESPONSE [2026-04-28T06:11:09.181626] ---
+@Ryuu D. solta as amarras com um movimento único, empurra o casco com o pé e deixa o navio deslizar para fora da enseada sem cerimônia. Sem destino fixo. Sem Log Pose. Sem mapa. Apenas a vela aberta e a maré decidindo o próximo capítulo.
+
+É libertador de um jeito que a jangada nunca foi.
+
+O East Blue se abre ao redor dele — azul profundo, salpicado de espuma branca, o sol quebrando na superfície em mil fragmentos dourados. Por horas, o navio deriva suavemente, balançando com uma preguiça agradável. @Ryuu D. deita no convés, braços atrás da cabeça, olhando as nuvens passarem como se tivesse todo o tempo do mundo.
+
+O estômago reclama em algum momento da tarde. Ele ignora.
+
+Quando o sol começa a inclinar para o oeste, o vento muda — e com ele, a maré empurra o navio em direção a uma silhueta que vai crescendo no horizonte. Uma ilha. Maior que a rochosa de areia escura, com vegetação densa descendo até a beira d'água e o som distante — muito distante ainda — de vozes e atividade.
+
+Um porto. Pequeno, mas movimentado. Barcos de pesca ancorados, algumas estruturas de madeira, fumaça de cozinha subindo entre as árvores. O cheiro de comida atravessa o ar salgado e chega até @Ryuu D. como uma agressão direta ao estômago.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T06:12:21.683333] ===
+[SAY] OOOHH, comida! / Do: Atracar o navio e seguir o cheiro de carne
+
+--- NARRATOR RESPONSE [2026-04-28T06:12:35.212740] ---
+@Ryuu D. senta de um salto no convés, os olhos arregalados e o nariz farejando o ar como um cão de caça que acabou de encontrar a trilha certa.
+
+— OOOHH, COMIDA!
+
+Ele agarra o leme com uma energia que o navio claramente não estava esperando e manobra a embarcação em direção ao porto com entusiasmo desproporcional para alguém que tecnicamente está navegando sem experiência formal. O casco bate no píer com um *THONK* satisfatório e @Ryuu D. amarra a corda no primeiro poste que encontra — nó torto, funcional, suficiente — e salta para a madeira do cais antes do navio parar completamente de balançar. 
+
+O porto é pequeno mas vivo. Pescadores carregando caixotes, crianças correndo entre as pernas dos adultos, uma ou duas barracas de comida com fumaça grossa e cheiro pesado de carne assada subindo em espirais gordurosas para o céu da tarde.
+
+@Ryuu D. segue o nariz com passos rápidos, desviando de caixotes e cordas, os olhos já brilhando com aquela luz específica que só aparece quando comida está próxima. O cheiro de carne fica mais forte a cada passo — temperada, gordurosa, assando em brasa viva.
+
+Uma barraca no canto do porto. Uma mulher robusta virando espetos sobre carvão em brasa, suor no rosto, sorriso no canto da boca.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T06:42:29.648615] ===
+[DO] Pedir um espeto para ela
+
+--- NARRATOR RESPONSE [2026-04-28T06:42:30.013536] ---
+The world shifts in response to your action. You proceed with intent: [DO] Pedir um espeto para ela Tension rises as the consequences begin to unfold.
+
+
+=== PLAYER ACTION [2026-04-28T06:48:10.041181] ===
+DO: Pedir um espeto para ela
+
+--- NARRATOR RESPONSE [2026-04-28T06:48:21.996239] ---
+A mulher robusta, com um avental manchado de gordura e um sorriso largo no rosto, ouve o pedido de @Ryuu D. com um aceno de cabeça.
+
+— Um espeto, é? — ela pega um dos espetos fumegantes, a carne ainda chiando e pingando gordura nas brasas, e estende para ele. — Dois berries.
+
+@Ryuu D. pisca. Dois berries.
+
+Ele cata nos bolsos — vazio da esquerda, vazio da direita, um bolso interno com um furo, um último bolso onde encontra duas moedas esquecidas, enferrujadas pelo tempo no mar. Berries. Exatamente dois.
+
+Ele entrega as moedas. Ela entrega o espeto.
+
+A primeira mordida é uma revelação. A carne é macia, levemente picante, com um tempero que queima a língua do jeito certo e deixa um gosto de fumaça no fundo da garganta. @Ryuu D. sente as papilas gustativas mandando fogos de artifício para o cérebro. O estômago agradece. O resto do mundo some por um momento enquanto ele devora o espeto em três mordidas e lambe os beiços.
+
+A mulher ri baixinho.
+
+— Bom, né? É receita da família. — Ela apoia as mãos no balcão improvisado. — Você não é da ilha. Marinheiro? Pirata?
+
+A pergunta fica no ar. O porto murmura ao redor — crianças correndo, pescadores conversando, gaivotas gritando.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:17:58.023384] ===
+[DO] OOOOOOOOOOI, me dá um espeto, tia
+
+--- NARRATOR RESPONSE [2026-04-28T07:18:09.116076] ---
+@Ryuu D. se inclina para frente no balcão com um sorriso enorme, os olhos brilhando para os espetos que ainda chiavam nas brasas.
+
+— OOOOOOOOOOI, me dá um espeto, tia!
+
+A mulher robusta levanta uma sobrancelha, claramente divertida com a energia do adolescente na sua frente. Ela pega um espeto fumegante com a pegador e o balança levemente no ar antes de apontar para uma tabuleta de madeira pendurada no canto da barraca.
+
+— Dois berries, meu bem.
+
+@Ryuu D. cata os bolsos com a velocidade de quem está com urgência genuína. Esquerda — vazio. Direita — vazio. Bolso interno — um furo pelo qual dois dedos passam com folga. Ele franze o cenho, revira o último bolso com crescente desespero, e encontra apenas um grão de areia e uma pedrinha que provavelmente entrou no navio de @Dargo.
+
+Ele olha para a mulher. Ela olha para ele.
+
+— Então... — @Ryuu D. sorri com toda a inocência que consegue reunir. — E se eu não tiver berries?
+
+A mulher apoia as mãos no balcão, sorrindo com a paciência de quem já viu muita coisa nesse porto.
+
+— Aí você me diz o que tem para oferecer em troca, garoto.
+
+O cheiro da carne assada é uma tortura deliciosa.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:18:50.185482] ===
+[SAY] Eu... sei... lutar!
+
+--- NARRATOR RESPONSE [2026-04-28T07:19:02.162925] ---
+@Ryuu D. endireita as costas, bate o punho no peito com dignidade solene e olha para a mulher nos olhos com uma seriedade que claramente considera absolutamente razoável para a situação.
+
+— Eu... sei... lutar!
+
+A mulher da barraca o encara por um segundo longo.
+
+Depois ri. Uma risada grossa, genuína, que sai do fundo do peito e faz os espetos na grelha tremerem levemente. Ela se apoia no balcão com as duas mãos, lágrimas de diversão no canto dos olhos.
+
+— Sabe lutar! — ela repete entre risadas, balançando a cabeça. — Minha nossa, já ouvi muita desculpa esfarrapada nesse porto, mas essa é nova!
+
+Ela pega um espeto, ainda rindo, e o estende para @Ryuu D. com um aceno resignado.
+
+— Toma lá, guerreiro. Considere um investimento. — O sorriso dela amolece num calor genuíno. — Mas se você realmente sabe lutar, fala com o @Gordo Benn lá no armazém no fim do cais. Ele anda precisando de alguém com habilidades... específicas. Pode valer mais do que espetos.
+
+Ela aponta para uma estrutura de madeira escura no fim do porto, onde duas figuras encostadas na parede observam o movimento do cais com olhos calculistas. 
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:20:30.552639] ===
+[SAY] Valeu, tia! *Ir rapidamente até onde está as duas figuras encostadas* / Say: Oi, a tia do espetinho me pediu pra falar com o @Gordo Benn, vocês conhecem?
+
+--- NARRATOR RESPONSE [2026-04-28T07:20:41.317153] ---
+@Ryuu D. agarra o espeto com um sorriso radiante, morde metade de uma vez e já está caminhando antes mesmo de engolir direito.
+
+— Valeu, tia!
+
+Ele atravessa o cais em passos rápidos, desviando de caixotes e pescadores com a naturalidade de quem nunca considerou que poderia estar no caminho de alguém, o espeto fumegante na mão e gordura no queixo. As duas figuras encostadas na parede do armazém o observam chegando — um homem magro com um chapéu de palha surrado e outro mais largo com os braços cruzados, ambos com aquele olhar específico de quem passa os dias avaliando se pessoas são problema ou não.
+
+@Ryuu D. para na frente dos dois, termina o espeto em mais uma mordida e aponta o palito vazio na direção deles com desenvoltura. 
+
+— Oi! A tia do espetinho me pediu pra falar com o Gordo Benn, vocês conhecem?
+
+O homem magro e o mais largo trocam um olhar rápido. O de chapéu de palha coça a nuca.
+
+— Conhecemos. — responde o mais largo, a voz baixa e cautelosa. — Mas o Benn não fala com qualquer um que aparece no cais, garoto. O que você quer com ele?
+
+O armazém atrás deles range levemente com o vento. Dentro, sombras e o cheiro pesado de alcatrão e madeira molhada.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:22:38.776113] ===
+[SAY] Eu? Quero falar com ele, ué! Ele precisa de alguém que sabe lutar, né?
+
+--- NARRATOR RESPONSE [2026-04-28T07:22:49.294348] ---
+@Ryuu D. responde com a naturalidade de quem acha que a pergunta tinha uma resposta óbvia o tempo todo.
+
+— Eu? Quero falar com ele, ué! Ele precisa de alguém que sabe lutar, né?
+
+O homem de chapéu de palha pisca. O mais largo descruza os braços lentamente, como se precisasse de um momento para processar a audácia tranquila do adolescente na frente dele.
+
+— Sabe lutar. — o de chapéu repete, no mesmo tom que a mulher do espetinho usou — só que sem a risada. Ele examina @Ryuu D. de cima a baixo com olhos estreitos. — Você tem o que, quinze anos? E aparece aqui com um palito de espeto na mão achando que vai trabalhar pro Benn.
+
+O mais largo, porém, faz um gesto sutil com a cabeça para o companheiro. Algo mudou no olhar dele — não exatamente respeito, mas uma centelha de curiosidade genuína.
+
+— Se você realmente sabe lutar, o Benn vai querer ver isso, não ouvir. — ele empurra a porta do armazém com o ombro, abrindo uma fresta de sombra e cheiro de madeira pesada. — Entra. Mas se estiver perdendo o tempo dele, você sai pelo mar.
+
+A escuridão do armazém pulsa com vozes abafadas lá dentro.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:23:30.081695] ===
+[DO] Entrar no armazém e procurar o @Gordo Benn
+
+--- NARRATOR RESPONSE [2026-04-28T07:23:40.193750] ---
+@Ryuu D. entra sem hesitar, como se a ameaça de sair pelo mar fosse apenas uma observação meteorológica sem importância.
+
+O armazém é grande e mal iluminado, com lanternas de óleo balançando no teto baixo e caixotes empilhados até onde a vista alcança. Uns seis homens espalhados pelo espaço param o que estão fazendo e olham para o adolescente que acabou de entrar com a mesma expressão — quem é esse e por que está aqui.
+
+No fundo do armazém, sentado em um caixote com um mapa aberto no colo, está um homem que só pode ser @Gordo Benn. Ele é exatamente o que o apelido promete — largo, pesado, com uma barba por fazer e olhos pequenos e afiados que contrastam com o corpo volumoso. Uma faca longa descansa na cintura. Ele levanta os olhos do mapa quando @Ryuu D. se aproxima e o examina com aquela expressão de quem já viu muita coisa e raramente se impressiona.
+
+— Então. — a voz de @Gordo Benn é grave e pausada. — Você é o garoto que sabe lutar.
+
+Não é uma pergunta. É um teste disfarçado de afirmação, e o silêncio que vem depois pesa como âncora.
+
+Todos no armazém estão ouvindo.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:24:44.183301] ===
+[SAY] *Coçar o ouvido enquanto fala* Sim, do que precisa?
+
+--- NARRATOR RESPONSE [2026-04-28T07:24:56.610146] ---
+@Ryuu D. coça o ouvido com um dedo, relaxado como se estivesse conversando com um vizinho, e olha diretamente para @Gordo Benn com aquela expressão aberta e direta que não conhece intimidação.
+
+— Sim, do que precisa?
+
+O silêncio que se segue é denso. Um dos seis homens espalhados pelo armazém solta um som baixo — quase uma risada, cortada antes de sair completamente. @Gordo Benn não se move. Os olhos pequenos e afiados estudam @Ryuu D. por um momento longo, varrendo da cabeça aos pés e de volta, como um comerciante avaliando mercadoria de procedência duvidosa.
+
+Então, devagar, ele dobra o mapa sobre o joelho.
+
+— Do que preciso. — ele repete, saboreando a pergunta como se estivesse decidindo se ela o agrada ou o ofende. — Preciso de alguém que consiga entrar num lugar, tirar uma pessoa de lá, e sair sem fazer barulho desnecessário. — Uma pausa calculada. — Ou com barulho. Dependendo do que encontrar.
+
+Ele se levanta do caixote com uma lentidão que sugere peso e força ao mesmo tempo, ficando uma cabeça mais alto que @Ryuu D.
+
+— Mas primeiro me diz uma coisa, garoto. — os olhos estreitam. — Por que eu deveria confiar num adolescente que apareceu no meu armazém com cheiro de espetinho?
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:27:41.852978] ===
+[SAY] UOOOU, então é para salvar alguém? Da onde? Marinha? Revolucionário? Algum pirata? Parece divertido. Ah, e você não precisa confiar em mim, é meio dificil eu mostrar meu poder sem destruir o armazém todo, só me diz o que eu preciso fazer
+
+--- NARRATOR RESPONSE [2026-04-28T07:27:53.077612] ---
+@Ryuu D. se anima visivelmente, os olhos acendendo com aquela luz específica de quem acabou de ouvir a palavra "aventura" embrulhada em informação.
+
+— UOOOU, então é para salvar alguém? Da onde? Marinha? Revolucionário? Algum pirata? Parece divertido. Ah, e você não precisa confiar em mim, é meio difícil eu mostrar meu poder sem destruir o armazém todo, só me diz o que eu preciso fazer!
+
+O silêncio que se segue é de natureza completamente diferente do anterior.
+
+@Gordo Benn o encara. Os seis homens no armazém o encaram. Uma das lanternas penduradas no teto balança levemente — sem vento aparente, como se algo invisível tivesse passado por ela — e a sombra de @Gordo Benn oscila na parede atrás dele como uma figura muito maior.
+
+O homem largo fica quieto por três segundos inteiros. Depois, algo no canto da boca dele se move. Não chega a ser um sorriso. É mais o reconhecimento involuntário de algo inesperado.
+
+— Destruir o armazém todo. — ele repete, a voz completamente plana. — Um adolescente com cheiro de espetinho me diz que pode destruir meu armazém e acha que isso é argumento de contratação.
+
+Ele dá um passo à frente, os olhos nunca saindo de @Ryuu D.
+
+— Me diz seu nome, garoto.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:29:31.696623] ===
+[SAY] Scar D. Ryuu, um dia serei o Rei dos Mares
+
+--- NARRATOR RESPONSE [2026-04-28T07:29:43.167887] ---
+@Ryuu D. endireita as costas, olha diretamente para @Gordo Benn nos olhos sem piscar, e fala com uma convicção tão absoluta e despretensiosa que soa menos como uma declaração e mais como um fato que o mundo ainda não descobriu.
+
+— Scar D. Ryuu. Um dia serei o Rei dos Mares.
+
+O armazém fica completamente quieto.
+
+Não o silêncio de antes — calculado, tenso, cheio de avaliação. Este é outro tipo. O tipo que acontece quando algo bate em algum lugar fundo que as pessoas nem sabiam que tinham. Uma das lanternas para de balançar. Um dos homens no fundo do armazém solta o caixote que estava carregando sem perceber.
+
+@Gordo Benn não se move. Mas algo nos olhos pequenos e afiados muda — uma faísca rápida, quase imperceptível, como relâmpago atrás de nuvem espessa. Ele conhece aquela letra. O D. Qualquer pessoa que viveu tempo suficiente nos mares conhece o peso daquela inicial, mesmo sem entender completamente o porquê.
+
+Os segundos se arrastam.
+
+— D. — @Gordo Benn finalmente fala, a voz mais baixa que antes, quase privada, como se a palavra fosse perigosa demais para o armazém inteiro ouvir. — Você sabe o que carrega nesse nome, garoto?
+
+Os olhos dele não piscam.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:30:35.505497] ===
+[SAY] Hehe, não faço ideia, meu avô disse que era um nome bem legal!
+
+--- NARRATOR RESPONSE [2026-04-28T07:30:46.042538] ---
+@Ryuu D. coça a nuca com um sorriso torto e despreocupado, como se estivesse comentando sobre o tempo.
+
+— Hehe, não faço ideia, meu avô disse que era um nome bem legal!
+
+Outro silêncio. Diferente de todos os anteriores.
+
+@Gordo Benn o encara por um momento que se estende além do confortável — e então, pela primeira vez desde que @Ryuu D. entrou no armazém, o homem largo deixa escapar algo que só pode ser descrito como uma risada. Curta, rouca, genuína. O tipo que sai sem permissão.
+
+— Um nome bem legal. — ele repete, balançando a cabeça devagar, como se estivesse engolindo algo que não esperava ter que engolir hoje. — Seu avô tem razão, garoto. É um nome muito legal.
+
+Ele vira as costas por um momento, os ombros largos relaxando levemente, e quando se vira novamente os olhos afiados carregam algo diferente — não confiança, ainda longe disso, mas uma atenção renovada. O tipo de atenção que @Gordo Benn provavelmente reserva para poucas coisas.
+
+— A pessoa que precisa ser resgatada está numa ilha a dois dias daqui. — ele fala devagar, medindo cada palavra. — Guardada por gente que não vai perguntar seu nome antes de atirar.
+
+Os olhos dele fixam nos de @Ryuu D.
+
+— Ainda acha divertido?
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:31:40.681550] ===
+[SAY] Legal! Quem eu preciso resgatar?
+
+--- NARRATOR RESPONSE [2026-04-28T07:31:52.692464] ---
+@Ryuu D. bate as palmas uma na outra com entusiasmo genuíno, como se @Gordo Benn tivesse acabado de confirmar um passeio e não uma missão potencialmente mortal.
+
+— Legal! Quem eu preciso resgatar?
+
+@Gordo Benn o observa por um segundo. Depois suspira — um som pesado, resignado, de alguém que está começando a aceitar que o universo tem senso de humor.
+
+Ele abre o mapa novamente e aponta para um ponto marcado com tinta vermelha no East Blue — uma ilha pequena, sem nome escrito, apenas um círculo e uma cruz.
+
+— Uma criança. — a voz de @Gordo Benn cai alguns tons, perdendo o peso calculista e ganhando algo mais seco, quase incômodo, como se a palavra custasse admitir. — Oito anos. Foi capturada há três semanas por um grupo que usa essa ilha como base. Eles querem algo que o pai dela tem. Enquanto não conseguem, a criança fica lá.
+
+Ele dobra o mapa e fita @Ryuu D. diretamente.
+
+— O pai não pode ir pessoalmente. Chamar a Marinha está fora de questão. — uma pausa curta e deliberada. — Por razões que você não precisa saber ainda.
+
+A lanterna acima deles balança. As sombras dançam pelas paredes do armazém.
+
+— Você vai sozinho ou tem tripulação?
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:33:07.709315] ===
+[SAY] *Ficar sério* Uma criança? Sequestraram uma criança? Me entregue o log pose dessa ilha
+
+--- NARRATOR RESPONSE [2026-04-28T07:33:20.658963] ---
+A descontração some do rosto de @Ryuu D. como maré vazando. Os olhos que um segundo atrás brilhavam com entusiasmo juvenil ficam fixos, diretos, com um peso que parece velho demais para a idade dele. A voz sai diferente — sem a energia saltitante, sem o sorriso embutido nas sílabas.
+
+— Uma criança? Sequestraram uma criança? Me entregue o log pose dessa ilha.
+
+@Gordo Benn fica imóvel por um momento, estudando a transformação no rosto do adolescente na frente dele. Aquela mudança — rápida, limpa, sem drama — diz mais sobre @Ryuu D. do que qualquer demonstração de poder teria dito.
+
+Ele mete a mão no bolso do colete e retira um log pose envolto em couro surrado, estendendo para @Ryuu D. sem cerimônia.
+
+— Dois dias de navegação para noroeste. — a voz de @Gordo Benn é baixa e direta. — A ilha não tem nome nos mapas. Você vai reconhecer pelos penhascos negros na entrada. Eles têm pelo menos doze homens armados que eu saiba. Pode ser mais.
+
+Ele não solta o log pose imediatamente. Os olhos afiados fixam nos de @Ryuu D. por mais um segundo.
+
+— A criança se chama Lena. Cabelo vermelho. Você a traz viva, eu pago bem.
+
+Uma das caixas empilhadas no canto do armazém deixa escapar um farfalhar seco e súbito — como papel amassado ou asas pequenas — e então silencia, sem que nenhum rato apareça.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:37:00.431967] ===
+[SAY] Voltarei logo. *Ir até seu barco e seguir o log pose* (Tive q reenviar essa mensagem pq vc gerou a anterior com um personagem chamado @Dargo, sendo q eu botei ele p correr na ilha passada)
+
+--- NARRATOR RESPONSE [2026-04-28T07:37:10.556026] ---
+## Nota de GM — Fora de Personagem
+
+Você está certo, obrigado pela correção.
+
+**Situação atual do inventário/logística:**
+- @Dargo foi dispensado na ilha rochosa de areia escura — ele não está mais disponível
+- O navio que estava com @Ryuu D. é o **Navio de Dargo** (item no inventário) — ele ficou com a embarcação quando dispensou Dargo
+- Portanto, @Ryuu D. tem um navio próprio para navegar
+
+---
+
+**Continuando a cena corretamente:**
+
+@Ryuu D. pega o log pose da mão de @Gordo Benn, vira as costas e caminha para a saída do armazém com passos firmes.
+
+— Voltarei logo.
+
+@Gordo Benn observa o adolescente sair sem dizer mais nada. Os olhos afiados ficam na porta por um momento depois que ela fecha.
+
+@Ryuu D. atravessa o cais, sobe no navio de @Dargo, amarra o log pose no pulso e verifica a agulha. Ela aponta firme para **noroeste**.
+
+O vento está favorável. O East Blue se abre na frente do casco com aquela calma traiçoeira que o mar usa quando quer parecer inofensivo.
+
+**Dois dias de navegação. Penhascos negros. Lena. Doze homens.**
+
+**O que você faz durante a viagem?
+
+
+=== PLAYER ACTION [2026-04-28T07:38:09.094913] ===
+[CONTINUE]
+
+--- NARRATOR RESPONSE [2026-04-28T07:38:23.489950] ---
+O primeiro dia passa com o mar se comportando bem — ondas baixas, vento constante, o log pose apontando firme para noroeste sem vacilar. @Ryuu D. fica na proa por horas, deixando a brisa salgada bater no rosto, a eletricidade formigando nos dedos como sempre faz quando ele fica muito quieto por muito tempo.
+
+À noite, o céu do East Blue abre um tapete de estrelas tão denso que parece irreal. @Ryuu D. deita no convés com os braços cruzados atrás da cabeça, olhando para cima. Em algum lugar naquele mesmo céu, uma criança de oito anos chamada @Lena está esperando sem saber se alguém vem.
+
+Ele fecha os olhos.
+
+O segundo dia amanhece com névoa baixa e um cheiro diferente no ar — mais pesado, com terra e pedra molhada misturados no sal. A agulha do log pose começa a tremer levemente, sinal de que a ilha está próxima.
+
+E então @Ryuu D. os vê.
+
+Penhascos negros. Altos, cortados reto como lâminas, emergindo da névoa com uma presença que parece deliberada — como se a ilha tivesse sido construída para intimidar quem chegasse pelo mar. Entre os penhascos, uma entrada estreita. Dentro dela, o contorno de estruturas de madeira e o brilho distante de tochas acesas mesmo durante o dia.
+
+Vozes chegam pelo vento. Pelo menos quatro homens visíveis na entrada.
+
+**Como @Ryuu D. quer se aproximar?
+
+
+=== PLAYER ACTION [2026-04-28T07:39:39.286156] ===
+[DO] Atracar o navio bem na entrada principal
+
+--- NARRATOR RESPONSE [2026-04-28T07:39:50.801438] ---
+@Ryuu D. não reduz a velocidade. Não desvia. Mantém o curso direto para a entrada estreita entre os penhascos negros com a mesma energia de quem está chegando em casa depois de um dia longo.
+
+O navio de @Dargo rasga a névoa e aparece na linha de visão dos guardas com tempo de sobra para que eles percebam — e claramente não esperavam isso. Nenhum navio sensato se aproxima assim, direto, sem hesitar, sem bandeira reconhecível.
+
+— Ei! — uma das vozes na entrada grita, áspera e surpresa. — NAVIO NA ENTRADA!
+
+O movimento na beira dos penhascos é imediato. Quatro homens se tornam seis em segundos, todos se posicionando na beirada das rochas, alguns com espingardas levantadas, outros com as mãos em facas. Um homem mais alto, com um lenço vermelho na cabeça, se inclina para frente e grita para o navio que se aproxima.
+
+— PARA AÍ! Quem é você? Esse cais não é público!
+
+O casco do navio desliza pela água escura entre os penhascos. As paredes de rocha negra sobem em ambos os lados, bloqueando boa parte do céu. O cheiro de tocha e fumaça fica mais forte.
+
+Seis pares de olhos fixos em @Ryuu D.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:40:38.349036] ===
+[SAY] Não tenho tempo pra besteiras, me levem ao chefe de vocês
+
+--- NARRATOR RESPONSE [2026-04-28T07:40:49.210833] ---
+@Ryuu D. amarra o navio no primeiro suporte de madeira que encontra na entrada, salta para o cais com um passo único e fica de pé na frente dos seis homens armados com as mãos no bolso e uma expressão que não conhece urgência performática — só a calma sólida de quem já decidiu como isso vai terminar.
+
+— Não tenho tempo pra besteiras. Me levem ao chefe de vocês.
+
+O homem do lenço vermelho o encara com a mandíbula levemente aberta. Depois fecha. Depois aperta.
+
+— Você... — ele começa, a voz entre o espanto e a raiva. — Você acabou de atracar aqui como se fosse dono do lugar e está me pedindo para—
+
+— Me levando. — @Ryuu D. corrige, sem elevar a voz.
+
+Dois dos homens trocam um olhar. Um terceiro aperta a empunhadura da faca com força desnecessária. A névoa continua baixa entre os penhascos, abafando os sons, deixando o grupo numa bolha estranha de tensão.
+
+O homem do lenço vermelho dá um passo à frente, colocando a espingarda na altura do peito de @Ryuu D.
+
+— Você tem cinco segundos para explicar quem é antes de eu decidir que você é problema.
+
+A tocha mais próxima crepita. Lá dentro da ilha, vozes distantes e o cheiro de comida cozinhando chegam pelo vento.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:41:43.992690] ===
+[SAY] ahhh, cara, é inútil, nem tenta
+
+--- NARRATOR RESPONSE [2026-04-28T07:41:55.568766] ---
+@Ryuu D. olha para a espingarda apontada para o peito com a mesma expressão que usaria para olhar para uma mosca pousada na manga da camisa. Suspira levemente pelo nariz — não de medo, não de raiva — da paciência específica de quem está tendo que explicar algo óbvio.
+
+— Ahhh, cara, é inútil, nem tenta.
+
+O homem do lenço vermelho pisca. O dedo no gatilho não se move, mas a confiança por trás dele vacila um milímetro.
+
+— O quê?
+
+Um dos outros seis homens dá meio passo involuntário para trás. Não sabe por quê. Algo no ar mudou — uma pressão sutil, como antes de uma tempestade fechar, quando os pássaros param de cantar e o mar fica liso demais.
+
+@Ryuu D. não levantou a voz. Não fez gesto nenhum. Só ficou parado com as mãos no bolso, olhando para o cano da espingarda como se fosse um inconveniente menor.
+
+— Eu vim buscar alguém. — ele continua, o tom idêntico ao de antes. — Vocês podem me levar ao chefe agora e isso acaba rápido. Ou não levam.
+
+Uma pausa de um segundo.
+
+— Mas a espingarda não muda nenhuma das duas opções.
+
+A névoa entre os penhascos parece mais densa de repente. As tochas crepitam ao mesmo tempo.
+
+**O homem do lenço vermelho não soltou a arma. O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:42:32.082854] ===
+[SAY] E aí, já se decidiram?
+
+--- NARRATOR RESPONSE [2026-04-28T07:42:43.324760] ---
+@Ryuu D. inclina levemente a cabeça para o lado, com a paciência calma de quem está esperando a resposta de um cardápio.
+
+— E aí, já se decidiram?
+
+O homem do lenço vermelho range os dentes. O dedo aperta o gatilho um milímetro — e para. Porque algo acontece no canto do grupo que ninguém esperava.
+
+O homem mais afastado, quase encostado na parede de pedra úmida dos penhascos, solta devagar a empunhadura da faca. Os olhos dele não estão em @Ryuu D. Estão no navio atracado. Fixos no casco, na vela remendada, em algum detalhe que só ele reconheceu — e seja lá o que for, tirou dele a certeza que tinha há trinta segundos. Ele recua meio passo sem fazer barulho, o rosto fechado numa expressão que não é medo exatamente, mas é parente próximo.
+
+O homem do lenço vermelho percebe o movimento pelo canto do olho. A hesitação contamina o grupo como tinta em água.
+
+Três segundos de silêncio absoluto entre os penhascos negros.
+
+Então o lenço vermelho abaixa a espingarda dois centímetros — não o suficiente para ser rendição, mas o suficiente para ser uma pergunta.
+
+— Como você se chama?
+
+A tocha crepita. Lá dentro da ilha, uma criança de oito anos está esperando.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:43:39.794306] ===
+[SAY] *Coçar o ouvido* Me chamo Ryuu, só me leva logo pro seu chefe, quero evitar fadiga
+
+--- NARRATOR RESPONSE [2026-04-28T07:43:53.061339] ---
+@Ryuu D. coça o ouvido com um dedo indicador, a expressão de quem está genuinamente mais preocupado com o tempo perdido do que com a espingarda que ainda aponta vagamente na direção do seu peito.
+
+— Me chamo Ryuu. Só me leva logo pro seu chefe, quero evitar fadiga.
+
+O homem do lenço vermelho fica parado por um momento que dura tempo demais. Depois olha para o companheiro que recuou — aquele que reconheceu o navio — e troca um olhar que carrega uma conversa inteira em silêncio.
+
+O companheiro faz um gesto quase imperceptível com a cabeça. Basta.
+
+O lenço vermelho baixa a espingarda completamente. Não com entusiasmo. Com a resignação específica de quem decidiu que algumas batalhas não valem o custo da descoberta.
+
+— Sigam ele. — ele fala para os outros, a voz baixa e controlada. Depois olha para @Ryuu D. com os olhos estreitos. — Você vai na frente. Qualquer movimento estranho—
+
+— Sim, sim. — @Ryuu D. já está caminhando.
+
+O grupo abre passagem. As tochas iluminam um caminho de pedra irregular que serpenteia para dentro da ilha, entre estruturas de madeira improvisadas e caixotes empilhados. O cheiro de comida fica mais forte. E em algum lugar mais fundo, o som abafado de vozes.
+
+**O chefe está próximo. O que você faz enquanto caminha?
+
+
+=== PLAYER ACTION [2026-04-28T07:44:37.365430] ===
+[SAY] Qual o nome dessa ilha, senhores?
+
+--- NARRATOR RESPONSE [2026-04-28T07:44:57.156875] ---
+@Ryuu D. caminha no ritmo de quem está passeando, as mãos ainda no bolso, olhando para os lados com curiosidade genuína — as paredes de pedra negra, as estruturas de madeira mal pregadas, um gato magro que some atrás de um caixote.
+
+— Qual o nome dessa ilha, senhores?
+
+O homem do lenço vermelho, caminhando dois passos atrás, responde com o tom seco de quem preferia não estar tendo essa conversa.
+
+— Não tem nome.
+
+— Não tem nome? — @Ryuu D. repete, sem julgamento, só processando a informação.
+
+— Não tem nome. — confirma o lenço vermelho.
+
+@Ryuu D. considera isso por um segundo, olhando para cima onde as paredes dos penhascos negros ainda enquadram uma faixa estreita de céu cinza.
+
+— Hm. — ele faz o som de quem está arquivando a informação numa gaveta rotulada como *razoável*.
+
+Nenhum dos outros seis homens acrescenta nada. O caminho de pedra vira numa curva fechada e abre para um pátio interno maior — mais caixotes, uma fogueira no centro, três homens sentados que param o que estão fazendo e olham para o recém-chegado com expressões que vão do espanto à desconfiança.
+
+No fundo do pátio, uma porta de madeira grossa. Atrás dela, vozes.
+
+O lenço vermelho para e bate três vezes na madeira.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:45:30.534958] ===
+[CONTINUE]
+
+--- NARRATOR RESPONSE [2026-04-28T07:45:42.313251] ---
+As vozes atrás da porta param.
+
+Passos pesados se aproximam do outro lado — lentos, deliberados, do tipo que não apressam por ninguém. A porta abre para dentro com um ranger longo.
+
+O homem que aparece no vão preenche a moldura inteira. Largo, alto, com uma barba curta e descuidada e os olhos pequenos e escuros de quem desenvolveu o hábito de calcular tudo que entra no campo de visão antes de decidir se é ameaça ou recurso. Uma cicatriz horizontal atravessa o queixo. As mãos são grandes o suficiente para segurar um melão inteiro com uma só.
+
+Ele olha para o lenço vermelho primeiro.
+
+— Quem é?
+
+— Diz que se chama Ryuu. — o lenço vermelho responde, a voz cuidadosamente neutra. — Atracou direto na entrada principal. Sozinho.
+
+O homem grande transfere o olhar para @Ryuu D. Desce devagar — dos olhos, para a cicatriz em forma de raio no peito visível pela gola da camisa, para as mãos nos bolsos, para os pés firmes no chão de pedra. Sobe de volta para o rosto.
+
+O pátio inteiro está em silêncio. Até o gato magro reapareceu em cima de um caixote e parou quieto, como se soubesse que o momento pede isso.
+
+O homem grande apoia o ombro na moldura da porta, cruza os braços e fala com a voz grave e direta de quem não desperdiça perguntas.
+
+— O que você quer aqui?
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:46:53.356635] ===
+[SAY] Você é o chefe daqui, grandão?
+
+--- NARRATOR RESPONSE [2026-04-28T07:47:03.916549] ---
+@Ryuu D. inclina a cabeça levemente para cima para encarar o homem grande nos olhos — não com desafio, com a curiosidade direta de quem está confirmando uma informação antes de prosseguir.
+
+— Você é o chefe daqui, grandão?
+
+O homem grande não pisca. Os olhos pequenos e escuros ficam fixos em @Ryuu D. por um momento que tem peso próprio. O pátio continua em silêncio absoluto — o lenço vermelho atrás de @Ryuu D. parece estar segurando a respiração.
+
+Então o canto da boca do homem grande se move. Não chega a ser um sorriso. É o reconhecimento involuntário de algo inesperado.
+
+— @Kael. — ele diz, como se o nome fosse resposta suficiente para a pergunta. — E sim.
+
+Ele não se move da moldura da porta. Os braços permanecem cruzados, as mãos enormes e marcadas pelo mar visíveis sobre os antebraços. Os olhos de @Kael descem uma vez mais para a cicatriz em forma de raio no peito de @Ryuu D. — demoram um segundo a mais desta vez — e sobem.
+
+— Você tem coragem ou é idiota. — @Kael fala devagar, sem inflexão de pergunta. — Ainda não decidi qual dos dois.
+
+O gato no caixote boceja.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:47:58.992925] ===
+[SAY] Eu vim buscar a @Lena... Sabe... Não é muito legal sequestrar crianças, sabia?
+
+--- NARRATOR RESPONSE [2026-04-28T07:48:10.438285] ---
+@Ryuu D. fala com o mesmo tom que usaria para comentar o tempo — direto, sem acusação dramática, sem ameaça embutida na voz. Só um fato sendo apresentado a alguém que talvez não tivesse considerado o assunto direito.
+
+— Eu vim buscar a Lena. Sabe... não é muito legal sequestrar crianças, sabia?
+
+O pátio congela.
+
+O lenço vermelho atrás de @Ryuu D. para de respirar de vez. Um dos homens sentados perto da fogueira deixa cair alguma coisa no chão e não se abaixa para pegar.
+
+@Kael não muda a postura. Os braços continuam cruzados, o ombro ainda apoiado na moldura. Mas algo nos olhos pequenos e escuros se move — uma reorganização interna, rápida e silenciosa, de quem acabou de recalcular uma situação inteira em menos de dois segundos.
+
+O silêncio dura tempo suficiente para o vento passar entre os penhascos e fazer as tochas do pátio tremerem todas ao mesmo tempo.
+
+— Hm. — @Kael solta o som pelo nariz. Grave, curto, sem revelar nada.
+
+Os olhos dele ficam em @Ryuu D. com uma atenção que não existia trinta segundos atrás. A cicatriz em forma de raio no peito do adolescente recebe mais um olhar — desta vez demorado, deliberado.
+
+— Você veio sozinho?
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:49:04.578304] ===
+[SAY] *Bocejar* Sim... é o suficiente
+
+--- NARRATOR RESPONSE [2026-04-28T07:49:15.328101] ---
+@Ryuu D. boceja. Não de nervoso. Não de afetação. Boceja como quem está levemente cansado de uma viagem de dois dias e preferia já estar resolvendo o assunto.
+
+— Sim... é o suficiente.
+
+O homem perto da fogueira que derrubou algo ainda não se abaixou para pegar.
+
+@Kael fica imóvel na moldura da porta por três segundos inteiros. Os olhos pequenos e escuros não saem do rosto de @Ryuu D. — não com raiva, não com medo. Com a concentração específica de um homem experiente tentando encaixar uma peça que não tem formato conhecido.
+
+Um adolescente. Sozinho. Que atracou na entrada principal. Que conhece o nome da criança. Que bocejou para o chefe de um acampamento armado no meio de uma ilha sem nome.
+
+@Kael descruza os braços devagar.
+
+— Entre. — ele diz. Só isso.
+
+Vira as costas e caminha para dentro do cômodo escuro atrás da porta, sem verificar se @Ryuu D. segue. As botas pesadas batem no chão de pedra em passos lentos e regulares.
+
+O lenço vermelho ao lado de @Ryuu D. se inclina dois centímetros na direção dele e sussurra, a voz tensa e baixa como arame esticado.
+
+— Cuidado com o que fala lá dentro.
+
+A tocha mais próxima crepita.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T07:49:51.471664] ===
+[DO] Entrar no cômodo
+
+--- NARRATOR RESPONSE [2026-04-28T07:50:04.812531] ---
+@Ryuu D. entra no cômodo sem hesitar, as mãos ainda nos bolsos.
+
+O ambiente é menor do que parece por fora — paredes de pedra negra úmida, uma mesa de madeira grossa no centro coberta de mapas e papéis amarelados, duas lanternas penduradas no teto baixo que balançam levemente com a corrente de ar da porta. Cheira a fumaça velha e sal.
+
+@Kael está de costas, de frente para um dos mapas pregados na parede. Não se virou quando @Ryuu D. entrou.
+
+— Quem te mandou? — ele pergunta para a parede, a voz grave e direta como sempre.
+
+As lanternas balançam. Numa das paredes, entre dois ganchos enferrujados, @Ryuu D. nota uma porta menor — fechada, com uma tranca de ferro nova demais comparada com o resto da estrutura. Tranca nova num lugar velho.
+
+Atrás dessa porta, silêncio. Mas o tipo de silêncio que respira.
+
+@Kael ainda não se virou. Os ombros largos estão levemente tensos sob a camisa escura, os dedos grandes e marcados apoiados na borda da mesa enquanto estuda o mapa. Está esperando uma resposta — mas também está esperando ver o que o adolescente faz com a informação da porta.
+
+O gato magro entrou atrás de @Ryuu D. e se sentou no canto, observando os dois.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:52:36.237130] ===
+[SAY] Sabe... Não irá mudar nada você saber, então eu posso falar. É um cara bem gordão *abrir as mãos para simular alguém gordo*. Ele pediu pra eu resgatar essa menina de vocês. Tem como você me adiantar logo?
+
+--- NARRATOR RESPONSE [2026-04-28T07:52:51.644037] ---
+@Ryuu D. abre as mãos na altura do peito, simulando uma barriga generosa com a expressão de quem está descrevendo o clima.
+
+— Sabe... não irá mudar nada você saber, então eu posso falar. É um cara bem gordão. — as palmas abertas se afastam para os lados em arco. — Ele pediu pra eu resgatar essa menina de vocês. Tem como você me adiantar logo?
+
+@Kael finalmente se vira.
+
+Lento. Completo. Os olhos pequenos e escuros encontram @Ryuu D. com uma expressão que reorganizou desde a última vez — menos calculista, mais fechada. A mandíbula está levemente contraída.
+
+— Gordo. — ele repete, a voz plana como pedra.
+
+Não é uma pergunta. É alguém confirmando internamente uma suspeita que preferia não ter confirmado.
+
+O silêncio dura dois segundos. @Kael olha para a porta trancada — o único movimento involuntário que fez desde que @Ryuu D. entrou — e volta os olhos para o adolescente.
+
+— Você sabe o que está carregando? — ele pergunta, a voz baixa agora, diferente. — O que essa criança representa pra quem a quer de volta?
+
+As lanternas balançam. O gato no canto lambe a pata, indiferente ao peso da pergunta que acabou de preencher o cômodo inteiro.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:53:47.285571] ===
+[SAY] Não, mas não é certo prender uma garota, por qualquer motivo que seja
+
+--- NARRATOR RESPONSE [2026-04-28T07:53:59.435440] ---
+@Ryuu D. fala sem hesitar, a voz no mesmo tom calmo de sempre — não é discurso, não é heroísmo performático. É só o que ele pensa, dito diretamente.
+
+— Não. Mas não é certo prender uma garota, por qualquer motivo que seja.
+
+@Kael fica parado. Os olhos pequenos e escuros estudam @Ryuu D. por um momento longo — não com raiva, não com desprezo. Com algo mais próximo de um homem tentando decidir se o que está na frente dele é ingenuidade perigosa ou uma convicção que merece ser levada a sério.
+
+Ele solta o ar pelo nariz. Devagar.
+
+— Certo e errado. — @Kael repete as palavras como se estivesse pesando cada uma na mão. — Você veio até uma ilha sem nome, sozinho, buscar uma criança pra um homem gordo que você mal conhece, porque não é certo.
+
+Não é escárnio. É quase admiração involuntária, do tipo que incomoda quem a sente.
+
+@Kael se afasta da mesa dois passos, os braços cruzados de novo, os olhos indo uma vez mais para a porta trancada antes de voltarem para @Ryuu D.
+
+— Essa menina não é só uma criança. — ele diz, a voz baixa e séria. — E o homem gordo não é só um cliente.
+
+As lanternas balançam. O silêncio atrás da porta trancada continua respirando.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T07:57:25.467916] ===
+[SAY] E o que muda? Só me diz se você vai me entregar ela ou eu vou precisar destruir essa ilha toda
+
+--- NARRATOR RESPONSE [2026-04-28T07:57:35.986166] ---
+@Ryuu D. fala sem levantar a voz. Sem endurecer a expressão. Com a mesma calma de quem está perguntando se vai chover — só que a pergunta tem o peso de uma tempestade inteira contida atrás dos olhos.
+
+— E o que muda? Só me diz se você vai me entregar ela ou eu vou precisar destruir essa ilha toda.
+
+O gato no canto para de se lamber.
+
+@Kael não recua. Mas algo na postura dele muda — os ombros descem meio centímetro, os braços cruzados apertam levemente. Não é medo. É o reconhecimento físico e involuntário de alguém que passou anos lendo pessoas perigosas e acabou de ler uma.
+
+O adolescente na frente dele não ameaçou com raiva. Não ameaçou com fanfarronice. Apresentou duas opções com a neutralidade de quem já decidiu que ambas são aceitáveis.
+
+A cicatriz em forma de raio no peito de @Ryuu D. fica visível quando a lanterna balança na direção certa.
+
+@Kael olha para ela por um segundo.
+
+Depois olha para a porta trancada.
+
+Depois olha para @Ryuu D. nos olhos — e pela primeira vez desde que a conversa começou, o homem grande e calculista de uma ilha sem nome parece estar genuinamente pesando algo que não pesava antes.
+
+— Você tem Fruta do Diabo. — ele diz baixo. Não é pergunta.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:00:36.678358] ===
+[SAY] Sim, eu comi a Goro Goro no Mi, eu consigo *abrir os braços e invocar um relampago que cai em algum lugar da ilha e faz um barulhão* controlar relâmpagos
+
+--- NARRATOR RESPONSE [2026-04-28T08:00:48.627872] ---
+@Ryuu D. abre os braços devagar — um gesto quase casual, como quem está se espreguiçando — e a eletricidade responde.
+
+Não é um aviso. É uma demonstração.
+
+O relâmpago rasga o céu acima da ilha sem nome com um estrondo que faz as paredes de pedra negra vibrarem. O clarão branco-azulado atravessa as lanternas do cômodo por meio segundo, apagando todas as sombras de uma vez. Lá fora, no pátio, alguém grita de susto. Caixotes caem. O gato desaparece atrás de algo num borrão cinza.
+
+O barulhão ecoa entre os penhascos e some no mar.
+
+— Controlar relâmpagos.
+
+@Ryuu D. baixa os braços com a mesma calma com que os abriu. A eletricidade some das pontas dos dedos sem pressa.
+
+@Kael não se moveu. Mas os olhos pequenos e escuros estão diferentes agora — abertos um milímetro a mais do que estavam. A mão direita, quase sem querer, deslizou para a borda da mesa e parou ali, os dedos grandes tocando a madeira.
+
+O polegar de @Kael roça distraidamente a borda de uma xícara de barro sobre a mesa. A xícara tem uma trinca fina no formato de um raio — antiga, como se já tivesse sobrevivido por pouco a algo muito parecido com o que acabou de acontecer lá fora.
+
+O silêncio que se segue é de outro tipo.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T08:03:14.969492] ===
+[CONTINUE]
+
+--- NARRATOR RESPONSE [2026-04-28T08:03:25.718402] ---
+@Kael solta a borda da mesa devagar. Os dedos grandes se afastam da madeira um por um, como se ele estivesse conscientemente recuperando o controle de cada parte do próprio corpo.
+
+Ele olha para @Ryuu D. por um longo momento. Depois olha para a janela estreita na parede — lá fora, as vozes do pátio ainda estão agitadas, alguém gritando para verificar os caixotes, o lenço vermelho respondendo com ordens curtas e tensas.
+
+@Kael fecha os olhos por dois segundos.
+
+Quando abre, a decisão já está feita. @Ryuu D. consegue ver isso — não na expressão, mas na postura. Os ombros largos descem completamente pela primeira vez desde que a conversa começou. O homem grande e calculista de uma ilha sem nome acabou de chegar no fim de um cálculo que não tinha resposta boa.
+
+Ele caminha até a porta trancada. Tira uma chave do bolso da calça — pequena, de ferro, nova como a tranca. Encaixa. Vira.
+
+A porta abre.
+
+Dentro, sentada no chão de pedra com os joelhos abraçados ao peito e os olhos grandes fixos na entrada, está uma menina de aproximadamente oito anos. Cabelo escuro embaraçado, um arranhão velho na testa, a expressão de quem parou de chorar faz tempo porque chorar não estava resolvendo nada.
+
+Os olhos dela encontram @Ryuu D.
+
+— Você não é daqui. — ela diz, a voz pequena mas direta.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:06:40.046296] ===
+[SAY] Não sou, vamos. *Estender a mão*
+
+--- NARRATOR RESPONSE [2026-04-28T08:06:51.125201] ---
+@Ryuu D. estende a mão na direção de @Lena — palma aberta, sem pressa, sem drama. O mesmo gesto que faria para ajudar alguém a subir num barco.
+
+— Não sou. Vamos.
+
+@Lena olha para a mão estendida. Depois olha para o rosto de @Ryuu D. — os olhos escuros, a cicatriz em forma de raio no peito visível pela gola da camisa, a expressão que não tem medo nem pressa nem intenção oculta que ela consiga identificar.
+
+A menina desdobra as pernas devagar. Levanta. E coloca a mão pequena na mão de @Ryuu D. sem dizer mais nada.
+
+@Kael observa os dois da entrada da porta, os braços caídos ao lado do corpo, a chave ainda entre os dedos. O rosto do homem grande está fechado — não arrependimento, não alívio. Só o peso silencioso de alguém que trocou uma coisa por outra e ainda está calculando o preço real da transação.
+
+— Rapaz. — @Kael fala quando @Ryuu D. se vira para sair, a voz baixa e séria. — O homem gordo que te contratou. Descubra quem ele realmente é antes de entregar a menina.
+
+As lanternas balançam uma última vez.
+
+O gato magro reaparece na soleira da porta principal, olha para @Ryuu D. e @Lena, e sai do caminho.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T08:07:48.956790] ===
+[DO] Ir até o barco com a menina
+
+--- NARRATOR RESPONSE [2026-04-28T08:08:02.480748] ---
+@Ryuu D. atravessa o pátio com @Lena ao lado, a mão pequena dela ainda na sua. Os homens do acampamento abrem caminho — não com respeito exatamente, mas com o recuo instintivo de quem viu um relâmpago cair do céu há menos de cinco minutos e prefere não testar a teoria uma segunda vez.
+
+O lenço vermelho observa os dois passarem sem dizer uma palavra. Os olhos dele acompanham @Ryuu D. até a curva do caminho de pedra negra e param ali.
+
+O vento do mar aumenta quando @Ryuu D. e @Lena saem dos penhascos e chegam à entrada da ilha. A jangada — o navio de @Dargo, robusto e cheirando a sal velho — balança suavemente contra as pedras da margem, a vela amarrada esperando.
+
+@Lena para um segundo quando vê o mar aberto além da proa. Os olhos grandes fixam o horizonte com uma expressão que @Ryuu D. não consegue classificar facilmente — não é medo do mar. É algo mais antigo do que isso.
+
+Depois ela dá o passo. Sobe no barco com @Ryuu D., senta perto do mastro e abraça os próprios joelhos de novo — o mesmo gesto do quarto de pedra, mas diferente agora. Menos defesa. Mais hábito.
+
+— Para onde vamos? — ela pergunta, os olhos no horizonte.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:09:18.844064] ===
+[SAY] Não sei, você que me diz... Alguém me pediu para te resgatar, mas não sei se é uma boa ideia te entregar a ele, você conhece algum @Gordo Benn?
+
+--- NARRATOR RESPONSE [2026-04-28T08:09:29.481534] ---
+@Ryuu D. solta a amarra do barco com uma das mãos e olha para @Lena com a expressão direta de sempre — sem rodeios, sem tentar suavizar a situação.
+
+— Não sei, você que me diz. Alguém me pediu para te resgatar, mas não sei se é uma boa ideia te entregar a ele. Você conhece algum Gordo Benn?
+
+O nome pousa no ar entre os dois como uma pedra jogada n'água.
+
+@Lena para de abraçar os joelhos.
+
+Não é um sobressalto dramático. É o contrário — ela fica absolutamente imóvel, os olhos grandes saindo do horizonte e encontrando o rosto de @Ryuu D. pela primeira vez desde que subiram no barco. A expressão dela é difícil de ler. Não é medo. É algo mais controlado do que isso. Mais velho do que oito anos tem direito de ser.
+
+O vento move o cabelo escuro e embaraçado dela. Na margem atrás do barco, uma das pedras negras dos penhascos tem marcas rasas gravadas na superfície — símbolos pequenos, repetidos em padrão regular, como uma contagem ou uma rota registrada por alguém com muito tempo e pouco papel.
+
+@Lena olha para as mãos no próprio colo por um segundo.
+
+— Conheço. — ela diz finalmente, a voz pequena e cuidadosa. — Você não deveria me entregar a ele.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:10:04.219751] ===
+[SAY] Por que?
+
+--- NARRATOR RESPONSE [2026-04-28T08:10:16.056204] ---
+A pergunta de @Ryuu D. é curta e limpa como tudo que ele diz. Sem pressão. Sem urgência. Só a palavra solta no ar entre os dois, com o mar batendo devagar contra o casco do barco de @Dargo.
+
+@Lena olha para @Ryuu D. por um momento longo. Os olhos grandes e escuros fazem o mesmo trabalho que os olhos de @Kael fizeram mais cedo — lendo, calculando, pesando o quanto pode custar confiar numa pessoa nova.
+
+O vento passa. A vela remendada estufа levemente e relaxa.
+
+— Porque ele não quer me resgatar. — @Lena diz devagar, cada palavra escolhida com cuidado de quem aprendeu que palavras erradas têm consequências. — Ele quer me usar.
+
+Os olhos dela descem para as marcas rasas nas pedras negras da margem — aquela contagem gravada por alguém com tempo demais — e voltam para @Ryuu D.
+
+— As pessoas que me prendiram naquela ilha tinham medo dele. Não de mim. — ela faz uma pausa pequena. — Você percebeu isso, né? O homem grande. Ele te avisou antes de você sair.
+
+A maré empurra o barco suavemente para longe das pedras. O horizonte aberto do East Blue espera na proa, indiferente e enorme.
+
+@Lena ainda não disse o suficiente. Mas está chegando perto de decidir se vai dizer.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:23:16.671859] ===
+[SAY] Te usar... hmm... Quem é você, afinal?
+
+--- NARRATOR RESPONSE [2026-04-28T08:23:28.292944] ---
+@Ryuu D. inclina levemente a cabeça, os olhos fixos em @Lena com uma curiosidade genuína e sem pressa. Não é interrogatório. É a pergunta de alguém que percebeu que a peça na frente dele tem mais peso do que aparenta.
+
+— Te usar... hmm... Quem é você, afinal?
+
+O barco balança suavemente. As pedras negras da ilha sem nome ficam cada vez mais distantes atrás da popa.
+
+@Lena olha para @Ryuu D. por um tempo que seria desconfortável para a maioria das pessoas. Para ela parece natural — o olhar de quem cresceu medindo cada situação antes de se mover.
+
+Depois ela solta o ar pelo nariz. Pequeno. Quase imperceptível.
+
+— Lena D. — ela diz. Simples assim.
+
+O D. pousa entre os dois como o relâmpago pousou na ilha mais cedo — sem aviso, com peso desproporcional ao tamanho do som.
+
+Os olhos grandes e escuros de @Lena D. encontram os de @Ryuu D. com uma expressão que mistura cansaço e algo teimoso, inabalável, familiar.
+
+— Agora você entende por que todo mundo quer me encontrar?
+
+O vento do East Blue estica a vela remendada do barco de @Dargo. O horizonte aberto espera. Em algum lugar nessa direção, @Gordo Benn também espera — sem saber ainda que a situação ficou consideravelmente mais complicada.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:24:01.574327] ===
+[SAY] Hmmm, não. O que tem esse D. ? Eu também tenho ele
+
+--- NARRATOR RESPONSE [2026-04-28T08:24:12.653557] ---
+@Ryuu D. franze levemente a testa — não de confusão, mas de quem está genuinamente tentando entender qual é o problema.
+
+— Hmmm, não. O que tem esse D.? Eu também tenho ele.
+
+O silêncio que se segue é de um tipo específico.
+
+@Lena D. para completamente. Os olhos grandes saem do horizonte e fixam o rosto de @Ryuu D. com uma intensidade que não combina com oito anos — ou combina exatamente, dependendo de que tipo de oito anos foram os dela.
+
+— Você tem. — ela repete baixinho. Não é dúvida. É ela processando.
+
+Os olhos dela descem para a cicatriz em forma de raio no peito de @Ryuu D., visível pela gola da camisa. Sobem de volta para o rosto dele. Descem de novo. Como se estivesse somando coisas que não sabia que precisavam ser somadas.
+
+— Ryuu D. — @Lena D. diz o nome completo dele devagar, testando o peso. Os lábios fazem uma linha fina que não é bem um sorriso e não é bem mais nada. — Você realmente não sabe o que carrega no nome.
+
+O vento passa entre os dois. O barco de @Dargo corta a água calma do East Blue sem pressa.
+
+@Lena D. abraça os joelhos de novo — mas desta vez os olhos dela têm algo diferente. Menos cansaço. Mais algo que se parece estranhamente com alívio.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:25:01.991423] ===
+[SAY] Não... Meu avô falava que era um nome legal!
+
+--- NARRATOR RESPONSE [2026-04-28T08:25:13.554037] ---
+@Ryuu D. fala com a convicção tranquila de quem apresenta um argumento irrefutável.
+
+— Não... Meu avô falava que era um nome legal!
+
+Uma gaivota pousa silenciosamente na proa do barco de @Dargo. Inclina a cabeça na direção de @Lena D. — devagar, preciso, como se a reconhecesse. @Lena D. olha para o pássaro por um segundo com uma expressão estranha, quase cautelosa, antes de voltar os olhos para @Ryuu D.
+
+E então acontece algo que provavelmente não acontecia faz tempo.
+
+@Lena D. ri.
+
+É pequeno, involuntário, abafado pela mão que ela levanta rápido demais para esconder — mas é real. Os ombros dela sobem e descem uma vez, os olhos escuros ficam levemente brilhantes, e por um segundo a menina que passou tempo demais num quarto de pedra negra tem exatamente oito anos.
+
+A gaivota grasnа uma vez e alça voo de volta para o céu.
+
+@Lena D. baixa a mão devagar. A expressão volta a ser séria, mas diferente de antes — menos fechada. Como uma porta que não está mais trancada, só encostada.
+
+— Seu avô estava certo. — ela diz finalmente, a voz pequena e cuidadosa de novo. — É um nome legal. Mas é também muito mais do que isso.
+
+Os olhos dela encontram os de @Ryuu D. com aquela intensidade desproporcional à idade.
+
+— Um dia você vai entender.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:30:14.355805] ===
+[SAY] Hmm... Então oq eu faço com você hein... Você é muito nova pra ser uma pirata né?
+
+--- NARRATOR RESPONSE [2026-04-28T08:30:26.141859] ---
+@Ryuu D. coça a nuca com a expressão de alguém que acabou de perceber que resolveu um problema e criou outro imediatamente na sequência. Os olhos dele varrem o barco de @Dargo, o horizonte aberto, @Lena D. sentada no mastro com os joelhos abraçados — e a equação não fecha de nenhum jeito simples.
+
+— Hmm... Então o que eu faço com você, hein... Você é muito nova pra ser uma pirata, né?
+
+@Lena D. olha para @Ryuu D. com aquela expressão velha demais para o rosto pequeno.
+
+— Eu tenho oito anos. — ela diz, seca. — Não doze.
+
+Uma pausa.
+
+— Mas você também não parece muito mais velho e já está aqui sozinho no meio do East Blue resgatando crianças pra homens gordos suspeitos.
+
+Não é veneno. É só a observação direta de alguém que aprendeu cedo que a lógica não respeita idade.
+
+O vento estica a vela remendada do barco de @Dargo. A ilha sem nome dos penhascos negros já é só uma mancha escura atrás da popa, sumindo devagar no horizonte. À frente, o East Blue se abre enorme e indiferente, sem dar nenhuma sugestão útil sobre o que fazer com uma menina de oito anos que carrega um sobrenome pesado demais e sabe mais do que deveria.
+
+@Lena D. inclina a cabeça levemente, os olhos fixos em @Ryuu D., esperando.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:33:50.994621] ===
+[SAY] *deitar no barco* Então eu tenho uma criança de 8 anos que se acha velha, não tenho um belly no bolso e eu tenho um barco roubado... O velhote não me disse que seria tão dificil ser pirata
+
+--- NARRATOR RESPONSE [2026-04-28T08:34:00.564715] ---
+@Ryuu D. deita no barco com a naturalidade de quem acabou de decidir que o chão de madeira é exatamente o lugar certo para uma crise existencial. Os braços abertos, os olhos no céu azul do East Blue, a cicatriz em forma de raio no peito subindo e descendo devagar.
+
+— Então eu tenho uma criança de oito anos que se acha velha, não tenho um belly no bolso e eu tenho um barco roubado... O velhote não me disse que seria tão difícil ser pirata.
+
+O barco range suavemente. Uma nuvem passa.
+
+@Lena D. olha para @Ryuu D. deitado no chão do barco por um momento longo. Depois olha para o horizonte. Depois olha de volta para ele com a expressão de quem está recalibrando completamente a avaliação que fez de uma situação.
+
+— Você é o meu resgatador. — ela diz. Não é pergunta. É uma constatação sendo digerida em tempo real.
+
+Uma pausa.
+
+— Sem dinheiro. Sem destino. Com um barco que não é seu.
+
+Outra pausa menor.
+
+— E você quer ser Rei dos Mares.
+
+O vento passa entre os dois. A vela remendada do barco de @Dargo estufа preguiçosamente. Algum lugar distante, uma gaivota grasna.
+
+@Lena D. abraça os joelhos, os olhos escuros fixos em @Ryuu D. com algo que está perigosamente próximo de diversão genuína.
+
+— Tudo bem. Eu também não tenho para onde ir.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T08:35:39.291358] ===
+[SAY] Já sei, vamos voltar naquela cidade que o @Gordo Benn está e destruir tudo, o que acha?
+
+--- NARRATOR RESPONSE [2026-04-28T08:35:48.238400] ---
+@Ryuu D. fala do chão do barco, os olhos ainda no céu, com o mesmo tom casual que usaria para sugerir pescar alguma coisa para o jantar.
+
+— Já sei, vamos voltar naquela cidade que o Gordo Benn está e destruir tudo. O que acha?
+
+O barco balança suavemente.
+
+@Lena D. pisca uma vez.
+
+Depois vira o rosto devagar para @Ryuu D. deitado no chão com os braços abertos, como se precisasse confirmar visualmente que a pessoa que acabou de dizer isso é real e está realmente aqui no mesmo barco que ela.
+
+— Você quer. — ela diz devagar. — Destruir tudo.
+
+Uma pausa.
+
+— Numa cidade inteira.
+
+Outra pausa menor.
+
+— Porque não tem dinheiro.
+
+Os olhos escuros de @Lena D. piscam de novo. Ela olha para o horizonte. Olha de volta para @Ryuu D. Olha para as próprias mãos no colo.
+
+— Eu tenho oito anos e isso é o plano mais irresponsável que já ouvi. — ela diz. — E eu fui sequestrada por corsários.
+
+O vento passa. A vela estufа.
+
+@Lena D. inclina levemente a cabeça, os olhos fixos no céu junto com @Ryuu D. por um segundo.
+
+— Mas Gordo Benn realmente merece. — ela acrescenta baixinho. Quase para si mesma.
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:37:15.534611] ===
+[SAY] O QUEEEEEEEEEEEEE? Corsários? @Kael era um corsário? QUE LEGAL! Eu vou ganhar um bounty então, né?
+
+--- NARRATOR RESPONSE [2026-04-28T08:37:26.847916] ---
+@Ryuu D. senta de um salto no chão do barco — a crise existencial completamente esquecida, os olhos arregalados e brilhantes com a energia específica de alguém que acabou de receber a melhor notícia do dia.
+
+— O QUEEEEEEEEEEEEE? Corsários? Kael era um corsário? QUE LEGAL! Eu vou ganhar um bounty então, né?
+
+O barco balança com o movimento brusco. Uma gaivota distante grasna com o que pode ser interpretado como julgamento.
+
+@Lena D. olha para @Ryuu D. sentado no chão com os olhos arregalados e a expressão de quem ganhou um presente de aniversário.
+
+Ela pisca.
+
+— Você. — ela começa devagar. — Entrou numa ilha de corsários. Sem Log Pose. Sem tripulação. Sem dinheiro. Invocou um relâmpago no meio do acampamento. Me resgatou. E só agora percebeu que eram corsários.
+
+Não é pergunta.
+
+@Lena D. passa uma mão pelo cabelo escuro embaraçado com o cansaço silencioso de alguém muito mais velha do que oito anos.
+
+— Sobre o bounty. — ela diz finalmente, a voz cuidadosa e direta. — Depende se a Marinha soube do que você fez. E depende do que você vai continuar fazendo.
+
+Os olhos escuros encontram os de @Ryuu D. com aquela intensidade desproporcional.
+
+— Você quer mesmo essa vida?
+
+**O que você responde?
+
+
+=== PLAYER ACTION [2026-04-28T08:39:22.401952] ===
+[SAY] Claro! Vai ser bem divertido! Então tá decidido, vamos voltar pra cidade e acabar com o @Gordo Benn
+
+--- NARRATOR RESPONSE [2026-04-28T08:39:32.836577] ---
+@Ryuu D. levanta do chão do barco com a energia de alguém que acabou de resolver todos os problemas do mundo com uma única decisão, os olhos brilhando com a determinação simples e absoluta de quem não vê razão nenhuma para complicar as coisas.
+
+— Claro! Vai ser bem divertido! Então tá decidido, vamos voltar pra cidade e acabar com o Gordo Benn!
+
+@Lena D. observa @Ryuu D. em silêncio por um momento. Os olhos escuros passam pelo rosto dele, pela cicatriz em forma de raio no peito, pela vela remendada do barco de @Dargo esticada no vento do East Blue.
+
+Ela solta o ar pelo nariz. Pequeno. Resignado. O som específico de alguém que percebeu que não vai ganhar esse argumento e decidiu parar de tentar.
+
+— Tudo bem. — @Lena D. diz, a voz baixa e cuidadosa. — Mas você não vai só destruir tudo. Você vai descobrir quem @Gordo Benn realmente é primeiro.
+
+Os olhos dela ficam sérios — mais sérios do que qualquer coisa que @Ryuu D. viu desde que entrou na ilha dos penhascos negros.
+
+— O @Kael te avisou. Eu te avisei. Ele é mais do que parece.
+
+O barco de @Dargo vira lentamente na direção da cidade portuária, a proa cortando as águas calmas do East Blue enquanto o horizonte à frente guarda suas respostas em silêncio.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T08:40:36.353317] ===
+[SAY] *Entrelaçar as mãos na nuca* Relaxa, eu sou forte.
+
+--- NARRATOR RESPONSE [2026-04-28T08:40:46.841628] ---
+@Ryuu D. entrelaça as mãos atrás da nuca com a postura completamente relaxada de alguém que está dando um passeio, não navegando em direção a uma confrontação com um corsário misterioso.
+
+— Relaxa, eu sou forte.
+
+@Lena D. olha para @Ryuu D. por um tempo longo.
+
+Depois olha para o mar.
+
+Depois olha de volta para ele.
+
+— Eu sei que você é forte. — ela diz, a voz pequena e precisa como sempre. — Eu vi o relâmpago.
+
+Uma pausa curta.
+
+— Mas @Gordo Benn não é só um homem gordo numa cidade portuária. As pessoas que me prenderam tinham medo dele. @Kael era corsário e tinha medo dele. — os olhos escuros fixam @Ryuu D. com aquela intensidade velha demais para o rosto pequeno. — Você entende o que isso significa?
+
+O vento do East Blue passa entre os dois. A vela remendada do barco de @Dargo estufа firme, empurrando a embarcação em direção ao horizonte onde a cidade portuária espera.
+
+@Lena D. não insiste mais. Encosta as costas no mastro, abraça os joelhos, e olha para a proa com a expressão fechada de quem guardou o aviso que precisava guardar e agora está calculando silenciosamente como sobreviver ao que vem a seguir.
+
+O barco corta a água. A cidade se aproxima.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T08:41:42.463886] ===
+[SAY] Não, vamos ver quando chegarmos, shishishishi! (Cortar para quando chegar na cidade)
+
+--- NARRATOR RESPONSE [2026-04-28T08:41:55.227396] ---
+@Ryuu D. ri com aquela gargalhada fácil e sem preocupação — shishishishi — que ecoa sobre a água calma do East Blue como se o mundo inteiro fosse uma piada boa que só ele entendeu completamente.
+
+— Não, vamos ver quando chegarmos, shishishishi!
+
+@Lena D. olha para ele. Olha para o horizonte. Decide silenciosamente que vai precisar ser a pessoa mais inteligente neste barco pelos próximos anos.
+
+---
+
+O porto da cidade portuária cheira a peixe salgado, madeira molhada e fritura barata. O barco de @Dargo bate suavemente contra o píer quando @Ryuu D. amarra a corda num poste enferrujado. A tarde já caiu — o sol laranja raspa os telhados de telha velha e transforma as poças d'água na rua de pedra em pequenos espelhos alaranjados.
+
+A cidade é maior por dentro do que parecia do mar. Ruelas estreitas se abrem em mercados barulhentos. Homens grandes com faces fechadas circulam em grupos de dois e três — não são marinheiros comuns. Carregam o andar de quem responde a alguém.
+
+Homens de @Gordo Benn. Vários deles.
+
+@Lena D. fica colada ao lado de @Ryuu D. no píer, os olhos escuros varrendo cada ruela, cada rosto, cada sombra com uma atenção que nenhuma criança de oito anos deveria precisar ter.
+
+— Ele sabe que escapei. — ela murmura baixinho, sem olhar para @Ryuu D.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T08:44:45.379171] ===
+[SAY] Nossa, a informação já chegou aqui? Pelo visto ele tem um Den Den Mushi *ir em direção ao armazén do @Gordo Benn*
+
+--- NARRATOR RESPONSE [2026-04-28T08:44:56.711537] ---
+@Ryuu D. fala com a curiosidade genuína de quem acaba de notar um detalhe interessante, as mãos ainda entrelaçadas na nuca enquanto caminha pelo píer em direção às ruelas da cidade.
+
+— Nossa, a informação já chegou aqui? Pelo visto ele tem um Den Den Mushi.
+
+@Lena D. acompanha @Ryuu D. em silêncio, os passos curtos e rápidos para manter o ritmo, os olhos escuros não parando de varrer o ambiente nem por um segundo.
+
+As ruelas da cidade engolем os dois. O cheiro de fritura fica mais forte perto do mercado — uma barraca de peixe frito crepita à esquerda, a fumaça subindo preguiçosa no ar da tarde. Um dos homens de @Gordo Benn passa devagar perto da barraca e para por um instante, os olhos fixos não em @Ryuu D., não em @Lena D. — mas no casco do barco de @Dargo ainda visível lá atrás no píer. O homem franze a testa. Reconhece alguma coisa. A mão dele se move imperceptivelmente em direção ao cinto.
+
+@Lena D. viu. Aperta levemente o braço de @Ryuu D. sem fazer barulho.
+
+O armazém de @Gordo Benn aparece no fim da ruela principal — uma estrutura larga de madeira escura com dois guardas na entrada, lanças cruzadas, expressões fechadas.
+
+Um deles olha diretamente para @Ryuu D. e não desvia o olhar.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T08:49:34.557167] ===
+[DO] Explodir a parede do estabelecimento com um Raijin Punch
+
+CONTEXTO: Skill da goro goro no mi que imbue relâmpago no punho do usuário e potencializa o poder destrutivo do soco
+
+Depois disso falar: @Gordo Benn tô de volta!
+
+--- NARRATOR RESPONSE [2026-04-28T08:49:49.110874] ---
+O punho direito de @Ryuu D. acende.
+
+Não gradualmente — de uma vez, como um interruptor virado. A eletricidade azul-branca envolve os dedos, sobe pelo antebraço, faz o ar ao redor crepitar e cheirar a ozônio. As poças d'água na ruela vibram. Os dois guardas na entrada do armazém de @Gordo Benn recuam um passo involuntário — o corpo respondendo ao perigo antes que o cérebro processe o que está vendo.
+
+@Ryuu D. não corre. Caminha.
+
+O soco parte com um estrondo seco que não é bem som — é pressão, é calor, é a parede de madeira escura do armazém simplesmente deixando de existir num raio de dois metros. Tábuas explodem para dentro. Poeira e lascas voam. O relâmpago racha a estrutura como uma fissura viva, chamuscando as bordas do buraco em preto e laranja.
+
+O silêncio dura exatamente um segundo.
+
+— Gordo Benn, tô de volta!
+
+A voz de @Ryuu D. entra pelo buraco fumegante com a mesma energia de quem chega numa festa.
+
+Dentro do armazém, através da poeira e da fumaça, formas se movem. Cadeiras caídas. Uma mesa virada. Homens recuando para as paredes. E no fundo — numa cadeira larga demais para qualquer cadeira normal, cercado por quatro guarda-costas com as mãos já nas armas — uma figura enorme e imóvel observa @Ryuu D. através da névoa de destroços.
+
+@Lena D. para ao lado de @Ryuu D. no buraco aberto, os olhos escuros fixos na figura do fundo. A expressão dela não é de medo. É de alguém que sabia exatamente que isso ia acontecer.
+
+**O que você faz?
+
+
+=== PLAYER ACTION [2026-04-28T08:51:56.174642] ===
+[SAY] Qual seu objetivo com a menina?
+
+--- NARRATOR RESPONSE [2026-04-28T08:52:07.985413] ---
+@Ryuu D. entra pelo buraco fumegante com as mãos nos bolsos, os olhos fixos na figura enorme no fundo do armazém através da poeira que ainda flutua no ar carregado de ozônio. A voz sai direta, sem cerimônia, sem ameaça desnecessária — só a pergunta limpa de quem quer uma resposta antes de decidir o próximo passo.
+
+— Qual seu objetivo com a menina?
+
+@Gordo Benn não se move imediatamente.
+
+Os quatro guarda-costas ao redor dele trocam olhares rápidos — o buraco fumegante na parede ainda crepita levemente atrás de @Ryuu D., as bordas chamuscadas laranja e preto. Nenhum deles saca a arma. Nenhum deles avança. Estão esperando o sinal do chefe.
+
+@Gordo Benn finalmente se mexe. Devagar. As mãos enormes se apoiam nos joelhos e ele se inclina levemente para frente na cadeira larga, os olhos pequenos e calculistas encontrando os de @Ryuu D. através da névoa de poeira. O rosto gordo não mostra medo. Mostra avaliação.
+
+— Garoto. — a voz de @Gordo Benn é grave e baixa, do tipo que preenche um cômodo sem precisar de volume. — Você destruiu a parede do meu armazém.
+
+Uma pausa pesada.
+
+— E chegou aqui sorrindo.
+
+Os olhos pequenos deslizam brevemente para @Lena D. ao lado de @Ryuu D. Algo passa por aquele rosto gordo — rápido demais para ser lido com clareza.
+
+— Sente. Vamos conversar.
+
+**O que você faz?

@@ -1,0 +1,186 @@
+{
+  "step": 4,
+  "heading": "class",
+  "cards": [
+    {
+      "title": "None",
+      "description": "No special abilities or combat training. Ordinary humans relying on strength, speed, and cleverness."
+    },
+    {
+      "title": "Tailor",
+      "description": "Uses clothing and thread for offense and defense; disguises, armor, thread traps."
+    },
+    {
+      "title": "Doctor",
+      "description": "Healing, antidotes, performance-enhancing medicine."
+    },
+    {
+      "title": "Navigator",
+      "description": "Ocean travel, weather prediction, map-making, ship combat."
+    },
+    {
+      "title": "Covenant Contract",
+      "description": "Supernatural agreement signed with Imu. Grants immortality, Abyss teleport circle, immense strength; in exchange, free will is lost."
+    },
+    {
+      "title": "Galaxy Impact",
+      "description": "Cosmic warriors harnessing star/celestial energy for explosive area attacks."
+    },
+    {
+      "title": "Voice of All Things",
+      "description": "Hears voices of animals, nature, and ancient relics; senses danger; uncovers hidden truths."
+    },
+    {
+      "title": "Armament Haki",
+      "description": "Spiritual energy armoring body/weapon; can hit Devil Fruit users."
+    },
+    {
+      "title": "Soul Damage Haki",
+      "description": "Rare advanced Haki that damages souls, bypassing physical defenses."
+    },
+    {
+      "title": "Shipwright",
+      "description": "Repairs/builds ships mid-battle and develops ship-based weapons."
+    },
+    {
+      "title": "Lily Carnation",
+      "description": "Symbiotic bond with the Lily Carnation plant; manipulates life forces, reanimates dead."
+    },
+    {
+      "title": "Supreme King Haki",
+      "description": "Conqueror's Haki: pure willpower that intimidates and subdues weak-minded foes."
+    },
+    {
+      "title": "Life Return",
+      "description": "Conscious control over body — muscles, bones, recovery, acrobatics."
+    },
+    {
+      "title": "Honestly Impact",
+      "description": "Fighting style of hard, accurate punches that break guards and stop multiple attackers."
+    },
+    {
+      "title": "Art of Weather",
+      "description": "Master of sky, sea, and storms via specialized weather staff (Clima-Tact recommended)."
+    },
+    {
+      "title": "Colors Trap",
+      "description": "Painter who manipulates emotions through colored symbols."
+    },
+    {
+      "title": "Weapon Master",
+      "description": "Multiple weapons (axes, chains, fans) with expert precision."
+    },
+    {
+      "title": "Dragon Claw Fist",
+      "description": "Hands become dragon claws; Armament-empowered; shatters steel."
+    },
+    {
+      "title": "Eight Impacts Fist",
+      "description": "Body-vibration shockwaves bypass defenses; unblockable strikes."
+    },
+    {
+      "title": "Black Leg Style",
+      "description": "Heated leg strikes; flaming kicks, acrobatic combat."
+    },
+    {
+      "title": "Fish Man Jujutsu",
+      "description": "Close-fighting throws/locks; water-enhanced grappling."
+    },
+    {
+      "title": "Foxfire Style",
+      "description": "Sword that generates and controls fire; cuts and burns."
+    },
+    {
+      "title": "Six Powers",
+      "description": "Rokushiki: Iron Body, Moon Walk, Tempest Kick, etc. Superhuman speed and strength."
+    },
+    {
+      "title": "Okama Kenpo",
+      "description": "Dance-like flashy kicks; flexibility and surprise attacks."
+    },
+    {
+      "title": "Hypnotist",
+      "description": "Mental manipulation through gestures, voice, and cues."
+    },
+    {
+      "title": "Awakened Devil Fruit",
+      "description": "Mastered Devil Fruit affecting environment/body extraordinarily."
+    },
+    {
+      "title": "Archaeologist",
+      "description": "Master of Poneglyphs and lost lore; uncovers ancient weapons."
+    },
+    {
+      "title": "Observation Haki",
+      "description": "Senses presence, intent, danger before it happens."
+    },
+    {
+      "title": "Full Haki User",
+      "description": "Mastery of Observation, Armament, and Conqueror's Haki."
+    },
+    {
+      "title": "Gunslinger",
+      "description": "Long-range; firearms, trick shots, explosives."
+    },
+    {
+      "title": "Swordsman",
+      "description": "Advanced sword techniques: flying slashes, elemental swordplay."
+    },
+    {
+      "title": "Beast Tamer",
+      "description": "Commands sea beasts, land animals, mythical Zoans."
+    },
+    {
+      "title": "Cyborg",
+      "description": "Tech inventor; modifies own body, builds weapons."
+    },
+    {
+      "title": "Brawler",
+      "description": "Brute force, grapples, wrestling moves."
+    },
+    {
+      "title": "Martial Artist",
+      "description": "Hand-to-hand styles: Fish-Man Karate, Black Leg, Rokushiki."
+    },
+    {
+      "title": "Spear Fighter",
+      "description": "Polearm techniques; long-melee, spinning crowd control."
+    },
+    {
+      "title": "Sniper",
+      "description": "Long-range marksman; rifles, pistols, slingshots."
+    },
+    {
+      "title": "Tactician",
+      "description": "Commands allies, predicts enemy moves."
+    },
+    {
+      "title": "Poneglyphs Reader",
+      "description": "Scholar who deciphers indestructible Poneglyph stones."
+    },
+    {
+      "title": "Treasure Hunter",
+      "description": "Finds loot, deciphers maps, avoids traps."
+    },
+    {
+      "title": "Gadgeteer",
+      "description": "Smoke bombs, traps, mechanical combat tools."
+    },
+    {
+      "title": "Blacksmith",
+      "description": "Crafts weapons/armor from Grand Line materials."
+    },
+    {
+      "title": "Professional Cook",
+      "description": "Master chef whose meals heal/boost allies; combat-ready."
+    },
+    {
+      "title": "Musician",
+      "description": "Rhythm-based buffs/debuffs; supports allies, confuses enemies."
+    },
+    {
+      "title": "Will of D.",
+      "description": "Carrier of the D. legacy: unyielding spirit, fearless courage, fated for change."
+    }
+  ]
+}

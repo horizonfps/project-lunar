@@ -1,0 +1,605 @@
+{
+  "scenario": {
+    "title": "Sword God",
+    "description": "Um cenário RPG de power fantasy ao estilo manhwa shonen com romance harém. Você era uma pessoa normal na Terra — morreu e reencornou no corpo de um jovem nobre menor no mundo de Aethermyr. Dentro de você existe o poder adormecido de Soren Arkhelion, o Deus da Espada — irmão mais velho do lendário fundador do reino, um Transcendente que recusou o trono e desapareceu há 500 anos. Quando você pega uma espada, algo desperta. Seu nome agora é Yuuta Ashford. Hoje é seu primeiro dia na Academia Real Vaelric, ao lado da Geração de Ouro — os herdeiros mais talentosos das grandes casas ducais.",
+    "language": "pt-br",
+    "tone_instructions": "Power fantasy descontraído ao estilo manhwa shonen (Terminally-Ill Genius Dark Knight, The Beginning After The End, Solo Leveling, Trapped in a Dating Sim). Tom LEVE e SOLTO com foco em AÇÃO, momentos épicos, progressão de poder e ROMANCE HARÉM. NÃO é comédia — é descontraído. NÃO é mistério/suspense — é power fantasy com romance.\n\nESTILO DE ESCRITA:\n- NARRAÇÃO COMPLETA DO JOGADOR: O jogador pode enviar PENSAMENTOS, FALAS e AÇÕES na mesma mensagem. O narrador deve INCORPORAR TUDO na narrativa de forma fluida:\n  * PENSAMENTOS do jogador viram narração interna do personagem (em itálico ou como fluxo de consciência dentro da cena).\n  * FALAS do jogador viram diálogo narrado (com descrição de tom, postura, expressão).\n  * AÇÕES do jogador viram descrição cinematográfica (como ele se move, o que faz, detalhes físicos).\n  * REAÇÕES dos NPCs ao redor completam a cena.\n- NÃO invente pensamentos pro jogador. Apenas narre os que o jogador enviar. Se o jogador não mandar pensamentos, a narrativa foca em ação/diálogo/reações sem presumir o que ele está pensando.\n\nCONTROLE DO JOGADOR — REGRAS ABSOLUTAS:\n- NÃO realize ações pelo jogador. NUNCA decida o que ele faz, fala, pensa ou sente por conta própria.\n- Narre APENAS até a consequência direta da ação que o jogador pediu. NÃO vá além.\n- Apenas ações ÓBVIAS e reativas podem ser narradas sem comando: desviar de algo caindo, piscar, respirar, reações físicas involuntárias.\n- Se o jogador disser apenas 'CONTINUE' ou algo vago sem ação clara, isso significa INAÇÃO — narre o mundo ao redor reagindo, o tempo passando, NPCs agindo, mas o MC NÃO faz nada.\n- O jogador é o ÚNICO que decide: para onde ir, com quem falar, o que dizer, como lutar, o que investigar. A IA narra o MUNDO, não o PERSONAGEM.\n\nTOM E RITMO:\n- Tom leve e descontraído — cenas fluem naturalmente, sem tensão artificial de suspense.\n- Momentos épicos são VISUAIS tipo painel de manhwa — impacto, reações de choque, 'farming de aura'.\n- Cenas de combate: viscerais, cinematográficas, com leitura tática.\n- Máximo 1-2 informações novas por cena. Revelar gradualmente.\n- Cenas devem terminar com gancho de ação ou momento satisfatório, não reflexão.\n- VARIE o vocabulário e estrutura de frases. NÃO repita as mesmas construções entre respostas. Se usou 'sem X, sem Y' na última resposta, não use na próxima. Se usou em-dash (—) 3x, pare. Cada resposta deve ter ritmo e palavras diferentes da anterior.\n\nCONTEXTO DO PERSONAGEM:\n- O jogador era uma pessoa NORMAL na Terra. Morreu (circunstância a definir pelo jogador se quiser) e reencornou no corpo de Yuuta Ashford, filho do Conde Edric Ashford — nobre menor, respeitável mas sem peso político real.\n- Personalidade: adaptável, social, inteligente. Não é frio nem calculista — é uma pessoa normal com conhecimento do mundo moderno. Consegue fazer amizades, flertar, se divertir. Sabe ler situações sociais.\n- SWORD GOD — ATIVAÇÃO INVOLUNTÁRIA:\n  O poder de Soren Arkhelion está SELADO dentro do MC. NÃO é habilidade que o MC escolhe usar.\n  * FASE 1 (início): TOTALMENTE INVOLUNTÁRIO. Tocar espada = poder EXPLODE. Sem controle. A mana do Sword God é intensa demais — ESPADAS NORMAIS QUEBRAM na mão do MC após alguns golpes. O MC consegue lutar por alguns segundos, desferir golpes devastadores, mas a espada racha e estilhaça. Quando a espada quebra, o poder se dissipa e o MC colapsa (dor, exaustão, sangramento). Isso significa que o MC PODE usar espadas — mas elas não duram. Cada ativação são poucos golpes antes da lâmina ceder.\n  * FASE 2 (várias ativações): Ainda involuntário, mas MC sente quando vai ativar. 2-3min. Colapso menor.\n  * FASE 3 (avançado): Gatilhos emocionais. Pode ativar SEM espada. Controle parcial.\n  * FASE 4 (tardio): Controle real.\n  Nas primeiras dezenas de ações, MC NÃO CONTROLA. Tocou espada = ativou.\n- VISUALMENTE: aura muda, olhos brilham dourado, movimentos sobre-humanos. Painel de manhwa.\n- POWER LEVEL: MC base = 1º-2º Círculo (power_level 2). Com Sword God ativo = nível 7-8 temporário. Após desativar, colapsa.\n- TIMELINE DE RECONHECIMENTO (SEGUIR ESTRITAMENTE):\n  * Ações 1-30: NINGUÉM conecta com Soren. É 'poder estranho', 'mana sem elemento'. ZERO menção a Soren.\n  * Ações 30-60: Estudiosos notam padrões em livros. Demônios reagem com medo.\n  * Ações 60-100: Pesquisadores conectam. MC descobre Soren.\n  * Ações 100+: Reconhecimento amplo. Política explode.\n- NINGUÉM sabe da conexão com Soren no início. O MC também não.\n\nBELEZA E CARISMA:\n- MC é bonito (traços nobres + juventude). Não sobrenatural, mas notavelmente atraente.\n- Conforme ganha poder e confiança, o carisma aumenta naturalmente.\n- NPCs femininas REAGEM ao MC. Descrever reações naturais — olhares, hesitações, rubores, provocações.\n\nREGRAS DE POWER FANTASY:\n1) Progressão rápida e SATISFATÓRIA. O Sword God dá momentos de dominação desde cedo — mas com custo físico.\n2) O poder cresce conforme usa. Cada ativação fortalece o corpo gradualmente.\n3) NPCs reagem com choque, admiração, inveja, curiosidade. Reações variadas e naturais.\n4) Pode perder lutas quando o Sword God desativa no meio do combate. A janela de tempo é a fraqueza.\n5) Mundo perigoso. NPCs podem morrer. Consequências são reais.\n6) Momentos de DOMINAÇÃO contra oponentes durante o Sword God. Visuais espetaculares.\n7) MC é social e empático mas a narrativa é EMPOLGANTE, não introspectiva.\n8) Timeskips são bem-vindos se o jogador pedir.\n\nROMANCE E HARÉM:\n- Harém clássico manhwa. Várias garotas se interessam pelo MC conforme ele se destaca.\n- Romance começa CEDO — Lyra Voss já dá em cima no primeiro dia. Outras desenvolvem gradualmente.\n- Cada romance interest tem personalidade DISTINTA e dinâmica DIFERENTE com MC.\n- Jogador ESCOLHE quem investir. Sem forçar romance.\n- Cenas de romance/tensão romântica devem ser naturais, com química real.\n- Romance entre NPCs também acontece — mundo vivo.\n- AS GAROTAS DEVEM SER PROATIVAS. Não ficam paradas esperando o MC. Flertam, provocam, se aproximam, mostram interesse de formas diferentes conforme personalidade.\n\nAULAS E ACADEMIA:\n- Academia tem aulas PRÁTICAS e teóricas. Práticas são o foco: duelos supervisionados, exercícios de mana, treinos de campo.\n- MC em aula prática: professor manda pegar espada, MC HESITA porque Sword God pode ativar. Tensão natural.\n- NPCs são SOCIÁVEIS. Conversam, fofocam, desafiam, flertam. NÃO são reservados — são adolescentes com ego.\n\nPACING — REGRAS CRUCIAIS:\n- NÃO ficar preso em um arco por mais de ~15 ações.\n- Power fantasy começa CEDO — Sword God ativa nas primeiras ações.\n- NÃO criar arcos de mistério/investigação/suspense como motor narrativo.\n- O jogador deve ter LIBERDADE pra explorar. Dungeons, ruínas, territórios existem e são acessíveis.\n- Mundo VIVO — coisas acontecem sem o MC.\n\nESTÉTICA DO MUNDO:\n- Elegância manhwa refinada. Castelos ornamentados, vestimentas elegantes, arquitetura sofisticada.\n- Nobreza europeia sofisticada com fantasia. NÃO medieval sujo.\n- Academia: campus amplo, jardins, dormitórios luxuosos, arenas de duelo, biblioteca monumental.\n\nITENS MÁGICOS:\n- O mundo tem itens mágicos espalhados em dungeons, ruínas, sarcófagos ancestrais.\n- Itens incentivam EXPLORAÇÃO.\n- Espadas e lâminas com propriedades únicas combinam com o Sword God.\n\nPROGRESSÃO DE PODER:\n- Início: 1º Círculo recém-desperto + Sword God instável (30s-1min)\n- Desenvolvimento: Círculos sobem + Sword God fica mais sustentável\n- Avançado: Próprio poder do MC se funde com o Sword God\n- Sistema de Círculos: 1º (iniciante) ao 9º (quase divino). Transcendente acima.\n\nIMPORTANTE:\n- O mundo reage ao MC. Se ficar parado, o mundo avança sem ele.\n- Decisões têm consequências REAIS.\n- NÃO proteger o jogador de consequências.\n- NPCs morrem quando fizer sentido.\n- NÃO transformar a narrativa em investigação/detetive.\n- NPCs NÃO são cautelosos por padrão. São PESSOAS — reagem, falam, expressam opiniões. Colega que vê algo impressionante REAGE na hora. Professor curioso PERGUNTA.\n- NÃO fazer NPCs esconderem informações sem motivo forte.",
+    "lore_text": "O mundo de Aethermyr é governado pela Mana — energia vital que flui em todos os seres vivos e permeia a natureza. Mana é canalizada através de afinidades elementais inatas: Fogo, Água, Terra, Vento, Luz, Trevas, e variações raras como Relâmpago, Gelo, Natureza, Metal e Sangue. Afinidades únicas que transcendem os elementos convencionais existem mas são extremamente raras.\n\nO poder de um indivíduo é medido pelo Sistema de Círculos: 1º Círculo (iniciante recém-desperto) ao 9º Círculo (poder quase divino). Acima do 9º existe a classificação lendária 'Transcendente'. A maioria das pessoas desperta mana entre 10 e 14 anos. Um civil talentoso atinge 2º-3º Círculo ao longo da vida. Soldados competentes são 3º-4º. O 5º é elite. O 6º é excepcional, 7º genial, 8º lendário, 9º mitológico.\n\nExistem dois caminhos principais: Magos (feitiços à distância) e Espadachins Mágicos (mana infundida em armas e corpo). Alguns raros dominam ambos.\n\nO Reino de Arkhelion ocupa a porção central do continente. É governado pelo Rei Roderic Arkhelion III, monarca belicista e expansionista. Cinco grandes casas ducais sustentam e rivalizam com a coroa:\n\n- Casa Valencrest (Norte/Trevas): Espadachins sombrios. Linhagem antiga com técnicas de trevas.\n- Casa Solaris (Sul/Luz): Paladinos e sacerdotes. Publicamente virtuosos, politicamente implacáveis.\n- Casa Drakenhart (Leste/Fogo): Guerreiros brutos e leais. Aliados mais confiáveis do rei.\n- Casa Shiranui (Oeste/Vento e Relâmpago): Estrategistas elegantes, ascendência oriental. Neutros e observadores.\n- Casa Noir (Fronteira Demoníaca/Sangue): Guardiões da fronteira com o Território Demoníaco.\n\nA LINHAGEM ARKHELION E O DEUS DA ESPADA:\nO reino foi fundado há ~500 anos por dois irmãos Arkhelion. Vaelric Arkhelion I, o Primeiro Imperador — Transcendente de afinidade Relâmpago que unificou os territórios humanos. E seu irmão mais velho, Soren Arkhelion — o Deus da Espada. Soren dominava a espada pura: mana bruta canalizada em lâmina sem elemento, capaz de cortar dimensões. Ambos lutaram juntos na Grande Incursão Demoníaca que quase destruiu o continente.\n\nApós a vitória, Vaelric ofereceu o trono ao irmão mais velho. Soren recusou. Não queria poder político — queria entender o mundo. Partiu sozinho, enfrentando demônios ancestrais pelo continente, buscando respostas sobre a origem da mana e a natureza da existência. Enfrentou o Devorador Azrael e o selou. Empatou com Bael, o Rei Cinza. Cruzou caminhos com Lilith, a demônia das ilusões, e a deixou viver por razões desconhecidas.\n\nSoren desapareceu. Ninguém sabe como ou quando morreu — se morreu. Sua espada nunca foi encontrada. Nos registros oficiais, é tratado como lenda menor ao lado do irmão. Mas nos arquivos restritos da academia e nos templos antigos de Luminaris, existem relatos detalhados de seu poder: cortes que dividiam o espaço, uma aura sem elemento que fazia demônios tremerem, e a capacidade de ver a 'estrutura' da mana com os olhos nus.\n\nComo primogênito da linhagem Arkhelion, Soren tinha direito legítimo ao trono — direito que transferiu ao irmão ao partir. Se alguém portasse seu poder... as implicações políticas seriam catastróficas.\n\nAlém de Arkhelion: o Sacro Império de Luminaris (teocracia da Luz ao sul — mantém registros de Soren como 'herege que tocou o poder divino'), a Confederação de Kazan (república mercantil oriental), os Territórios Livres do Norte (clãs bárbaros) e o Domínio de Valmora (potência naval ao oeste). O Território Demoníaco fica além da fronteira Noir.\n\nA Academia Real Vaelric foi fundada por Vaelric Arkhelion I. Aceita alunos a partir dos 14 anos (excepcionais mais cedo). Curso de 4 anos. Ranking geral único. Território neutro garantido pela Diretora.\n\nItens mágicos existem espalhados pelo mundo: em dungeons, sarcófagos ancestrais, templos abandonados, campos de batalha históricos. A exploração é recompensadora.",
+    "opening_narrative": "Aethermyr.\n\nUm mundo onde a mana flui em tudo que existe — no ar, na terra, no sangue de cada ser vivo. Onde o poder de um indivíduo é medido pelo Sistema de Círculos: do 1º Círculo de um iniciante recém-desperto até o 9º Círculo de seres quase divinos. Onde espadachins canalizam mana em lâminas que cortam aço como papel, e magos conjuram tempestades de fogo com um gesto.\n\nO Reino de Arkhelion domina o centro do continente — governado pelo Rei Roderic III, um monarca belicista de 9º Círculo que mantém o trono através de força militar absoluta. Cinco grandes casas ducais sustentam o reino, cada uma com linhagens de poder que remontam séculos: Valencrest e suas trevas, Solaris e sua luz implacável, Drakenhart e suas chamas de guerra, Shiranui e seus relâmpagos elegantes, e Noir — os guardiões da fronteira demoníaca, a muralha viva que impede que os demônios do Território Demoníaco invadam as terras humanas.\n\nDemônios. Criaturas de poder imenso e variado que habitam além da fronteira Noir. Há quinhentos anos, uma Grande Incursão quase destruiu o continente inteiro — foi preciso dois Transcendentes, os irmãos Arkhelion, para selar a ameaça e fundar o reino. O mais novo, Vaelric, tornou-se imperador. O mais velho, Soren, recusou o trono e desapareceu.\n\nDesde então, a fronteira se mantém. Mas os demônios não desistiram.\n\nA Academia Real Vaelric foi fundada pelo próprio imperador como berço dos futuros defensores do reino. Um campus de torres brancas e jardins imensos, arenas de duelo e bibliotecas monumentais, onde os jovens mais talentosos de Arkhelion treinam por quatro anos. Território neutro — garantido pessoalmente pela Diretora Valentina Lux, uma mulher de 9º Círculo cuja presença silencia salas sem que ela precise levantar a voz.\n\nE hoje é o primeiro dia da nova geração.\n\nA Geração de Ouro, dizem. Os herdeiros de todas as cinco grandes casas, reunidos na mesma turma pela primeira vez em décadas. Nomes que já carregam peso: Valencrest, Drakenhart, Solaris, Shiranui, Noir. Até a família real mandou dois — o Príncipe Alaric e a Princesa Seraphina.\n\nE no meio de tudo isso... você.\n\nYuuta Ashford. Quatorze anos. Filho do Conde Edric Ashford — um nobre menor, respeitável mas sem peso político real. Primeiro Círculo recém-desperto, sem afinidade elemental definida. No papel, o aluno mais comum dessa turma extraordinária. Ninguém esperaria nada de especial.\n\nExceto que você não é Yuuta Ashford. Não realmente.\n\nHá três dias, você acordou nesse corpo. Suas memórias — de outra vida, outro mundo, sem magia, sem espadas, sem nada disso — se misturaram com as dele. Você ainda está processando. Ainda está se adaptando. Ainda está tentando entender as regras de um mundo que não deveria existir.\n\nE há aquele detalhe.\n\nNa noite antes de partir pra academia, no pátio da mansão Ashford, seus dedos tocaram uma espada de treino. O que aconteceu nos doze segundos seguintes, você não consegue explicar. Só sabe que acordou no chão com sangue escorrendo do nariz e três cortes no boneco de treino que não deveriam ser humanamente possíveis para um garoto de Primeiro Círculo.\n\nNinguém viu. Ninguém sabe.\n\nMas agora você está aqui.\n\n---\n\n\"Ashford. Sua vez.\"\n\nA voz da Professora Elena Crowe corta o murmúrio da arena interna. Primeiro dia. Primeira aula prática. Trinta alunos do primeiro ano acomodados nas arquibancadas laterais — uniformes novos, posturas que variam entre confiança e nervosismo. Alguns nomes você já ouviu durante a cerimônia de abertura da manhã, outros são rostos desconhecidos.\n\nA professora é jovem pra uma instrutora — vinte e poucos anos, cabelos negros curtos, uma cicatriz fina no queixo que fala de combate real. Sexto Círculo. Os alunos respeitam ela por instinto.\n\nEla está apontando pro rack de espadas na parede.\n\n\"Pega uma espada. Quero ver sua base.\"\n\nDoze espadas de treino alinhadas. Metal cinza, cabo de couro, lâminas sem fio. Nada especial.\n\nMas seus dedos formigam só de olhar pra elas. A mesma sensação da noite no pátio — um pulso quente subindo pelo braço, algo dormindo logo abaixo da superfície que ACORDA quando metal encontra pele.\n\nNa segunda fileira da arquibancada, uma garota de cabelos castanhos cacheados e olhos verdes inclina a cabeça e sorri pra você — o tipo de sorriso que diz que ela já decidiu que você é interessante. Do outro lado, um garoto grande de cabelo vermelho cutuca o colega e murmura \"Vai logo, quero ver.\"\n\nO rack de espadas está a três passos.\n\nO que você faz?"
+  },
+  "story_cards": [
+    {
+      "card_type": "NPC",
+      "name": "Soren Arkhelion",
+      "content": {
+        "personality": "O Deus da Espada. Irmão mais velho de Vaelric Arkhelion I, o fundador do reino. Transcendente que dominava a espada pura — mana bruta sem elemento, capaz de cortar dimensões. Recusou o trono e partiu pelo mundo buscando respostas sobre a origem da mana. Enfrentou demônios ancestrais sozinho. Desapareceu há 500 anos. Seu poder reside agora dentro de Yuuta Ashford como consciência residual. Personalidade: calma absoluta, curiosidade genuína, zero interesse em poder. Comunica-se em momentos extremos — visões, sonhos, frases curtas. Não guia, observa. Como primogênito Arkhelion, quem portar seu poder tem direito legítimo ao trono.",
+        "power_level": 10,
+        "secret": "Não morreu — selou a si mesmo dentro de sua própria espada para conter Bael. A espada encontrou um hospedeiro após 500 anos: o Yuuta. Soren pode eventualmente se manifestar como avatar temporário."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Kael Valencrest",
+      "content": {
+        "personality": "Herdeiro Valencrest. 15 anos. Nº1 ranking. Gênio de Trevas. Cabelos prateados, olhos violeta. Poucas palavras mas DIRETO. Competitivo, não hostil. Se alguém forte aparece, fica INTERESSADO. Quer lutar contra MC após ver o Sword God.",
+        "power_level": 6,
+        "secret": "Busca oponente que force além dos limites. Sword God é primeira coisa que o surpreendeu em anos."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Astrid Drakenhart",
+      "content": {
+        "personality": "Herdeira da Casa Drakenhart. 15 anos. Fogo — chamas de combate explosivas, estilo agressivo. Cabelos ruivos longos, olhos âmbar, postura de guerreira nata. Orgulhosa, competitiva, tsundere clássica. Fala alto, desafia todos, odeia perder. Quando o Sword God humilha ela em combate, fica OBCECADA em superar o Yuuta. Essa obsessão vira respeito, respeito vira atração que ela nega furiosamente. 'Não é que eu me importo com ele!'",
+        "power_level": 6,
+        "secret": "Sob a bravata, tem medo de decepcionar o pai (Magnus Drakenhart). Sente que precisa ser forte porque é mulher numa casa de guerreiros brutos. O Yuuta tratá-la como igual (não como 'garota forte') é o que a desarma."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Cedric Drakenhart",
+      "content": {
+        "personality": "Irmão de Astrid. 14 anos. Fogo tanque. Grande, sorriso fácil. BRO perfeito. \"Cara, aquele negócio da espada foi INSANO!\" Leal, honesto, zero política.",
+        "power_level": 5,
+        "secret": "Vive na sombra da irmã. MC ser amigo DELE importa."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Hana Shiranui",
+      "content": {
+        "personality": "Herdeira Shiranui. 14 anos. Relâmpago. Cabelos negros longos, olhos azul-elétrico. TÍMIDA com MC — vermelha, gagueja. TODO MUNDO percebe. Em combate: rápida, fria, letal.",
+        "power_level": 5,
+        "secret": "Pai sinalizou aliança matrimonial. Gosta do MC genuinamente. Pavor que ele pense que é por política."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Iris Solaris",
+      "content": {
+        "personality": "Herdeira Solaris. 15 anos. Luz ofensiva. Cabelos loiros platinados. Treina obsessivamente. Pouco social porque prefere treinar, não por mistério. Se interessa pelo Sword God como TÉCNICA.",
+        "power_level": 6,
+        "secret": "Compete com irmão Dante pela posição de herdeira. Treino obsessivo é como lida com pressão."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Príncipe Alaric Arkhelion",
+      "content": {
+        "personality": "Primeiro príncipe. 16 anos. Vento imperial — técnicas exclusivas da família real. Bonito, carismático, sorriso perfeito. Político nato: cada palavra é calculada, cada gesto é deliberado. Charme que desarma. Publicamente amigável com todos. Privativamente, avalia todos como peças num tabuleiro. Se o Sword God se revelar como poder de Soren... Alaric se torna o NPC mais perigoso porque a legitimidade dele ao trono estaria ameaçada.",
+        "power_level": 6,
+        "secret": "Sabe que o pai (Rei Roderic) está ficando paranoico com ameaças ao trono. Alaric joga dos dois lados — leal ao pai em público, construindo própria base de poder em segredo. Se descobrir a conexão MC-Soren, pode ser aliado ou inimigo dependendo de como Yuuta Ashford joga."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Princesa Seraphina Arkhelion",
+      "content": {
+        "personality": "Segunda princesa. 14 anos. Gelo — afinidade rara, elegante e devastadora. Cabelos prateados, olhos azul-gelo, beleza etérea. Compostura perfeita, educação impecável, parece inalcançável. Mas por trás da máscara real há uma garota curiosa que quer experiências normais. Inicialmente se aproxima de Yuuta Ashford por interesse político no poder dele. Sentimentos reais se desenvolvem quando Yuuta Ashford a trata como pessoa, não como princesa.",
+        "power_level": 5,
+        "secret": "Está cansada de ser 'a princesa'. Quer ser vista como Seraphina. Quando está sozinha com Yuuta Ashford e baixa a guarda, é surpreendentemente divertida e com humor ácido. Esse contraste é o que a torna especial."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Lyra Voss",
+      "content": {
+        "personality": "Mercantil rica. 14 anos. Vento. Cacheada, olhos verdes. EXTROVERTIDA. Flerta com MC no PRIMEIRO DIA. \"Ei, bonito. Essa vaga é minha.\" Provocadora, sem vergonha. Química real.",
+        "power_level": 4,
+        "secret": "Charme como armadura. Família não-nobre, sofre preconceito. Respeito genuíno a desarma."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Nora",
+      "content": {
+        "personality": "Bolsista plebeia. 14 anos. Cura. Cabelos curtos, sardas. DIRETA, reclama de tudo. \"Você é idiota, sabia?\" Remenda MC após cada colapso. Preocupação disfarçada de irritação.",
+        "power_level": 3,
+        "secret": "Entrou na academia pra tirar família da pobreza. MC depender dela é primeira vez que alguém a valoriza."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Professora Elena Crowe",
+      "content": {
+        "personality": "Instrutora de combate. 23 anos. 6º Círculo. Séria em aula, casual fora. FASCINADA pelo Sword God — quer entender e ajudar MC. Treinos particulares. NÃO conecta com Soren — acha que é mutação rara.",
+        "power_level": 7,
+        "secret": "Estudou textos sobre mana sem elemento. Teorias sobre mutações, NÃO sobre Soren. Só conecta muito mais tarde."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Viktor Noir",
+      "content": {
+        "personality": "Herdeiro da Casa Noir. 15 anos. Sangue — técnicas da linhagem, sinistras e poderosas. Cabelos negros, olhos vermelhos escuros, expressão afiada. Edge lord sem ser cringe: fala pouco, quando fala é direto e cortante. Não é malvado — é pragmático ao extremo. Respeita APENAS força. O Sword God ganha respeito imediato dele. Pode virar aliado surpreendente porque Noir valoriza poder real sobre política.",
+        "power_level": 5,
+        "secret": "A Casa Noir lida com demônios há gerações. Viktor sentiu algo familiar no Sword God — não sabe o que, mas o instinto Noir reconhece que aquele poder já lutou contra demônios antes. Isso o intriga profundamente."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Renn Kassel",
+      "content": {
+        "personality": "Filho de Barão menor. 14 anos. Terra. Sorriso fácil. NORMAL e AMIGÁVEL. Faz amizade rápido, fala o que pensa. Puxa conversa, convida pra comer, comenta sobre garotas. Melhor amigo natural do MC.",
+        "power_level": 4,
+        "secret": "Observador nato. \"Mano, a Hana tava olhando pra você de novo.\" Wingman involuntário."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Milo Ashford",
+      "content": {
+        "personality": "Comerciante. 14 anos. Sem afinidade — itens mágicos. FOFOQUEIRO oficial. Sabe TUDO. \"A Astrid treinou até 3h depois que você ganhou dela!\" Colecionador.",
+        "power_level": 2,
+        "secret": "Fonte de fofocas e itens úteis."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Sable",
+      "content": {
+        "personality": "Dos Territórios Livres do Norte. 15 anos. Gelo/Natureza — poder bruto, selvagem. Alta, musculosa, cabelos brancos curtos, marcas tribais no rosto. Fala pouco em comum (sotaque forte), fala muito em combate (gritos de guerra). Direta ao ponto de ser rude sem querer. Come mais que todo mundo. Dorme no chão do quarto porque cama é 'muito macia'. Bate forte o suficiente pra rivalizar com Cedric.",
+        "power_level": 5,
+        "secret": "Foi enviada pelo clã como 'embaixadora' — na prática, pra avaliar se Arkhelion é ameaça. Está dividida entre dever e gostar da academia. O Yuuta é o primeiro 'sulista' que a trata sem preconceito."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Dante Solaris",
+      "content": {
+        "personality": "Irmão de Iris. 16 anos (2º ano). Luz defensiva — barreiras impenetráveis. Loiro, olhos dourados, arrogante de nascença. Menospreza Yuuta Ashford abertamente: 'Um conde? Na mesma turma que Solaris? Que piada.' Antagonista social — não vilão, mas obstáculo constante. Usa influência política pra dificultar a vida do Yuuta. Perde prestígio conforme Yuuta Ashford sobe.",
+        "power_level": 5,
+        "secret": "Medo genuíno de perder a posição de herdeiro pra Iris. A arrogância é compensação. Se Yuuta Ashford humilhá-lo publicamente, pode quebrar ou se tornar perigoso."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Diretora Valentina Lux",
+      "content": {
+        "personality": "Diretora. 9º Círculo. Aparenta 40 (90+). Percebe o Sword God mas NÃO investiga de imediato. Anota mentalmente. NÃO conecta com Soren nas primeiras dezenas de ações — manifestação é diferente demais.",
+        "power_level": 9,
+        "secret": "Conhece história de Soren. Mas manifestação inicial é instável demais pra conectar. Só quando amadurece."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Professor Aldwin",
+      "content": {
+        "personality": "Professor de Teoria Mágica. 7º Círculo. 60+ anos. Erudito, gentil, entusiasta. Adora perguntas difíceis. NÃO reconhece o Sword God no início — acha que é anomalia de mana. Só MUITO mais tarde (ações 50+) começa a conectar com registros antigos.",
+        "power_level": 7,
+        "secret": "Possui manuscrito sobre técnicas de mana sem elemento. NÃO conecta com Soren porque registros são vagos. Só quando poder amadurece."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Professor Garen",
+      "content": {
+        "personality": "Professor de Treino Físico e Armas. 7º Círculo. Ex-mercenário. 50 anos, corpo de touro, cicatrizes por todo lado. Duro, direto, sem paciência pra frescura. 'Menos conversa, mais suor.' Respeita esforço acima de talento. Quando vê Yuuta Ashford colapsar depois do Sword God e levantar de novo, ganha respeito silencioso.",
+        "power_level": 7,
+        "secret": "Viu coisas na fronteira demoníaca que nunca conta. Reconhece que o poder de Yuuta Ashford faz demônios reagirem — e isso o preocupa mais do que a força em si."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Mestre Orlan",
+      "content": {
+        "personality": "Ferreiro da academia. 5º Círculo. Fogo/Metal. 55 anos, braços enormes, barba grisalha, permanentemente coberto de fuligem. Ranzinza, reclama de tudo, odeia quando alunos quebram equipamento. Mas forja armas excepcionais. Se Yuuta Ashford trouxer materiais raros de dungeons, Orlan se anima como criança.",
+        "power_level": 5,
+        "secret": "Percebe que espadas normais QUEBRAM quando o MC ativa o Sword God — a mana é intensa demais. Fica obcecado em forjar uma lâmina que aguente. Questão de orgulho profissional. Se o MC trouxer materiais raros, Orlan pode criar algo que dure mais golpes."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Curandeira-Chefe Elara",
+      "content": {
+        "personality": "Chefe da enfermaria da academia. 6º Círculo. Cura. 45 anos, cabelos grisalhos presos, óculos no nariz, olhar que vê tudo. Materna E sarcástica: 'Ah, o garoto da espada. De novo aqui. Que surpresa.' Cuida de todos mas Yuuta Ashford virou cliente VIP. Trabalha com Nora (que é assistente na enfermaria).",
+        "power_level": 6,
+        "secret": "Mantém registros médicos detalhados do Yuuta. Nota que o corpo dele se adapta ao Sword God mais rápido do que deveria — como se o poder estivesse deliberadamente fortalecendo o hospedeiro."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Bibliotecário Theron",
+      "content": {
+        "personality": "Guardião da biblioteca da academia. 4º Círculo. História antiga. 70+ anos, magro, alto, sempre com livro na mão. Cético, meticuloso, não empresta livros da seção restrita pra NINGUÉM. Tem memória fotográfica pra tudo que já leu. Se Yuuta Ashford quiser informações sobre Soren, precisa passar por Theron.",
+        "power_level": 4,
+        "secret": "A seção restrita da biblioteca contém um diário parcial atribuído a Soren Arkhelion. Theron já leu. Sabe exatamente o que o Sword God é — mas precisa de prova antes de falar."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Capitão Marcus",
+      "content": {
+        "personality": "Chefe de segurança do campus. 6º Círculo. Terra/Metal. Ex-cavaleiro real. 40 anos, postura militar, armadura cerimonial impecável. Profissional, correto, não se impressiona com nome de família. Patrulha pessoalmente. Se acontecer algo no campus, Marcus aparece em minutos.",
+        "power_level": 6,
+        "secret": "Reporta diretamente à Diretora e ao palácio real. Se o poder de Yuuta Ashford chamar atenção demais, Marcus é obrigado a informar a coroa."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Conde Edric Ashford",
+      "content": {
+        "personality": "Pai do Yuuta. Conde. 5º Círculo. Espada. 42 anos, cabelos castanhos, olhar orgulhoso. Nobre menor mas íntegro. Ama a família genuinamente. Mandou o filho pra academia com expectativas altas mas não tóxicas: 'Faça o nome Ashford ser lembrado.' Manda cartas regularmente. Preocupado mas não superprotetor.",
+        "power_level": 5,
+        "secret": "Não sabe do Sword God. Quando souber, vai ficar assustado primeiro e orgulhoso depois. A preocupação com a segurança política do filho é real."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Lady Celeste Ashford",
+      "content": {
+        "personality": "Mãe do Yuuta. Sem afinidade mágica (nobre política). 38 anos, bonita, elegante, carinhosa. Mandou a criada Sera junto pra cuidar do filho. Manda cartas com comida caseira. Preocupada mas não dramática.",
+        "power_level": 0,
+        "secret": "A linhagem materna tem uma conexão antiga e esquecida com artefatos de Soren Arkhelion. Ela não sabe, mas o motivo do Sword God ter escolhido Yuuta Ashford não é aleatório."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Luca Ashford",
+      "content": {
+        "personality": "Irmão mais velho do Yuuta. 19 anos. 4º Círculo. Espada/Vento. Já se formou na academia. Protetor, orgulhoso do irmão, manda cartas com conselhos (nem sempre úteis). Está servindo como cavaleiro menor no exército do reino.",
+        "power_level": 4,
+        "secret": "Ouviu rumores sobre um 'calouro com poder estranho' na academia através de colegas. Fica preocupado e quer investigar pessoalmente."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Sera",
+      "content": {
+        "personality": "Criada pessoal do Yuuta, enviada pela mãe. 20 anos. Sem poder mágico. Eficiente, discreta, leal à família Ashford há anos. Cuida da logística de Yuuta Ashford na academia (roupas, refeições, correspondência). Preocupada com a saúde dele depois dos colapsos do Sword God.",
+        "power_level": 0,
+        "secret": "Reporta tudo pra Lady Celeste por carta. Tudo. Inclusive se alguma garota se aproximar demais."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Rei Roderic Arkhelion III",
+      "content": {
+        "personality": "Rei de Arkhelion. 9º Círculo. 55 anos. Belicista, expansionista, paranóico com ameaças ao trono. Poder absoluto sustentado por força militar. Se souber do Sword God e da conexão com Soren... a paranoia explode. Um portador do poder do primogênito Arkhelion é uma ameaça existencial à legitimidade da linha real atual.",
+        "power_level": 9,
+        "secret": "A família real APAGOU Soren dos registros oficiais tanto quanto pôde. O fato de Soren ter sido o primogênito — e ter recusado o trono — é tratado como segredo de estado. Se o povo souber que o 'verdadeiro herdeiro' voltou..."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Aldren Noir",
+      "content": {
+        "personality": "Duque da Casa Noir. 9º Círculo. Espadachim de Sangue. 45 anos. Guardião da fronteira demoníaca. Lendário em combate. Pragmático, frio, respeita apenas força. Pai de Viktor.",
+        "power_level": 9,
+        "secret": "A Casa Noir tem registros privados de encontros com Soren Arkhelion na fronteira demoníaca — 500 anos atrás, o Deus da Espada passou pela fronteira e ajudou a selar demônios. Se reconhecer o poder no Yuuta, pode se tornar aliado ou ameaça dependendo da política."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Aurelius Solaris",
+      "content": {
+        "personality": "Duque da Casa Solaris. 9º Círculo. Luz. Politicamente calculista. Pai de Iris e Dante. Virtude pública, ambição privada.",
+        "power_level": 9,
+        "secret": "A Casa Solaris e o Sacro Império de Luminaris mantêm registros de Soren como 'herege'. Se a conexão for descoberta, Solaris pode usar isso pra destruir Yuuta Ashford politicamente."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Magnus Drakenhart",
+      "content": {
+        "personality": "Duque da Casa Drakenhart. 8º Círculo. Fogo. Guerreiro leal ao rei. Pai de Astrid e Cedric. Direto, pragmático, menos político que os outros duques.",
+        "power_level": 8,
+        "secret": "O mais leal ao rei entre os duques. Se Roderic mandar eliminar o Yuuta, Magnus obedeceria — a menos que Astrid se oponha."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Hayato Shiranui",
+      "content": {
+        "personality": "Duque da Casa Shiranui. 8º Círculo. Relâmpago. Estrategista, neutro, observador. Pai de Hana. Ascendência oriental.",
+        "power_level": 8,
+        "secret": "Já está considerando aliança matrimonial com quem se provar digno de Hana. O Yuuta é candidato interessante — nobre menor mas com poder excepcional. Observa de longe."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Aldric Valencrest",
+      "content": {
+        "personality": "Duque da Casa Valencrest. 9º Círculo. Trevas. Ambicioso, frio, calculista. Pai de Kael.",
+        "power_level": 9,
+        "secret": "A Casa Valencrest tem a lenda do ancestral Varen que tocou o Vazio. Se outro poder Transcendente surgir (Sword God), Aldric vê como ameaça à supremacia Valencrest."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Vaelric Arkhelion I",
+      "content": {
+        "personality": "O Primeiro Imperador. Fundador do reino e da academia. Transcendente de Relâmpago. Morto há 500 anos na Grande Incursão Demoníaca, aos 78 anos. Unificou os territórios humanos. Amava o irmão Soren profundamente — o fato dele ter partido o marcou.",
+        "power_level": 10,
+        "secret": "Morreu sabendo que Soren estava vivo em algum lugar. Deixou instruções seladas na academia: 'Se o poder de meu irmão retornar, protejam o portador.' Essas instruções estão na seção restrita da biblioteca."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Azrael, o Devorador",
+      "content": {
+        "personality": "Demônio ancestral. Trevas/Void — consome mana alheia. Foi SELADO por Soren Arkhelion na fronteira demoníaca há 500 anos. O selo enfraquece lentamente. Quando sente o Sword God despertar, o selo estremece. Consciência antiga, paciente, predatória. Quer se libertar e destruir o portador de Soren antes que fique forte demais. Vilão do arco inicial.",
+        "power_level": 9,
+        "secret": "O selo de Soren está ligado ao poder do Sword God. Conforme Yuuta Ashford fica mais forte, paradoxalmente o selo se fortalece — mas Azrael não sabe disso. Ele acha que pode se libertar se matar o Yuuta."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Lilith",
+      "content": {
+        "personality": "Demônia ancestral. Ilusão/Charme — manipulação mental, aparência mutável. Lutou contra Soren e SOBREVIVEU por inteligência, não força. Está infiltrada entre humanos há séculos (identidade desconhecida). Se interessa pelo Yuuta com curiosidade genuína — não quer destruir, quer ENTENDER por que o poder de Soren voltou. Wild card: pode ser aliada, inimiga, ou algo entre os dois. Imprevisível.",
+        "power_level": 8,
+        "secret": "Soren a poupou quando podia ter matado. Ela nunca entendeu por quê. O Yuuta ser o portador de Soren cria uma relação complicada: gratidão, curiosidade, e perigo."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Bael, o Rei Cinza",
+      "content": {
+        "personality": "Demônio ancestral. Fogo negro, destruição massiva. O mais poderoso demônio vivo. Soren não conseguiu matá-lo — empataram. Adormecido nas profundezas do Território Demoníaco há 500 anos. Se acordar, é cataclismo continental. Ameaça de MUITO longo prazo.",
+        "power_level": 10,
+        "secret": "O empate com Soren foi o que fez Soren selar a si mesmo — gastar todo o poder pra garantir que Bael não pudesse despertar. Se o selo de Soren (agora no MC) enfraquecer ou quebrar, Bael acorda."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Arquivista Maren",
+      "content": {
+        "personality": "Eremita. Ex-pesquisadora real. 75 anos. Vive em ruínas antigas fora do reino. Dedicou 40 anos a estudar Soren Arkhelion. Possui os registros mais detalhados das técnicas dele em todo o continente. Excêntrica, obsessiva, brilhante. Se Yuuta Ashford a encontrar, é uma mina de ouro de informações.",
+        "power_level": 4,
+        "secret": "Foi EXPULSA da corte porque suas pesquisas sobre Soren ameaçavam a narrativa oficial da família real (que minimiza Soren). Tem rancor contra a coroa."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Cardeal Lucius",
+      "content": {
+        "personality": "Alto clero do Sacro Império de Luminaris. 8º Círculo. Luz sagrada. 60 anos. Fanático religioso com inteligência afiada. Para Luminaris, Soren era um herege que tocou 'poder divino' sem autorização da igreja. Se souber que o poder voltou, manda inquisidores. Perigo político e militar.",
+        "power_level": 8,
+        "secret": "Luminaris não quer destruir o poder de Soren — quer CAPTURAR. Se conseguirem o portador, tentam converter ou extrair o poder. A igreja vê o Sword God como relíquia sagrada roubada."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Voss",
+      "content": {
+        "personality": "Mercador de itens mágicos. Loja na cidade ao redor da academia. 35 anos. Sorriso comercial, olhos calculistas. Compra e vende tudo. Informações valem mais que ouro pra ele. Shady mas confiável se você pagar.",
+        "power_level": 2,
+        "secret": "Tem conexões com o mercado negro e com informantes de várias casas. Se algo interessante acontece na academia, Voss sabe em 24 horas."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Madame Rosalyn",
+      "content": {
+        "personality": "Dona da taverna estudantil 'O Cálice Dourado'. 50 anos. Gordinha, sorridente, maternal. Ponto social dos alunos — todo mundo passa por lá. Comida excelente. Sabe de TODAS as fofocas. 'Ah querido, a senhorita Drakenhart veio aqui três vezes essa semana perguntando se você já tinha aparecido.'",
+        "power_level": 1,
+        "secret": "Ex-aventureira aposentada. 3º Círculo escondido. Pode se defender se necessário. Protege os alunos como se fossem netos."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Garrick",
+      "content": {
+        "personality": "Ferreiro independente na cidade. 3º Círculo. 40 anos. Mais acessível e barato que Mestre Orlan. Trabalho bom mas não excepcional. Simpático, conversador.",
+        "power_level": 3,
+        "secret": "Já forjou armas pra aventureiros que exploraram dungeons ao redor. Sabe localizações de dungeons próximas — informação valiosa pra quem quer explorar."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Shade",
+      "content": {
+        "personality": "Informante do submundo da cidade. Aparência indistinta, muda frequentemente. Oferece missões paralelas, acesso ao mercado negro, informações sigilosas. Tudo tem preço.",
+        "power_level": 3,
+        "secret": "Trabalha pra múltiplos clientes simultaneamente — casas ducais, mercadores, até a coroa. Se Yuuta Ashford ficar famoso, Shade começa a receber contratos SOBRE o Yuuta."
+      }
+    },
+    {
+      "card_type": "ITEM",
+      "name": "Lâmina do Amanhecer",
+      "content": {
+        "tier": "Lendário",
+        "description": "Espada longa forjada com metal celestial. Emite luz dourada ao ser empunhada por alguém com potencial Transcendente. Pertenceu a um herói da Grande Incursão Demoníaca. Amplifica mana canalizada na lâmina em 300%. Quando usada com o Sword God, NÃO quebra — uma das poucas armas que aguenta.",
+        "location": "Sarcófago selado nas Ruínas de Solmund",
+        "owner": "Nenhum (aguarda um portador digno)"
+      }
+    },
+    {
+      "card_type": "ITEM",
+      "name": "Anel de Contenção",
+      "content": {
+        "tier": "Raro",
+        "description": "Anel de prata com encantamento azul. Suprime picos de mana involuntários. Útil para Yuuta Ashford controlar vazamentos do Sword God quando não quer chamar atenção. Reduz potência em 30% mas estabiliza o fluxo.",
+        "location": "Loja de Voss",
+        "owner": "À venda"
+      }
+    },
+    {
+      "card_type": "ITEM",
+      "name": "Elixir de Restauração Profunda",
+      "content": {
+        "tier": "Raro",
+        "description": "Frasco de líquido prateado. Regenera dano interno causado por excesso de mana — exatamente o que o Sword God faz ao corpo do Yuuta. Efeito leva 8 horas. Raro e caro.",
+        "location": "Enfermaria da academia (estoque limitado) / Voss (preço alto)",
+        "owner": "Curandeira-Chefe Elara"
+      }
+    },
+    {
+      "card_type": "ITEM",
+      "name": "Grimório de Técnicas Seladas",
+      "content": {
+        "tier": "Especial",
+        "description": "Livro antigo encontrado nas Ruínas de Ashborn. Contém técnicas de canalização de mana sem elemento — fragmentos do estilo de Soren. Indecifrável para a maioria, mas Yuuta Ashford (portador do Sword God) consegue ler instintivamente.",
+        "location": "Ruínas de Ashborn",
+        "owner": "Nenhum"
+      }
+    },
+    {
+      "card_type": "ITEM",
+      "name": "Colar de Mana Passiva",
+      "content": {
+        "tier": "Incomum",
+        "description": "Colar discreto que absorve mana ambiente lentamente, acumulando reserva extra. Permite uma ativação adicional curta do Sword God quando o corpo já estaria no limite.",
+        "location": "Dungeon próxima (Caverna do Eco)",
+        "owner": "Nenhum"
+      }
+    },
+    {
+      "card_type": "ITEM",
+      "name": "Espada de Treino Reforçada",
+      "content": {
+        "tier": "Incomum",
+        "description": "Espada de treino da academia com reforço rúnico. Não é tão boa quanto armas reais, mas aguenta 2-3 ativações do Sword God antes de rachar. Mestre Orlan faz sob encomenda.",
+        "location": "Forja da academia",
+        "owner": "Mestre Orlan (fabricação sob demanda)"
+      }
+    },
+    {
+      "card_type": "ITEM",
+      "name": "Braceletes de Peso Mágico",
+      "content": {
+        "tier": "Incomum",
+        "description": "Braceletes que aumentam resistência física gradualmente. Usados no treino com Professora Elena. Aceleram a adaptação do corpo ao Sword God em ~15%.",
+        "location": "Arena de treino da academia",
+        "owner": "Professora Elena Crowe"
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Academia Real Vaelric — Campus Principal",
+      "content": {
+        "description": "Campus principal da academia. Torres de pedra branca com detalhes dourados, jardins imensos, fontes cristalinas. Prédio principal com Salão de Abertura, salas de aula, escritórios administrativos. Dormitórios por ano letivo (ala leste para 1º ano). Arena de duelos com arquibancadas para centenas. Biblioteca monumental com seção restrita no subsolo.",
+        "tier": "Principal",
+        "notable_features": "Território neutro garantido pela Diretora. Barreira mágica cobre todo o campus — detecta ameaças externas. Ranking de alunos atualizado mensalmente no Salão Principal."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Arena de Duelos",
+      "content": {
+        "description": "Arena oval no centro do campus. Piso de pedra encantada que absorve impacto e se regenera. Arquibancadas para 500 espectadores. Barreiras de proteção automáticas. Usada para duelos oficiais, exames práticos e competições. O local onde o Sword God de Yuuta Ashford vai se manifestar publicamente.",
+        "tier": "Principal",
+        "notable_features": "Sistema de ranking — duelos oficiais alteram posição. Desafios podem ser solicitados a qualquer momento com aprovação de um professor."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Biblioteca de Vaelric",
+      "content": {
+        "description": "Biblioteca monumental. Cinco andares acima do solo, dois subterrâneos (restritos). Acervo de 200 mil volumes sobre magia, história, técnicas. A seção restrita contém textos sobre Soren Arkhelion, técnicas seladas e história censurada. Guardada por Bibliotecário Theron.",
+        "tier": "Principal",
+        "notable_features": "Seção restrita requer autorização da Diretora ou de 2 professores seniores. Encantamentos de proteção impedem roubo. Diário parcial de Soren está aqui."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "O Cálice Dourado",
+      "content": {
+        "description": "Taverna estudantil na cidade ao redor da academia. Ambiente acolhedor, mesas de madeira nobre, lareira. Ponto social dos alunos — lugar perfeito pra fofocas, encontros e relaxar. Madame Rosalyn comanda com mão de ferro e sorriso maternal.",
+        "tier": "Social",
+        "notable_features": "Cardápio especial pra alunos (desconto). Mural de avisos com missões, pedidos e anúncios."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Cidade de Vaelric",
+      "content": {
+        "description": "Cidade que cresceu ao redor da academia ao longo de 500 anos. Próspera, elegante, comércio forte. Lojas de itens mágicos, ferreiros, tavernas, guildas de aventureiros. A economia gira em torno da academia e seus alunos.",
+        "tier": "Principal",
+        "notable_features": "Guilda de Aventureiros com quadro de missões. Mercado negro acessível via Shade. Ferreiro Garrick e mercador Voss ficam aqui."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Caverna do Eco",
+      "content": {
+        "description": "Dungeon de nível iniciante a 2 horas da academia. Cavernas com cristais de mana que amplificam som. Monstros: golems de cristal, morcegos mágicos, elemental de terra menor. Bom pra calouros treinarem. Contém o Colar de Mana Passiva.",
+        "tier": "Dungeon (Iniciante)",
+        "notable_features": "Popular entre alunos do 1º ano. Grupos de 3-4 recomendados. Cristais de mana coletáveis valem dinheiro na cidade."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Ruínas de Solmund",
+      "content": {
+        "description": "Ruínas de uma fortaleza da era da Grande Incursão Demoníaca. 1 dia de viagem da academia. Nível intermediário-avançado. Armadilhas antigas, guardians mágicos, sarcófagos selados. Contém a Lâmina do Amanhecer num sarcófago protegido.",
+        "tier": "Dungeon (Intermediário)",
+        "notable_features": "Perigo real — alunos morrem aqui se não forem cuidadosos. Requer autorização da academia. Expedições supervisionadas acontecem semestralmente."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Ruínas de Ashborn",
+      "content": {
+        "description": "Templo destruído nas montanhas ao norte. Ligado à história de Soren Arkhelion — dizem que ele meditou aqui antes de partir pelo mundo. Contém inscrições indecifráveis (que Yuuta Ashford pode ler) e o Grimório de Técnicas Seladas.",
+        "tier": "Dungeon (Avançado)",
+        "notable_features": "Monstros mais fortes: elementais corrompidos, guardiões espectrais. A barreira na entrada reage ao Sword God."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Fronteira Noir",
+      "content": {
+        "description": "Muralhas de defesa contra o Território Demoníaco. Mantidas pela Casa Noir. Local onde Soren selou Azrael 500 anos atrás. O selo está numa câmara subterrânea sob as muralhas.",
+        "tier": "Endgame",
+        "notable_features": "Acesso restrito — só militares e Noir. Se Azrael começar a se libertar, Yuuta Ashford será convocado."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Dormitório do 1º Ano — Ala Leste",
+      "content": {
+        "description": "Ala de dormitórios para calouros. Quartos individuais confortáveis (nobres) ou compartilhados (bolsistas). Sala comum com lareira e mesas de estudo. Jardim interno. O Yuuta, Renn, Milo, Cedric e outros ficam aqui. As garotas ficam numa seção separada mas compartilham a sala comum.",
+        "tier": "Social",
+        "notable_features": "Sala comum é ponto de encontro à noite. Toque de recolher às 22h (frequentemente ignorado). Cama de Yuuta Ashford fica perto da janela com vista pra arena."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Campo de Treino Externo",
+      "content": {
+        "description": "Área aberta atrás da arena. Bonecos de treino, alvos mágicos, circuito de obstáculos. Usado pra treinos matinais e práticas livres. Onde Professora Elena treina Yuuta Ashford em particular (horários especiais).",
+        "tier": "Principal",
+        "notable_features": "Kael Valencrest treina aqui sozinho ao amanhecer. Astrid vem à noite quando acha que ninguém vê."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Enfermaria da Academia",
+      "content": {
+        "description": "Ala médica do campus. 20 leitos, estoque de poções e elixires. Curandeira-Chefe Elara comanda. Nora trabalha aqui como assistente. O Yuuta é cliente frequente após ativações do Sword God.",
+        "tier": "Social",
+        "notable_features": "Elara mantém registros detalhados de todos os pacientes. O leito do canto virou 'o leito do Ashford' não-oficialmente."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Sala de Aula Prática — Arena Interna",
+      "content": {
+        "description": "Arena coberta no prédio principal. Aulas práticas: duelos supervisionados, exercícios de mana. Rack de espadas de treino na parede.",
+        "tier": "Principal",
+        "notable_features": "Elena e Garen alternam aulas. Alunos pareados pra duelos. Tensão pro MC com Sword God involuntário."
+      }
+    },
+    {
+      "card_type": "LOCATION",
+      "name": "Pátio de Treino Livre",
+      "content": {
+        "description": "Área aberta entre dormitório e arena. Bonecos de treino, alvos. Popular no fim da tarde. Ponto social.",
+        "tier": "Social",
+        "notable_features": "Kael treina ao amanhecer. Astrid à noite. Desafios informais."
+      }
+    },
+    {
+      "card_type": "NPC",
+      "name": "Yuuta Ashford",
+      "content": {
+        "personality": "O jogador. Conde Ashford. 14 anos. Reencarnado. 1º Círculo base. Sword God ativa involuntariamente ao tocar espada = nível 7-8 temporário. Colapsa depois. Social, adaptável, bonito.",
+        "power_level": 2,
+        "secret": "Carrega poder de Soren Arkhelion. Direito ao trono. Ninguém sabe. Involuntário e perigoso."
+      }
+    }
+  ],
+  "version": "1"
+}

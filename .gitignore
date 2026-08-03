@@ -45,3 +45,13 @@ fix_scenario.py
 .inference_venv/
 .playwright-mcp/
 test-results/
+
+# CLIProxyAPI heavy artifacts
+proxy/cliproxyapi/*.zip
+proxy/cliproxyapi/*.pre-v*
+proxy/cliproxyapi/static/
+
+# Runtime logs and scratch
+backend/logs/
+logs/
+.tmp/

@@ -1,0 +1,309 @@
+{
+  "step": "Step 6\n of 14",
+  "heading": "faction",
+  "inputType": null,
+  "radioCount": 0,
+  "cardCount": 75,
+  "cards": [
+    {
+      "title": "Flying Pirates",
+      "description": "A fearsome pirate crew that moves just above the ocean floor, striking at anyone near Fish‑Man Island and making life dangerous for its people. They sail under the shadow of their great ship, thought to be named after the old vessel used for many generations, and they attack without warning from the deep waters."
+    },
+    {
+      "title": "Zou Guardians",
+      "description": "A proud group of warriors from the Mink Tribe who protect the hidden island of Zou, which sits on the back of a giant elephant. They watch over their people and land, ready to fight anyone who tries to harm their home. Strong, brave, and loyal, they know every part of the island and will do anything to keep it safe."
+    },
+    {
+      "title": "Fake Straw Hat Pirates",
+      "description": "A band of pirates who pretended to be the famous Straw Hat Pirates to steal their reputation and gain recruits and power. They spread word across the seas that they were the real deal and even managed to gather many followers and smaller crews by using the legend of the originals."
+    },
+    {
+      "title": "Seven Warlords of the Sea",
+      "description": "The Seven Warlords of the Sea are big name pirates chosen by the World Government to act as powerful, world government-backed hunters of other pirates. Each warlord is granted frozen bounties, official protection, and the freedom to rule their own territory as long as they answer the World Government’s call, and their presence alone can shift the balance of a battlefield. Though they hold an official title, the warlords remain pirates at heart, following their own ambitions, commanding secret armies, and building hidden empires far from the Government’s eyes. SHOW MORE"
+    },
+    {
+      "title": "The Vice Admirals",
+      "description": "Through strong effort, loyalty, and skill, you earned the rank of Vice Admiral in the marines. This rank is just below Admiral, making you one of the most trusted leaders in the Marines. You lead large groups of Marines, take on dangerous missions, and keep order in the seas. Many look up to you, and your choices can decide the outcome of important battles. With more experience, you may one day rise even higher."
+    },
+    {
+      "title": "The Admirals",
+      "description": "After many years of hard work, tough missions, and gaining respect from everyone around you, you have finally become an Admiral in the marines. This is one of the highest ranks in the Marines, right under the Fleet Admiral. As an Admiral, your power is known across the world. Pirates fear you, nations watch you, and the Marines trust you to protect the seas and follow your orders. Your actions can change everything, and your voice carries great weight wherever you go. SHOW MORE"
+    },
+    {
+      "title": "Giant Squad",
+      "description": "The Giant Squad is an elite unit of the Marines, made up of massive giants who tower over ordinary soldiers. They act as living battering rams and protectors of critical operations, their sheer strength and size making them nearly unstoppable in battle. Any pirate or hunter who faces the Marines’ Giant Squad must prepare for overwhelming force and relentless power."
+    },
+    {
+      "title": "Foxy Pirates",
+      "description": "The Foxy Pirates are a mischievous and cunning crew, notorious for their clever tricks and schemes. Famous for orchestrating the Davy Back Fight, they often outsmart stronger opponents using games and deception rather than brute force. Their unpredictable tactics and flamboyant style make them both feared and ridiculed across the seas."
+    },
+    {
+      "title": "Straw Hat Grand Fleet",
+      "description": "The Straw Hat Grand Fleet is a group of seven pirate crews who all pledged to follow Monkey D. Luffy after Dressrosa. They work together to help him and protect his friends. Each crew is different, with its own strengths and style, but together they are very strong."
+    },
+    {
+      "title": "Four emperors",
+      "description": "After all those crimes you committed during your years as a pirate, and after facing countless powerful figures with your mighty and most powerful crew, you have finally been recognized and become one of the Four Emperors. Feared across the entire seas as one of the four emperors the marines are very afraid of you, you have also allied with some powerful figures but are closely watched by the world government."
+    },
+    {
+      "title": "Beautiful Pirates",
+      "description": "The Beautiful Pirates are a stylish and disciplined crew led by Cavendish. Known for their grace, coordination, and teamwork, they turn battles into displays of elegance and precision. As members of the Straw Hat Grand Fleet, they are loyal, efficient, and surprisingly deadly despite their focus on appearances."
+    },
+    {
+      "title": "Shoujou Pirates",
+      "description": "The Shoujou Pirates are energetic and relentless, striking with speed and coordinated attacks. Led by Shoujou, they are adaptable and fearless, able to take on larger crews through persistence and teamwork. Their playful spirit combined with combat efficiency makes them a dangerous and unpredictable force."
+    },
+    {
+      "title": "Gyro Pirates",
+      "description": "The Gyro Pirates are a quirky and resourceful crew hailing from the South Blue. Led by the eccentric Gyro, they are known for their unconventional methods and adaptability in various situations."
+    },
+    {
+      "title": "Bonney Pirates",
+      "description": "The Bonney Pirates are a formidable crew from the South Blue, led by the fierce Jewelry Bonney. They gained notoriety for their daring exploits and were considered a significant threat before their downfall."
+    },
+    {
+      "title": "Caribou Pirates",
+      "description": "The Caribou Pirates are a cunning and opportunistic crew, led by the notorious Caribou. They are known for their deceptive tactics and ability to exploit situations to their advantage, making them unpredictable adversaries."
+    },
+    {
+      "title": "Whitebeard Pirates",
+      "description": "The Whitebeard Pirates were a legendary crew celebrated for their strength, loyalty, and unity. Revered as protectors of the seas, they took in allies from all walks of life. Their legacy is one of honor, sacrifice, and the ability to inspire fear and respect across the world."
+    },
+    {
+      "title": "Masira Pirates",
+      "description": "The Masira Pirates are a resourceful and resilient crew known for their salvage operations and deep connection to the Saruyama Alliance. Operating near Jaya Island, they specialize in recovering sunken ships, showcasing their ingenuity and teamwork."
+    },
+    {
+      "title": "Krieg Pirates",
+      "description": "The Krieg Pirates are infamous for their brutality, tyranny, and greed. Once a massive and feared crew under the tyrannical Captain Don Krieg, they ruled through intimidation and overwhelming numbers. Though many were defeated, the remnants maintain their reputation for ruthlessness, striking fear into anyone who dares challenge them."
+    },
+    {
+      "title": "Barto Club",
+      "description": "The Barto Club is a crew known for their theatrical style and daring exploits. They often take on challenges for the thrill and the fame, blending humor and bravado with serious combat ability. Their members value camaraderie and loyalty, making them a close-knit and determined crew."
+    },
+    {
+      "title": "Black Cats Pirates",
+      "description": "The Black Cats Pirates are agile, sneaky, and unpredictable. They specialize in fast strikes and hit-and-run tactics, often using their cunning and stealth to gain the upper hand. Their reputation thrives on mischief, trickery, and leaving enemies confused and disorganized."
+    },
+    {
+      "title": "Alvida Pirates",
+      "description": "The Alvida Pirates are known for their flashy style and aggressive raids. They are opportunistic and often strike quickly, using speed and cunning to overwhelm smaller crews. Though not as large or famous as other pirate crews, they have earned a reputation for resilience and tenacity."
+    },
+    {
+      "title": "Cross Guild",
+      "description": "Cross Guild is a powerful and controversial organization formed from some of the most notorious pirates in the world. They operate both as mercenaries and bounty hunters, using their influence to dominate seas and control territories. Their reputation combines wealth, intimidation, and political maneuvering, making them a formidable faction in the pirate world."
+    },
+    {
+      "title": "Golden Lion Pirates",
+      "description": "The Golden Lion Pirates are proud, charismatic, and aggressive. Known for their daring raids and fierce pride, they strike with courage and boldness that few can match. The crew values loyalty above all, and their unity makes them a dangerous force in any confrontation."
+    },
+    {
+      "title": "Giant Warrior Pirates",
+      "description": "The Giant Warrior Pirates are a massive and imposing crew, renowned for their incredible size and brute strength. Their members are often towering fighters who overwhelm foes with sheer power and endurance. Despite their size, they are surprisingly coordinated, combining raw strength with clever battlefield tactics."
+    },
+    {
+      "title": "Fallen Monk Pirates",
+      "description": "The Fallen Monk Pirates are a disciplined yet fallen crew, once guided by ideals of honor and protection. Over time, they became merciless and opportunistic, using their knowledge and strength to exploit weaker crews. They are known for their surprising tactical awareness and the ability to turn even hopeless battles into victories."
+    },
+    {
+      "title": "Gecko Pirates",
+      "description": "The Gecko Pirates are a crew that revels in fear and domination. Their mere presence can unsettle opponents, as they are infamous for their ruthless tactics and the eerie aura they project. They carve their name into the world through intimidation and the relentless pursuit of power, leaving chaos in their wake."
+    },
+    {
+      "title": "Drake Pirates",
+      "description": "The Drake Pirates are a disciplined and secretive crew, operating under the guise of piracy while serving a covert mission. Led by X Drake, a former Marine Rear Admiral, the crew's true objectives are shrouded in mystery. Their reputation is built on precision, intelligence, and the ability to strike quickly when least expected."
+    },
+    {
+      "title": "Nox Pirates",
+      "description": "The Nox Pirates are a brave and honorable crew composed of skilled Mink Tribe warriors. They are renowned for their courage and dedication to their mission, often risking everything to protect their people or uncover secrets of the world. Though small, their unity and resilience make them formidable opponents."
+    },
+    {
+      "title": "Hawkins Pirates",
+      "description": "The Hawkins Pirates are a mysterious and calculating crew, feared for their eerie composure and unshakable loyalty. They manipulate fate and use careful strategy to control the battlefield. Known for their stoicism and eerie aura, this crew is difficult to predict and even harder to defeat."
+    },
+    {
+      "title": "On Air Pirates",
+      "description": "The On Air Pirates are a chaotic and unpredictable crew that strikes with the power of sound and rhythm. They rely on deception, coordination, and their musical combat style to overwhelm opponents. Their reputation is built on creativity and the fear they instill in those who cannot anticipate their next move, making them both formidable and eccentric."
+    },
+    {
+      "title": "God's Knights",
+      "description": "The God’s Knights, also known as the Holy Knights, are an elite group of warriors serving the World Government. They operate in the Holy Land of Mary Geoise and are tasked with enforcing the laws, even among the Celestial Dragons. They hold authority over World Nobles and have the power to execute them if necessary. The Knights are known for their immense strength, combat skills, and immortality, making them formidable enforcers of the World Government’s will. SHOW MORE"
+    },
+    {
+      "title": "New Fish-Man Pirates",
+      "description": "The New Fish-Man Pirates are a crew of Fish-Men led by Hody Jones. They are known for their hatred of humans and their goal to take over Fish-Man Island. They are strong, aggressive, and work together to achieve their ambitions."
+    },
+    {
+      "title": "Thriller Bark Victim's Association",
+      "description": "The Thriller Bark Victim's Association is a group formed by the people affected by the Thriller Bark Pirates. They aim to support and protect victims of the crew, sharing information and helping each other recover from attacks."
+    },
+    {
+      "title": "WCI 31",
+      "description": "The WCI 31 is a group of renowned head chefs working in Whole Cake Island's kitchens. They are known for their exceptional culinary skills and are trusted to oversee various kitchens, each led by a head chef. Under the guidance of Streusen, the head chef of Whole Cake Island, they are responsible for preparing elaborate dishes."
+    },
+    {
+      "title": "NEO MADS",
+      "description": "NEO MADS is a scientific organization founded by Vinsmoke Judge and Caesar Clown, serving as a successor to their previous group, MADS. They aim to surpass Dr. Vegapunk in scientific achievements, utilizing resources like Germa 66's army."
+    },
+    {
+      "title": "Nine Red Scabbards",
+      "description": "The Nine Red Scabbards are a group of loyal samurai who serve the Kozuki family. They are known for their bravery, skill, and dedication to protecting their lord and restoring the honor of Wano. They are respected and feared for their combat abilities and unwavering loyalty."
+    },
+    {
+      "title": "WE News",
+      "description": "WE News is a major newspaper that reports on pirates, governments, and global events. It reaches most seas with the help of News Coo, and despite attempts by the World Government to influence it, the paper remains highly influential."
+    },
+    {
+      "title": "Roshio Pirates",
+      "description": "Led by the pirate captain Roshio, whose crew's jolly roger features a red circle with the black silhouette of a hanged man. They are known for their macabre symbol and have a bounty of 42,000,000."
+    },
+    {
+      "title": "Space Pirates",
+      "description": "The Space Pirates are a group of fox-like aliens from the moon. They are moon miners who excavate valuable resources and are known for their cunning and teamwork. They are led by a strong captain and operate in the skies above the moon."
+    },
+    {
+      "title": "Big Helmet Pirates",
+      "description": "The Big Helmet Pirates are a strong and loyal crew known for their teamwork and fighting skills. They sail the seas seeking adventure and challenges, always sticking together to protect their captain and crew."
+    },
+    {
+      "title": "Five Elders",
+      "description": "You have successfully become a member of the Five Elders, the highest-ranking officials in the World Government who oversee global policy and decisions. Feared and respected across the world, you now stand among those who shape history from the shadows. With absolute authority over the Marines, Cipher Pol, and even the Celestial Dragons, your words can spark wars or silence nations."
+    },
+    {
+      "title": "Celestial Dragons",
+      "description": "The Celestial Dragons are the noble and wealthy rulers of the World Government. They live in luxury and are treated as untouchable, often abusing their power over others. Feared and hated by many, they enforce their will through the Marines and influence world politics."
+    },
+    {
+      "title": "Seraphim",
+      "description": "The Seraphim are advanced weapons created by Vegapunk, based on the strongest pirates of the past. They are powerful, humanoid cyborgs used by the World Government to maintain control and fight dangerous opponents. Each one has unique abilities that make them highly dangerous in battle."
+    },
+    {
+      "title": "Pacifista Program",
+      "description": "The Pacifista Program is a project by Vegapunk that creates powerful human-like weapons. These cyborgs are used by the Marines to fight pirates and enforce the World Government’s rules. They are strong, fast, and equipped with advanced technology and weapons."
+    },
+    {
+      "title": "Vegapunk's Creations",
+      "description": "Vegapunk’s Creations are advanced inventions and weapons made by the brilliant scientist Vegapunk. They include robots, artificial Devil Fruits, and other powerful technologies. Many are used by the World Government or Marines, and they are known for their strength and clever designs."
+    },
+    {
+      "title": "Kuja Tribe",
+      "description": "The Kuja Tribe is made up entirely of women who are fierce warriors skilled in combat and Haki. They are loyal to their empress and protect their home from outsiders. The tribe is known for its strength, discipline, and unity."
+    },
+    {
+      "title": "Tontatta Tribe",
+      "description": "The Tontatta Tribe is a group of small but brave warriors who live in the Green Bit. They are known for their speed, cleverness, and strong sense of loyalty. Despite their size, they are skilled fighters and protect their home from threats."
+    },
+    {
+      "title": "Kozuki Retainers",
+      "description": "The Kozuki Retainers are loyal samurai who serve the Kozuki family of Wano. They are brave, skilled fighters dedicated to protecting their lord and restoring Wano’s peace. Their loyalty and honor make them respected and feared by enemies."
+    },
+    {
+      "title": "Shandia",
+      "description": "The Shandia are a proud and brave tribe that lives on Skypiea. They are known for their fighting skills, loyalty, and strong connection to their land. They defend their home from invaders and work together to protect their people."
+    },
+    {
+      "title": "Five Families of the West",
+      "description": "The Five Families of the West are powerful and influential pirate families that control parts of the West Blue. They are known for their wealth, strong fighters, and influence over local seas. These families work together or compete to protect their power and expand their territories."
+    },
+    {
+      "title": "Yakuza of Wano",
+      "description": "The Yakuza of Wano are powerful criminal groups operating across the Wano Country. They control trade, gambling, and other illegal businesses while enforcing their own rules. Loyal to their families and leaders, they are feared by many but respected by those who follow them."
+    },
+    {
+      "title": "Germa 66",
+      "description": "Germa 66 is a powerful military organization led by a royal family. They are known for advanced technology, science, and highly trained soldiers. The group fights with precision and strategy, making them a strong force in both war and politics."
+    },
+    {
+      "title": "Baroque Works",
+      "description": "Baroque Works is a secret criminal organization that works to gain power and wealth through illegal means. They operate in the shadows, using spies, assassins, and clever plans to achieve their goals. The group is organized in pairs and follows a strict hierarchy, making them a dangerous force in the world of pirates and politics."
+    },
+    {
+      "title": "Neo Marines",
+      "description": "The Neo Marines are a private military group that acts independently of the World Government. They take on missions for power, money, or influence and are known for being aggressive and well-armed. Their strength and organization make them a dangerous force on the seas."
+    },
+    {
+      "title": "Revolutionary Army",
+      "description": "The Revolutionary Army is a secretive group that fights against the World Government. They work to protect people from tyranny and bring freedom to oppressed nations. They are strong, smart, and organized, and they carry out dangerous missions to achieve their goals."
+    },
+    {
+      "title": "Special Science Group",
+      "description": "The Special Science Group is a top-level team of scientists working for the World Government. They create advanced weapons, technology, and experiments to give the Marines and government an advantage. Their inventions are powerful and often shape the balance of power across the seas."
+    },
+    {
+      "title": "Cipher Pol",
+      "description": "Cipher Pol is a secret government organization that carries out covert missions. They handle spying, assassination, and intelligence work to protect the World Government and keep control over the seas."
+    },
+    {
+      "title": "SWORD",
+      "description": "SWORD is a secret and powerful organization within the Marines that handles special missions. They take on dangerous jobs and protect the world from serious threats, operating in the shadows with skill and precision."
+    },
+    {
+      "title": "Donquixote Pirates",
+      "description": "The Donquixote Pirates are a strong and organized crew led by a clever and ruthless captain which is Donquixote Doflamingo. They are known for using strategy and power to control others, and they follow their captain’s orders without question. Their loyalty and skill make them a dangerous force on the seas."
+    },
+    {
+      "title": "Saruyama Alliance",
+      "description": "A coalition of explorers and adventurers seeking ancient treasures."
+    },
+    {
+      "title": "Straw Hats",
+      "description": "The Straw Hat Pirates are a brave and adventurous crew known for their strong bonds and determination. They sail the seas chasing dreams and protecting each other, always standing up for what they believe is right. Their courage and teamwork make them a well-known and respected crew."
+    },
+    {
+      "title": "Buggy's Delivery",
+      "description": "Buggy’s Delivery is a small but clever crew known for taking on jobs and missions for profit. They are not very strong compared to other pirate crews, but they are tricky, resourceful, and loyal to their captain."
+    },
+    {
+      "title": "Spade Pirates",
+      "description": "The Spade Pirates were a strong and brave crew known for their loyalty and fighting skills. They sailed the seas seeking adventure and freedom, standing up against powerful enemies when needed. Their captain led them with courage, earning respect from allies and foes alike."
+    },
+    {
+      "title": "Roger Pirates",
+      "description": "The Roger Pirates were a legendary crew known for their adventures and discovery of the final island, Laugh Tale. They were brave, strong, and full of daring spirit, inspiring fear and respect across the seas. Their captain led them with wisdom and strength, leaving a lasting legacy in pirate history."
+    },
+    {
+      "title": "Rocks Pirates",
+      "description": "The Rocks Pirates were a legendary and feared crew that caused chaos across the seas. They were known for their power, ambition, and willingness to do anything to rule the world. Many strong and dangerous pirates were part of this crew, making them one of the most notorious in history."
+    },
+    {
+      "title": "Thriller Bark Pirates",
+      "description": "The Thriller Bark Pirates are a creepy and mysterious crew that uses shadows and strange powers to scare their enemies. They are led by a captain who loves to play tricks and collect strong fighters. Despite their spooky appearance, they are clever and dangerous on the seas."
+    },
+    {
+      "title": "Sun Pirates",
+      "description": "The Sun Pirates are a strong crew made up mostly of Fish-Men. They are known for their courage, teamwork, and their fight for freedom. They protect each other and stand up against anyone who threatens them."
+    },
+    {
+      "title": "Fire Tank Pirates",
+      "description": "The Fire Tank Pirates are a strong and bold crew that is known for their fearless attacks and fiery fighting style. They are tough and work together well, always ready to take on challenges and protect their crew."
+    },
+    {
+      "title": "Kid Pirates",
+      "description": "The Kid Pirates are a bold and aggressive crew known for their strength and fearlessness. They are ambitious and always go after what they want, often taking risks that others would avoid. Their teamwork and determination make them a crew to be reckoned with on the seas."
+    },
+    {
+      "title": "Heart Pirates",
+      "description": "The Heart Pirates are a small but strong crew led by a smart and caring captain. They are known for their speed, clever plans, and strong teamwork. They help others and fight for what they believe is right, making them respected across the seas."
+    },
+    {
+      "title": "Blackbeard Pirates",
+      "description": "The Blackbeard Pirates are a dangerous and sneaky crew led by a very ambitious captain name Blackbeard. They are known for being unpredictable and doing whatever it takes to get stronger even if it includes betraying someone to achieve a goal, They strike hard and fast, and many fear them across the seas."
+    },
+    {
+      "title": "Beasts Pirates",
+      "description": "The Beast Pirates are a terrifying and relentless crew led by a fearsome captain known for his overwhelming power. They rule through strength, intimidation, and loyalty to their leader, often recruiting powerful fighters and Zoan Devil Fruit users to expand their might. The crew is infamous for their brutality and ambition, making them one of the most dangerous forces feared by allies and enemies alike."
+    },
+    {
+      "title": "Big Mom Pirates",
+      "description": "The Big Mom Pirates are a massive and ruthless crew that rules with a mix of fear, power, and family loyalty. Led by their unpredictable and terrifying captain, they dominate the seas through sheer strength and an unbreakable sense of kinship among their members. Though their actions can be chaotic and violent, the crew thrives on the bonds of family, making them a dangerous and united force."
+    },
+    {
+      "title": "Red-Hair Pirates",
+      "description": "The Red-Hair Pirates are a legendary crew known for their strength, loyalty, and adventurous spirit. They command respect not through fear, but through their bonds and reputation, balancing power with honor. Known for celebrating life with laughter and camaraderie, they can also unleash overwhelming force when threatened, making them one of the most respected crews."
+    },
+    {
+      "title": "Neutral/Unaffiliated",
+      "description": "An individual who belongs to no faction, aligning with no cause or ideology. They act on their own terms, free from allegiance, forging their own path!"
+    }
+  ]
+}

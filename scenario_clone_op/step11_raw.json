@@ -1,0 +1,17 @@
+{
+  "step": "Step 11\n of 14",
+  "heading": "Are you apart of the worst generation?",
+  "inputType": null,
+  "radios": [],
+  "cardCount": 2,
+  "cards": [
+    {
+      "title": "No",
+      "description": "You weren’t grouped with those shaking the seas, but that doesn't mean your path holds less weight. Away from the spotlight, you move with intent not to follow in another’s wake, but to forge your own route through this chaotic world. While others chase fame or infamy, you pursue something greater, your own purpose. The age may not have named you… but the future might."
+    },
+    {
+      "title": "Yes",
+      "description": "You are counted among the Worst Generation individuals, those whose potential is great enough to shake the world, even if your name has not yet reached every corner. Some have made headlines, others remain in the shadows, but all share one thing: a will strong enough to challenge the old era. Whether you walk the path of a pirate, a marine, or something in between, your journey is only beginning. The seas are watching, not for who you are now, but for what you will become. SHOW MORE"
+    }
+  ]
+}

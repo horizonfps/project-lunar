@@ -1,0 +1,106 @@
+{
+  "step": 3,
+  "heading": "race",
+  "options": [
+    {
+      "title": "Human",
+      "description": "The most common race in the world. Humans vary widely in size, strength, intelligence, and moral alignment."
+    },
+    {
+      "title": "Fish-Men",
+      "description": "Humanoid beings with traits from various aquatic animals. Possess immense strength and breathe underwater. Masters of Fish-Man Karate."
+    },
+    {
+      "title": "Merfolk",
+      "description": "Half-human, half-fish beings. Graceful swimmers; tails split into legs at age 30."
+    },
+    {
+      "title": "Sky Islanders",
+      "description": "Winged humans from islands above the clouds. Use Dial technology."
+    },
+    {
+      "title": "Minks",
+      "description": "Furry humanoid animals with mammal traits. Use Electro and gain Sulong form under full moon."
+    },
+    {
+      "title": "Giants",
+      "description": "Enormous humanoids from Elbaf, the warrior island."
+    },
+    {
+      "title": "Lunarians",
+      "description": "Ancient race with dark skin, white hair, flaming wings; manipulate flames; nearly extinct."
+    },
+    {
+      "title": "Cyborgs",
+      "description": "Humans modified with mechanical enhancements."
+    },
+    {
+      "title": "Zombies",
+      "description": "Reanimated corpses created through Moria's shadow powers."
+    },
+    {
+      "title": "Skeleton",
+      "description": "A human soul revived inside a reanimated skeleton body."
+    },
+    {
+      "title": "Artificial Humans",
+      "description": "Created by Vegapunk and other scientists; Seraphim and Vinsmoke siblings."
+    },
+    {
+      "title": "Wotans",
+      "description": "Rare hybrids between Fish-Men and Giants."
+    },
+    {
+      "title": "Longarm Tribe",
+      "description": "Humanoids with two elbows per arm. From Kenzan island."
+    },
+    {
+      "title": "Longleg Tribe",
+      "description": "Humanoids with extremely long legs; rivals of Longarm Tribe."
+    },
+    {
+      "title": "Snakeneck Tribe",
+      "description": "Rare humanoids with long, snake-like necks."
+    },
+    {
+      "title": "Buccaneer Race",
+      "description": "Mysterious race with giant-like strength; oppressed by World Government. Bartholomew Kuma's race."
+    },
+    {
+      "title": "Tontatta",
+      "description": "Tiny people from Green Bit; incredible strength and speed; honest and loyal."
+    },
+    {
+      "title": "Fairies",
+      "description": "Dressrosan name for invisible-thieving Tontatta. Not a separate race."
+    },
+    {
+      "title": "Automata",
+      "description": "Sentient beings made from objects/animals with human souls embedded."
+    },
+    {
+      "title": "Pacifistas",
+      "description": "Genetically modified clones with cyborg parts and Lunarian DNA. By Vegapunk."
+    },
+    {
+      "title": "Toy",
+      "description": "Transformed into a wooden toy by the Hobby-Hobby Fruit; everyone forgot you exist."
+    },
+    {
+      "title": "Demons",
+      "description": "Transformed into a demon by Imu; immortal, monstrous strength, but soul/free-will lost."
+    },
+    {
+      "title": "Three-Eye Tribe",
+      "description": "Rare race with a third eye granting heightened perception."
+    },
+    {
+      "title": "Dosundada",
+      "description": "Hybrid of humans and Tontatta dwarves."
+    },
+    {
+      "title": "Zushindodo",
+      "description": "Extremely rare hybrid of giants and dwarves."
+    }
+  ]
+}

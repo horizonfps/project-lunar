@@ -1,0 +1,137 @@
+{
+  "step": "Step 9\n of 14",
+  "heading": "Tell Me, Who will be your Family?",
+  "inputType": null,
+  "radios": [],
+  "cardCount": 32,
+  "cards": [
+    {
+      "title": "King Harald Family",
+      "description": "A proud royal family that once ruled the giant island of Elbaf, known for their strength, history, and leadership. They held power over the land for generations, guiding their people with both wisdom and might. After the death of King Harald, the family no longer rules Elbaf, but their name still carries great respect and reputation among the giants."
+    },
+    {
+      "title": "Accino Family",
+      "description": "The Accino Family is a famous family of bounty hunters, known for their skill and clever strategies. Led by Don Accino, they are well-known for capturing many pirate flags, which they keep as trophies. The family plans carefully and knows their enemies well, making them a respected force in bounty hunting."
+    },
+    {
+      "title": "Davy Family",
+      "description": "The Davy Family is a famous family linked to the mysterious pirate Davy D. Jones, who was cursed to live on the ocean floor. They are one of the most legendary families among those with the \"Will of D.\" Important members of this family include Rocks D. Xebec and Marshall D. Teach. Their family has a strong connection to the sea and its secrets."
+    },
+    {
+      "title": "Fugetsu Family",
+      "description": "The Fugetsu Family was a distinguished samurai lineage from the Kibi region of Wano Country. As staunch supporters of the ruling Kouzuki Family, they held the title of daimyo and were integral to the region's governance and defense."
+    },
+    {
+      "title": "Amatsuki Family",
+      "description": "The Amatsuki Family were staunch supporters of the ruling Kouzuki Family in Wano. Members held the title of daimyo, overseeing various regions."
+    },
+    {
+      "title": "Uzuki Family",
+      "description": "Once a powerful family in Wano Country, the Uzuki Family ruled over the Udon region until the rise of Kurozumi Orochi. Notable members include Uzuki Tempura, the former daimyo of Udon, and Uzuki Namida."
+    },
+    {
+      "title": "Bavette Family",
+      "description": "The Bavette Family is another royal bloodline of the World Nobles. About 38 years ago, members participated in the Native Hunting Competition at God Valley, ranking among the top scorers. Details about their current activities and influence remain limited."
+    },
+    {
+      "title": "Rimoshifu Family",
+      "description": "A royal bloodline among the World Nobles, the Rimoshifu Family is represented by Saint Killingham, a member of the Holy Knights. The family is known for its association with the Kirin, a mythical creature of Chinese origin."
+    },
+    {
+      "title": "Boa Family",
+      "description": "The Boa Family is a powerful and influential lineage, feared and respected across the seas. Known for their cunning, combat skill, and sharp intellect, they strike strategically rather than relying on brute force alone. Loyalty and family honor are everything to them, and any threat to their name is met with swift and decisive retaliation."
+    },
+    {
+      "title": "Charlotte Family",
+      "description": "You are one of many born under a powerful and feared matriarch. In a family of politics, power, and sweets, your upbringing was anything but simple. In this world of monstrous siblings and ruthless ambition, will you rise above or become another pawn in your mother’s empire?"
+    },
+    {
+      "title": "Kurozumi Family",
+      "description": "Once veiled in shadows, the Kurozumi Family rose to power through deceit, dark ambition, and ruthless cunning. Masters of manipulation and subterfuge, their name inspires fear and distrust throughout Wano. Hidden behind a facade of honor, they wield treacherous secrets and deadly plots to seize control a legacy stained by betrayal and bloodshed. To cross a Kurozumi is to invite ruin."
+    },
+    {
+      "title": "Furukawa Family",
+      "description": "A noble lineage rooted deeply in tradition and honor, the Furukawa Family stands as a pillar of stability within Wano. Known for their unwavering loyalty and skilled craftsmanship, they have long served as trusted retainers to the ruling class. Though not the most flashy or powerful, their wisdom and steady influence quietly shape the fate of their land."
+    },
+    {
+      "title": "Nerona Family",
+      "description": "Shrouded in mystery, your family is rumored to hold the keys to ancient secrets and forbidden knowledge. Your path is one of discovery and the weight of hidden truths."
+    },
+    {
+      "title": "Manmayer Family",
+      "description": "A lesser-known lineage among the elite, your family's contributions are veiled in secrecy. Operating from the shadows, your influence is felt in whispers and unseen actions."
+    },
+    {
+      "title": "Shepherd Family",
+      "description": "Known for their stewardship and guidance, your family has long been caretakers of global balance. Your role is one of quiet influence and enduring legacy."
+    },
+    {
+      "title": "Topman Family",
+      "description": "Steeped in tradition and governance, your family has long been a pillar of the world order. Your decisions ripple through history, shaping the course of civilizations."
+    },
+    {
+      "title": "Jaygarcia Family",
+      "description": "As part of the ruling elite, your family holds sway over the world's most critical decisions. With a legacy of authority and control, your path is one of command and consequence."
+    },
+    {
+      "title": "Figarland Family",
+      "description": "A noble lineage with ties to the highest echelons of power, your family's influence is felt across the seas. With secrets and connections that span the globe, your heritage is both a blessing and a burden."
+    },
+    {
+      "title": "Chinjao Family",
+      "description": "Hailing from a line of powerful martial artists, your family is known for strength and pride. With a legacy of combat and honor, your fists carry the weight of generations."
+    },
+    {
+      "title": "Dadan Family",
+      "description": "Though not related by blood, your family ties are forged through shared hardship and survival. Raised among bandits, your upbringing was rough but instilled in you a fierce sense of loyalty and resilience."
+    },
+    {
+      "title": "Franky Family",
+      "description": "Born from camaraderie and shared purpose, your family is a band of shipwrights and fighters. United not by blood but by bonds forged in fire and steel, your legacy is one of creation and rebellion."
+    },
+    {
+      "title": "Shimotsuki Family",
+      "description": "Descended from legendary samurai, your family brought the way of the sword from Wano to the wider world. With a heritage of honor and discipline, your blade carries the weight of generations."
+    },
+    {
+      "title": "Riku Family",
+      "description": "Once rulers of Dressrosa, your family was overthrown and later restored. Known for compassion and justice, your lineage stands as a symbol of resilience. Will you uphold this legacy or seek a new destiny?"
+    },
+    {
+      "title": "Neptune Family",
+      "description": "As royalty of the Ryugu Kingdom beneath the sea, your family holds ancient ties to the world's mysteries. With the ability to communicate with Sea Kings and a history intertwined with legends, your path is one of deep currents and hidden depths."
+    },
+    {
+      "title": "Nefertari Family",
+      "description": "Royalty of the desert kingdom of Alabasta, your family is revered for wisdom, loyalty, and compassion. You walk the line between nobility and humility, a bridge between the people and the throne. Will you rule with grace or forge your own crown?"
+    },
+    {
+      "title": "Donquixote Family",
+      "description": "You come from a family once seated among the Celestial Dragons, now infamous for its fall from grace. With a legacy steeped in corruption, betrayal, and tragedy, your journey may be one of redemption or vengeance."
+    },
+    {
+      "title": "Kozuki Family",
+      "description": "Heirs of an ancient kingdom and guardians of powerful knowledge, your lineage carries a legacy of honor, sacrifice, and resistance. Bound to the fate of Wano, your blood ties you to a history of war and prophecy."
+    },
+    {
+      "title": "Vinsmoke Family",
+      "description": "Engineered for warfare, you are a product of science and royalty. Your family leads the Germa 66, feared across seas for their genetic advancements and ruthless ambition. Do you embrace your designed destiny, or rebel against the machine?"
+    },
+    {
+      "title": "Portgas Family",
+      "description": "Born of sacrifice and hidden lineage, your family endured great suffering to bring you into the world. You represent both the fire of rebellion and the burden of secrecy. What will you do with the freedom bought for you?"
+    },
+    {
+      "title": "Gol Family",
+      "description": "Your blood flows from a legend whispered across every sea. As a descendant of a Pirate King, you bear the weight of greatness and the eyes of the world. Hunted, honored, or feared your heritage cannot be ignored."
+    },
+    {
+      "title": "Monkey D. Family",
+      "description": "You hail from a lineage known for defying the world. With ties to both the Marines and the Revolutionary Army, your family legacy is one of strength, rebellion, and unwavering conviction. Will you carry on the will of your ancestors, or carve your own path?"
+    },
+    {
+      "title": "Unknown Family",
+      "description": "You were raised with no knowledge of your lineage. Whether abandoned, orphaned, or hidden away for protection, your family history is a mystery. Your quest may one day uncover a powerful bloodline or prove that destiny is forged, not inherited."
+    }
+  ]
+}
