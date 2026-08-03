@@ -417,6 +417,36 @@ def _cloak_messages_for_anthropic(messages: list[dict]) -> list[dict]:
     return [{"role": "user", "content": cloaked}] + messages[1:]
 
 
+_SYSTEM_CLOAK_TAG = "system-instructions"
+_SYSTEM_CACHE_MIN_CHARS = 5000
+_SYSTEM_CACHE_CONTROL = {"type": "ephemeral", "ttl": "1h"}
+
+
+def _fold_system_into_user(messages: list[dict]) -> tuple[list[dict], bool]:
+    """Proxy OAuth mode replaces the system field, so carry system text as a leading
+    user block instead. Returns (messages, cached) — cached is True when the folded
+    block got cache_control."""
+    system_msgs = [m for m in messages if m.get("role") == "system"]
+    if not system_msgs:
+        return messages, False
+    parts: list[str] = []
+    for m in system_msgs:
+        content = m.get("content", "")
+        if isinstance(content, list):
+            parts.append("\n".join(b.get("text", "") for b in content if isinstance(b, dict)))
+        else:
+            parts.append(content or "")
+    text = "\n".join(parts)
+    wrapped = f"<{_SYSTEM_CLOAK_TAG}>\n{text}\n</{_SYSTEM_CLOAK_TAG}>"
+    block: dict = {"type": "text", "text": wrapped}
+    cached = len(text) >= _SYSTEM_CACHE_MIN_CHARS
+    if cached:
+        block["cache_control"] = _SYSTEM_CACHE_CONTROL
+    folded = [{"role": "user", "content": [block]}]
+    rest = [m for m in messages if m.get("role") != "system"]
+    return folded + rest, cached
+
+
 def _flatten_system_for_openai(messages: list[dict]) -> list[dict]:
     """Collapse the leading system blocks into a single plain system string."""
     system = messages[0]
@@ -574,6 +604,7 @@ class LLMRouter:
         """Send a cached-form Anthropic request through the anthropic SDK, preserving
         cache_control (which litellm drops). Retries transient failures; returns a
         litellm-shaped adapter so _log_call reads real cache usage."""
+        messages, _ = _fold_system_into_user(messages)
         client = _get_anthropic_client(api_base, _ANTHROPIC_PROXY_KEY)
         bare_model = model.split("/")[-1]
         last_exc: Exception | None = None
@@ -623,6 +654,13 @@ class LLMRouter:
         if self.config.primary_provider == LLMProvider.ANTHROPIC:
             messages = self._sanitize_messages_for_anthropic(messages)
         messages = self._prepare_cached_messages(messages, call_kwargs)
+        if api_base and self.config.primary_provider == LLMProvider.ANTHROPIC:
+            messages, folded_cached = _fold_system_into_user(messages)
+            if folded_cached:
+                call_kwargs["extra_headers"] = {
+                    **_CACHE_HEADERS,
+                    **call_kwargs.get("extra_headers", {}),
+                }
         if api_base:
             call_kwargs["api_base"] = api_base
             call_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
@@ -682,6 +720,13 @@ class LLMRouter:
         if self.config.primary_provider == LLMProvider.ANTHROPIC:
             messages = self._sanitize_messages_for_anthropic(messages)
         messages = self._prepare_cached_messages(messages, call_kwargs)
+        if api_base and self.config.primary_provider == LLMProvider.ANTHROPIC:
+            messages, folded_cached = _fold_system_into_user(messages)
+            if folded_cached:
+                call_kwargs["extra_headers"] = {
+                    **_CACHE_HEADERS,
+                    **call_kwargs.get("extra_headers", {}),
+                }
         if api_base:
             call_kwargs["api_base"] = api_base
             call_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
