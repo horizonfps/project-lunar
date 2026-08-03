@@ -207,7 +207,7 @@ class NpcMindEngine:
                 "content": f"Are these the same character?\nName A: {name_a}\nName B: {name_b}{context_info}",
             },
         ]
-        raw = await self._llm.complete(messages=messages, max_tokens=16)
+        raw = await self._llm.complete(messages=messages, max_tokens=16, reasoning=False)
         return raw.strip().upper().startswith("YES")
 
     def _ensure_mind(self, campaign_id: str, npc_name: str) -> NpcMind:

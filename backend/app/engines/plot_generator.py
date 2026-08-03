@@ -159,7 +159,7 @@ class PlotGenerator:
             {"role": "user", "content": f"World context:\n{world_context}{tone_hint}{recent_hint}{dedup_hint}"},
         ]
         try:
-            raw = await self._llm.complete(messages=messages, max_tokens=2048)
+            raw = await self._llm.complete(messages=messages, max_tokens=2048, reasoning=False)
         except Exception:
             logger.exception("NPC generation failed")
             return None
@@ -227,7 +227,7 @@ class PlotGenerator:
             },
         ]
         try:
-            raw = await self._llm.complete(messages=messages, max_tokens=2048)
+            raw = await self._llm.complete(messages=messages, max_tokens=2048, reasoning=False)
         except Exception:
             logger.exception("Random event generation failed")
             return None
@@ -277,7 +277,7 @@ class PlotGenerator:
             {"role": "user", "content": f"World context:\n{world_context}{tone_hint}{recent_hint}"},
         ]
         try:
-            raw = await self._llm.complete(messages=messages, max_tokens=2048)
+            raw = await self._llm.complete(messages=messages, max_tokens=2048, reasoning=False)
         except Exception:
             logger.exception("Plot arc generation failed")
             return None
@@ -329,7 +329,7 @@ class PlotGenerator:
             },
         ]
         try:
-            raw = await self._llm.complete(messages=messages, max_tokens=2048)
+            raw = await self._llm.complete(messages=messages, max_tokens=2048, reasoning=False)
         except Exception:
             logger.exception("Micro-hook generation failed")
             return None
