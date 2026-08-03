@@ -43,6 +43,22 @@ _BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 _event_store = EventStore(os.environ.get("EVENT_DB_PATH", os.path.join(_BACKEND_DIR, "events.db")))
 _trace_store = TraceStore(os.environ.get("LLM_TRACE_DB_PATH", os.path.join(_BACKEND_DIR, "traces.db")))
 _llm = LLMRouter(LLMConfig())
+
+# Secondary calls (audit, memory, journal, combat, NPCs, plot, opening) run on a
+# cheaper model than the narrative call.
+_AUXILIARY_MODELS = {
+    LLMProvider.ANTHROPIC: "claude-sonnet-5",
+    LLMProvider.DEEPSEEK: "deepseek-v4-flash",
+}
+
+
+def apply_model_policy(provider: LLMProvider, model: str) -> None:
+    """Narrative runs on `model`; everything else on the provider's auxiliary model."""
+    _llm.config.primary_provider = provider
+    _llm.config.primary_model = _AUXILIARY_MODELS.get(provider, model)
+    _llm.config.orchestrator_model = model
+
+
 _narrator = NarratorEngine(llm=_llm)
 _memory = MemoryEngine(event_store=_event_store, llm=_llm)
 _world_reactor = WorldReactor(llm=_llm)
@@ -323,10 +339,10 @@ async def player_action(req: PlayerActionRequest):
     session.language = req.language or session.language
     # Apply user's LLM settings per-request
     try:
-        _llm.config.primary_provider = LLMProvider(req.provider)
+        provider = LLMProvider(req.provider)
     except ValueError:
-        pass
-    _llm.config.primary_model = req.model
+        provider = _llm.config.primary_provider
+    apply_model_policy(provider, req.model)
     _llm.config.temperature = req.temperature
     _llm.config.max_tokens = req.max_tokens
     if req.combat_enabled is not None:
