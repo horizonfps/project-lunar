@@ -61,3 +61,64 @@ async def test_complete_uses_fallback_on_error(router):
         result = await router.complete(messages=[{"role": "user", "content": "test"}])
     assert result == "Fallback response"
     assert call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_complete_reasoning_false_disables_deepseek_reasoning(router):
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="ok"))]
+    mock_acompletion = AsyncMock(return_value=mock_response)
+    with patch("app.engines.llm_router.litellm.acompletion", new=mock_acompletion):
+        await router.complete(
+            messages=[{"role": "user", "content": "test"}], reasoning=False
+        )
+    _, call_kwargs = mock_acompletion.call_args
+    assert call_kwargs.get("reasoning_effort") == "none"
+    assert "reasoning" not in call_kwargs
+
+
+@pytest.mark.asyncio
+async def test_complete_without_reasoning_key_omits_reasoning_effort(router):
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="ok"))]
+    mock_acompletion = AsyncMock(return_value=mock_response)
+    with patch("app.engines.llm_router.litellm.acompletion", new=mock_acompletion):
+        await router.complete(messages=[{"role": "user", "content": "test"}])
+    _, call_kwargs = mock_acompletion.call_args
+    assert "reasoning_effort" not in call_kwargs
+    assert "reasoning" not in call_kwargs
+
+
+@pytest.mark.asyncio
+async def test_complete_reasoning_false_anthropic_never_sends_reasoning_effort():
+    config = LLMConfig(
+        primary_provider=LLMProvider.ANTHROPIC,
+        primary_model="claude-sonnet-4-6",
+        temperature=0.85,
+        max_tokens=2000,
+    )
+    router = LLMRouter(config)
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="ok"))]
+    mock_acompletion = AsyncMock(return_value=mock_response)
+    with patch("app.engines.llm_router.litellm.acompletion", new=mock_acompletion):
+        await router.complete(
+            messages=[{"role": "user", "content": "test"}], reasoning=False
+        )
+    _, call_kwargs = mock_acompletion.call_args
+    assert "reasoning_effort" not in call_kwargs
+
+
+@pytest.mark.asyncio
+async def test_complete_empty_output_logs_error(router, caplog):
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content=""), finish_reason="length")]
+    mock_response.usage = MagicMock(
+        prompt_tokens=10, completion_tokens=64, completion_tokens_details=MagicMock(reasoning_tokens=64)
+    )
+    with patch("app.engines.llm_router.litellm.acompletion", new=AsyncMock(return_value=mock_response)):
+        with caplog.at_level("ERROR"):
+            await router.complete(messages=[{"role": "user", "content": "test"}])
+    messages = [r.getMessage() for r in caplog.records]
+    assert any("EMPTY OUTPUT" in m for m in messages)
+    assert any("[" in m and "]" in m for m in messages)
