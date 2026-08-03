@@ -608,7 +608,7 @@ class GameSession:
                 "_ensure_player_power: running for campaign %s (history=%d msgs, scale=%d chars)",
                 self.campaign_id, len(self._history), len(power_scale),
             )
-            raw = await self._combat._llm.complete(messages=messages, max_tokens=128)
+            raw = await self._combat._llm.complete(messages=messages, max_tokens=128, reasoning=False)
             logger.info("_ensure_player_power: LLM response: %s", (raw or "")[:200])
             data = parse_json_dict(raw)
             if data and "power" in data:
@@ -694,7 +694,7 @@ class GameSession:
             },
         ]
         try:
-            raw = await self._combat._llm.complete(messages=messages, max_tokens=128)
+            raw = await self._combat._llm.complete(messages=messages, max_tokens=128, reasoning=False)
             data = parse_json_dict(raw)
             if data and data.get("should_update"):
                 new_power = max(0, min(10, int(data.get("new_power", self._player_power))))
@@ -2028,7 +2028,7 @@ class GameSession:
             {"role": "user", "content": narrative_text},
         ]
         try:
-            raw = await self._narrator._llm.complete(messages=messages, max_tokens=256)
+            raw = await self._narrator._llm.complete(messages=messages, max_tokens=256, reasoning=False)
             data = parse_json_dict(raw) or {}
             names = data.get("npcs_present", [])
             if not isinstance(names, list):
@@ -2777,7 +2777,7 @@ class GameSession:
             },
             {"role": "user", "content": narrative_text},
         ]
-        raw = await self._narrator._llm.complete(messages=messages, max_tokens=2048)
+        raw = await self._narrator._llm.complete(messages=messages, max_tokens=2048, reasoning=False)
         data = parse_json_dict(raw)
         if not data:
             return

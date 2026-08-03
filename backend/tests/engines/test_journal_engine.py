@@ -160,3 +160,22 @@ def test_journal_entry_default_witnesses_is_empty():
         created_at=datetime.utcnow().isoformat(),
     )
     assert entry.witnessed_by == []
+
+
+@pytest.mark.asyncio
+async def test_evaluate_and_log_disables_reasoning(engine):
+    """This mechanical call must run without the reasoning budget eating the token cap."""
+    calls = []
+
+    class RecordingLLM:
+        async def complete(self, messages, max_tokens=None, **kwargs):
+            calls.append(kwargs)
+            return '{"relevant": true, "category": "DECISION", "summary": "The player agreed."}'
+
+    engine._llm = RecordingLLM()
+    await engine.evaluate_and_log(
+        campaign_id="c1",
+        narrative_text="You agree to the terms.",
+    )
+    assert calls
+    assert calls[0].get("reasoning") is False

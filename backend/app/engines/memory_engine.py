@@ -520,7 +520,7 @@ class MemoryEngine:
             {"role": "user", "content": source_text},
         ]
         try:
-            raw = await self._llm.complete(messages=messages, max_tokens=max_tokens)
+            raw = await self._llm.complete(messages=messages, max_tokens=max_tokens, reasoning=False)
             parsed = parse_json_dict(raw)
             if parsed:
                 ai_value = parsed.get("ai", parsed.get("ai_memory", ""))
