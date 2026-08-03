@@ -28,10 +28,13 @@ REQUEST_TIMEOUT = 300.0
 TOKEN_FILE = Path.home() / ".claude-max-proxy" / "tokens.json"
 
 # Default model
-DEFAULT_MODEL = "claude-sonnet-4-6"
+DEFAULT_MODEL = "claude-sonnet-5"
 
-# Available models (Claude 4.6 + older)
+# Available models (Claude 5 + older)
 MODELS = {
+    # Claude 5 (1M context)
+    "claude-sonnet-5": {"context": 1_000_000, "max_output": 64_000},
+    "claude-opus-5": {"context": 1_000_000, "max_output": 64_000},
     # Claude 4.6 (1M context)
     "claude-sonnet-4-6": {"context": 1_000_000, "max_output": 64_000},
     "claude-opus-4-6": {"context": 1_000_000, "max_output": 32_000},
