@@ -17,6 +17,23 @@ const TAG_COLORS = {
 const tagColor = (tag) =>
   TAG_COLORS[tag] || 'text-white/60 border-white/15 bg-white/5'
 
+const fmtDateTime = (iso) => {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+const truncate = (s, n) => {
+  if (!s) return ''
+  return s.length > n ? `${s.slice(0, n)}…` : s
+}
+
 function turnTotals(entries) {
   return (entries || []).reduce(
     (acc, e) => {
@@ -107,6 +124,7 @@ export default function DevtoolsPanel({ open, onClose, traces, onClear }) {
 
   const current = traces.find((t) => t.key === selectedKey) || traces[traces.length - 1] || null
   const tot = current ? turnTotals(current.entries) : null
+  const currentEntries = current?.entries || []
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -116,7 +134,7 @@ export default function DevtoolsPanel({ open, onClose, traces, onClear }) {
           <div className="flex items-center gap-3">
             <Terminal size={16} className="text-white" />
             <h2 className="text-white font-bold text-sm uppercase tracking-widest">LLM Devtools</h2>
-            <span className="text-white/30 text-xs font-mono">{traces.length} turns captured</span>
+            <span className="text-white/30 text-xs font-mono">{traces.length} turns saved</span>
           </div>
           <div className="flex items-center gap-2">
             {traces.length > 0 && (
@@ -156,7 +174,15 @@ export default function DevtoolsPanel({ open, onClose, traces, onClear }) {
                   }`}
                 >
                   {t.label}
-                  <span className="block text-[10px] text-white/25">{t.entries.length} calls</span>
+                  {t.created_at && (
+                    <span className="block text-[10px] text-white/25">{fmtDateTime(t.created_at)}</span>
+                  )}
+                  {t.action && (
+                    <span className="block text-[10px] text-white/25 truncate" title={t.action}>
+                      {truncate(t.action, 40)}
+                    </span>
+                  )}
+                  <span className="block text-[10px] text-white/25">{(t.entries || []).length} calls</span>
                 </button>
               ))}
             </div>
@@ -173,10 +199,10 @@ export default function DevtoolsPanel({ open, onClose, traces, onClear }) {
                   ) : (
                     <span className="text-amber-400/60">cache off</span>
                   )}
-                  <span className="text-white/25">{current.entries.length} calls</span>
+                  <span className="text-white/25">{currentEntries.length} calls</span>
                 </div>
               )}
-              {current?.entries.map((e) => (
+              {currentEntries.map((e) => (
                 <CallCard key={e.seq} entry={e} />
               ))}
             </div>

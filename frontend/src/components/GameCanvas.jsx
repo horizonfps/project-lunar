@@ -10,6 +10,8 @@ import {
   rewindLastAction,
   fetchScenarioView,
   regenerateOpening,
+  fetchTraces,
+  deleteTraces,
 } from '../api'
 import ActionInput from './ActionInput'
 import JournalPanel from './JournalPanel'
@@ -135,6 +137,7 @@ export default function GameCanvas() {
     traces,
     pushTrace,
     clearTraces,
+    setTraces,
   } = useGameStore()
   const bottomRef = useRef(null)
   const [journalOpen, setJournalOpen] = useState(false)
@@ -194,6 +197,16 @@ export default function GameCanvas() {
     fetchJournal(activeCampaignId)
       .then((entries) => setJournal(entries))
       .catch(() => {})
+  }, [activeCampaignId])
+
+  const loadTraces = async () => {
+    if (!activeCampaignId) return
+    const list = await fetchTraces(activeCampaignId)
+    setTraces(list)
+  }
+
+  useEffect(() => {
+    loadTraces()
   }, [activeCampaignId])
 
   const resolvedOpening = scenarioView?.opening_narrative ?? activeScenario?.opening_narrative ?? ''
@@ -450,7 +463,10 @@ export default function GameCanvas() {
               <BookOpen size={14} />
             </button>
             <button
-              onClick={() => setDevtoolsOpen(true)}
+              onClick={() => {
+                setDevtoolsOpen(true)
+                loadTraces()
+              }}
               title="LLM Devtools — inspect what each call sends"
               aria-label="Open LLM devtools"
               className="relative p-2 rounded-lg bg-white/5 hover:bg-white text-white/80 hover:text-black rounded-2xl border border-white/5 hover:text-cyan-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
@@ -589,7 +605,15 @@ export default function GameCanvas() {
       <WorldMapModal open={mapOpen} onClose={() => setMapOpen(false)} campaignId={activeCampaignId} />
       <InventoryPanel open={inventoryOpen} onClose={() => setInventoryOpen(false)} campaignId={activeCampaignId} inventory={inventory} setInventory={setInventory} />
       <JournalPanel open={journalOpen} onClose={() => setJournalOpen(false)} entries={journal} onRefresh={refreshJournal} />
-      <DevtoolsPanel open={devtoolsOpen} onClose={() => setDevtoolsOpen(false)} traces={traces} onClear={clearTraces} />
+      <DevtoolsPanel
+        open={devtoolsOpen}
+        onClose={() => setDevtoolsOpen(false)}
+        traces={traces}
+        onClear={async () => {
+          await deleteTraces(activeCampaignId)
+          clearTraces()
+        }}
+      />
     </div>
   )
 }
