@@ -72,6 +72,30 @@ async def test_detect_ambush(engine, mock_llm):
     assert meta["ambush"] is True
 
 
+@pytest.mark.asyncio
+async def test_detect_mode_is_not_marked_as_orchestrator(engine, mock_llm):
+    mock_llm.complete = AsyncMock(
+        return_value='{"mode": "NARRATIVE", "ambush": false, "narrative_time_seconds": 60}'
+    )
+    await engine.detect_mode("I look around the room")
+    assert not mock_llm.complete.call_args.kwargs.get("orchestrator")
+
+
+@pytest.mark.asyncio
+async def test_complete_single_call_is_marked_as_orchestrator(engine, mock_llm):
+    mock_llm.complete = AsyncMock(
+        return_value='{"mode": "NARRATIVE", "ambush": false, "narrative_time_seconds": 60, "narrative_text": "You step into the room."}'
+    )
+    result = await engine.complete_single_call(
+        player_input="I look around the room",
+        static_prompt="Static prompt",
+        dynamic_prompt="Dynamic prompt",
+        history=[],
+    )
+    assert result["narrative_text"] == "You step into the room."
+    assert mock_llm.complete.call_args.kwargs.get("orchestrator") is True
+
+
 def test_build_system_prompt_includes_tone(engine):
     prompt = engine.build_system_prompt(
         tone_instructions="Dark and hopeless. No happy endings.",

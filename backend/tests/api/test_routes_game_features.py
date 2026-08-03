@@ -48,6 +48,39 @@ def test_update_settings_invalid_provider_falls_back(client):
     assert r.json()["provider"] == "deepseek"
 
 
+def test_update_settings_anthropic_splits_narrative_and_auxiliary_model(client):
+    r = client.post("/api/settings", json={
+        "provider": "anthropic",
+        "model": "claude-opus-5",
+    })
+    assert r.status_code == 200
+
+    r2 = client.get("/api/settings")
+    data = r2.json()
+    assert data["model"] == "claude-opus-5"
+    assert data["auxiliary_model"] == "claude-sonnet-5"
+
+    # Restore the shared _llm state so later tests in this module don't
+    # inherit the Anthropic provider.
+    client.post("/api/settings", json={
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+    })
+
+
+def test_update_settings_deepseek_uses_same_model_everywhere(client):
+    r = client.post("/api/settings", json={
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+    })
+    assert r.status_code == 200
+
+    r2 = client.get("/api/settings")
+    data = r2.json()
+    assert data["model"] == "deepseek-v4-flash"
+    assert data["auxiliary_model"] == "deepseek-v4-flash"
+
+
 def test_get_npc_minds_empty(client):
     r = client.get("/api/game/test-campaign/npc-minds")
     assert r.status_code == 200

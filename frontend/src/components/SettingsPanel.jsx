@@ -4,8 +4,8 @@ import { updateCampaignSettings } from '../api'
 import { Settings, X } from 'lucide-react'
 
 const PROVIDERS = [
-  { id: 'deepseek', label: 'DeepSeek', models: ['deepseek-v4-flash', 'deepseek-v4-pro'] },
-  { id: 'anthropic', label: 'Anthropic', models: ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6', 'claude-opus-4-6'] },
+  { id: 'deepseek', label: 'DeepSeek', models: ['deepseek-v4-flash'] },
+  { id: 'anthropic', label: 'Anthropic', models: ['claude-opus-5', 'claude-sonnet-5'] },
   { id: 'openai', label: 'OpenAI', models: ['gpt-4o', 'gpt-4o-mini'] },
 ]
 
