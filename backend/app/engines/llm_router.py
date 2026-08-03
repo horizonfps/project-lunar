@@ -340,7 +340,10 @@ _CONTEXT_WINDOWS: dict[str, int] = {
     # Legacy aliases — map to DeepSeek-V4-Flash (non-thinking / thinking modes)
     "deepseek/deepseek-chat": 1_000_000,
     "deepseek/deepseek-reasoner": 1_000_000,
-    # Anthropic — Claude 4.6 (1M context)
+    # Anthropic Claude 5 (1M context)
+    "anthropic/claude-opus-5": 1_000_000,
+    "anthropic/claude-sonnet-5": 1_000_000,
+    # Anthropic Claude 4.6 (1M context)
     "anthropic/claude-opus-4-6": 1_000_000,
     "anthropic/claude-sonnet-4-6": 1_000_000,
     # Anthropic — Claude 4.5 / 4.0 / Haiku (200k context)
@@ -380,6 +383,7 @@ _CLOAK_TAG = "narrator-instructions"
 _NO_SAMPLING_MODELS = (
     "claude-opus-4-8",
     "claude-opus-4-7",
+    "claude-opus-5",
     "claude-sonnet-5",
     "claude-fable-5",
     "claude-mythos-5",
@@ -511,17 +515,19 @@ def _get_anthropic_client(base_url: str, api_key: str):
 class LLMConfig:
     primary_provider: LLMProvider = LLMProvider.DEEPSEEK
     primary_model: str = "deepseek-v4-flash"
+    orchestrator_model: str | None = None
     fallback_provider: LLMProvider | None = None
     fallback_model: str | None = None
     temperature: float = 0.85
     max_tokens: int = 2000
 
     def get_context_window(self) -> int:
-        """Return the context window size (tokens) for the current primary model."""
+        """Return the context window size (tokens) for the orchestrator model."""
+        model = self.orchestrator_model or self.primary_model
         model_key = (
-            self.primary_model
+            model
             if self.primary_provider == LLMProvider.OPENAI
-            else f"{self.primary_provider.value}/{self.primary_model}"
+            else f"{self.primary_provider.value}/{model}"
         )
         return _CONTEXT_WINDOWS.get(model_key, _DEFAULT_CONTEXT_WINDOW)
 
@@ -545,6 +551,12 @@ class LLMRouter:
         if provider == LLMProvider.OPENAI:
             return model
         return f"{provider.value}/{model}"
+
+    def _active_model(self, orchestrator: bool) -> str:
+        """Orchestrator calls use the dedicated model when one is configured."""
+        if orchestrator and self.config.orchestrator_model:
+            return self.config.orchestrator_model
+        return self.config.primary_model
 
     def _get_api_base(self, provider: LLMProvider) -> str | None:
         """Return custom api_base for providers that use a local proxy."""
@@ -643,8 +655,9 @@ class LLMRouter:
 
     async def complete(self, messages: list[dict], **kwargs) -> str:
         caller = _get_caller()
+        orchestrator = kwargs.pop("orchestrator", False)
         model = self._build_model_string(
-            self.config.primary_provider, self.config.primary_model
+            self.config.primary_provider, self._active_model(orchestrator)
         )
         max_tokens = kwargs.pop("max_tokens", self.config.max_tokens)
         reasoning = kwargs.pop("reasoning", True)
@@ -709,8 +722,9 @@ class LLMRouter:
 
     async def stream(self, messages: list[dict], **kwargs) -> AsyncIterator[str]:
         caller = _get_caller()
+        orchestrator = kwargs.pop("orchestrator", False)
         model = self._build_model_string(
-            self.config.primary_provider, self.config.primary_model
+            self.config.primary_provider, self._active_model(orchestrator)
         )
         max_tokens = kwargs.pop("max_tokens", self.config.max_tokens)
         reasoning = kwargs.pop("reasoning", True)

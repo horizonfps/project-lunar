@@ -1,6 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from app.engines.llm_router import LLMRouter, LLMConfig, LLMProvider, _fold_system_into_user
+from app.engines.llm_router import (
+    LLMRouter, LLMConfig, LLMProvider, _fold_system_into_user, _accepts_temperature,
+)
 
 
 @pytest.fixture
@@ -246,3 +248,72 @@ def test_fold_system_into_user_with_block_list_content():
     text = folded[0]["content"][0]["text"]
     assert "part one" in text
     assert "part two" in text
+
+
+@pytest.mark.asyncio
+async def test_orchestrator_flag_without_orchestrator_model_uses_primary(router):
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="ok"))]
+    mock_acompletion = AsyncMock(return_value=mock_response)
+    with patch("app.engines.llm_router.litellm.acompletion", new=mock_acompletion):
+        await router.complete(messages=[{"role": "user", "content": "test"}])
+        normal_model = mock_acompletion.call_args.kwargs["model"]
+        await router.complete(messages=[{"role": "user", "content": "test"}], orchestrator=True)
+        orchestrator_model = mock_acompletion.call_args.kwargs["model"]
+    assert normal_model == orchestrator_model
+
+
+@pytest.mark.asyncio
+async def test_orchestrator_flag_with_orchestrator_model_configured():
+    config = LLMConfig(
+        primary_provider=LLMProvider.ANTHROPIC,
+        primary_model="claude-sonnet-5",
+        orchestrator_model="claude-opus-5",
+        temperature=0.85,
+        max_tokens=2000,
+    )
+    router = LLMRouter(config)
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="ok"))]
+    mock_acompletion = AsyncMock(return_value=mock_response)
+    with patch("app.engines.llm_router.litellm.acompletion", new=mock_acompletion):
+        await router.complete(
+            messages=[{"role": "user", "content": "test"}], orchestrator=True
+        )
+        assert mock_acompletion.call_args.kwargs["model"] == "anthropic/claude-opus-5"
+        await router.complete(messages=[{"role": "user", "content": "test"}])
+        assert mock_acompletion.call_args.kwargs["model"] == "anthropic/claude-sonnet-5"
+
+
+@pytest.mark.asyncio
+async def test_orchestrator_kwarg_not_forwarded_to_acompletion(router):
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="ok"))]
+    mock_acompletion = AsyncMock(return_value=mock_response)
+    with patch("app.engines.llm_router.litellm.acompletion", new=mock_acompletion):
+        await router.complete(
+            messages=[{"role": "user", "content": "test"}], orchestrator=True
+        )
+    _, call_kwargs = mock_acompletion.call_args
+    assert "orchestrator" not in call_kwargs
+
+
+def test_get_context_window_claude_5_without_orchestrator_model():
+    config = LLMConfig(
+        primary_provider=LLMProvider.ANTHROPIC,
+        primary_model="claude-sonnet-5",
+    )
+    assert config.get_context_window() == 1_000_000
+
+
+def test_get_context_window_claude_5_with_orchestrator_model():
+    config = LLMConfig(
+        primary_provider=LLMProvider.ANTHROPIC,
+        primary_model="deepseek-v4-flash",
+        orchestrator_model="claude-opus-5",
+    )
+    assert config.get_context_window() == 1_000_000
+
+
+def test_accepts_temperature_false_for_claude_opus_5():
+    assert _accepts_temperature("anthropic/claude-opus-5") is False
