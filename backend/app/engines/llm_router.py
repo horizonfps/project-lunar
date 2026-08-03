@@ -98,6 +98,7 @@ def get_call_trace() -> list[dict]:
                 "output": c.get("output_tokens", 0),
                 "cache_read": c.get("cache_read", 0),
                 "cache_creation": c.get("cache_creation", 0),
+                "reasoning": c.get("reasoning_tokens", 0),
             },
             "input": c.get("input", []),
             "output": c.get("output", ""),
@@ -257,9 +258,21 @@ def _log_call(caller: str, messages: list[dict], max_tokens: int, response, elap
     output_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
     cache_read, cache_creation = _cache_tokens(usage)
 
+    try:
+        finish_reason = getattr(response.choices[0], "finish_reason", "") or ""
+    except Exception:
+        finish_reason = ""
+    try:
+        details = getattr(usage, "completion_tokens_details", None) if usage else None
+        reasoning_tokens = getattr(details, "reasoning_tokens", 0) or 0
+    except Exception:
+        reasoning_tokens = 0
+
     # Fallback: estimate from chars if usage not available
     if not input_tokens:
         input_tokens = total_chars // 4  # rough estimate
+
+    response_text = _extract_response_text(response)
 
     entry = {
         "caller": caller,
@@ -272,22 +285,30 @@ def _log_call(caller: str, messages: list[dict], max_tokens: int, response, elap
         "elapsed_s": round(elapsed, 2),
         "msg_count": len(messages),
         "system_chars": system_chars,
+        "finish_reason": finish_reason,
+        "reasoning_tokens": reasoning_tokens,
     }
     if _TRACE_ENABLED:
         entry["input"] = _trace_sections(messages)
-        entry["output"] = _extract_response_text(response)
+        entry["output"] = response_text
     _call_log.append(entry)
     logger.warning(
         "🔥 LLM CALL [%s] input=%d output=%d cache_r=%d cache_w=%d max=%d time=%.1fs msgs=%d sys_chars=%d",
         caller, input_tokens, output_tokens, cache_read, cache_creation, max_tokens, elapsed,
         len(messages), system_chars,
     )
+    if not response_text.strip():
+        logger.error(
+            "🚨 LLM EMPTY OUTPUT [%s] model=%s max_tokens=%d finish_reason=%s "
+            "output_tokens=%d reasoning_tokens=%d — model spent the budget before writing an answer",
+            caller, model, max_tokens, finish_reason, output_tokens, reasoning_tokens,
+        )
     _dump_call(
         caller=caller,
         model=model,
         messages=messages,
         max_tokens=max_tokens,
-        response_text=_extract_response_text(response),
+        response_text=response_text,
         input_tokens=input_tokens,
         output_tokens=output_tokens,
         elapsed=elapsed,
@@ -301,6 +322,13 @@ class LLMProvider(str, Enum):
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     DEEPSEEK = "deepseek"
+
+
+def _reasoning_kwargs(provider: LLMProvider, reasoning: bool) -> dict:
+    """DeepSeek V4 counts reasoning against max_tokens; disable it for mechanical calls."""
+    if reasoning or provider != LLMProvider.DEEPSEEK:
+        return {}
+    return {"reasoning_effort": "none"}
 
 
 # Context window sizes (in tokens) per provider/model.
@@ -387,6 +415,36 @@ def _cloak_messages_for_anthropic(messages: list[dict]) -> list[dict]:
             new_block["cache_control"] = b["cache_control"]
         cloaked.append(new_block)
     return [{"role": "user", "content": cloaked}] + messages[1:]
+
+
+_SYSTEM_CLOAK_TAG = "system-instructions"
+_SYSTEM_CACHE_MIN_CHARS = 5000
+_SYSTEM_CACHE_CONTROL = {"type": "ephemeral", "ttl": "1h"}
+
+
+def _fold_system_into_user(messages: list[dict]) -> tuple[list[dict], bool]:
+    """Proxy OAuth mode replaces the system field, so carry system text as a leading
+    user block instead. Returns (messages, cached) — cached is True when the folded
+    block got cache_control."""
+    system_msgs = [m for m in messages if m.get("role") == "system"]
+    if not system_msgs:
+        return messages, False
+    parts: list[str] = []
+    for m in system_msgs:
+        content = m.get("content", "")
+        if isinstance(content, list):
+            parts.append("\n".join(b.get("text", "") for b in content if isinstance(b, dict)))
+        else:
+            parts.append(content or "")
+    text = "\n".join(parts)
+    wrapped = f"<{_SYSTEM_CLOAK_TAG}>\n{text}\n</{_SYSTEM_CLOAK_TAG}>"
+    block: dict = {"type": "text", "text": wrapped}
+    cached = len(text) >= _SYSTEM_CACHE_MIN_CHARS
+    if cached:
+        block["cache_control"] = _SYSTEM_CACHE_CONTROL
+    folded = [{"role": "user", "content": [block]}]
+    rest = [m for m in messages if m.get("role") != "system"]
+    return folded + rest, cached
 
 
 def _flatten_system_for_openai(messages: list[dict]) -> list[dict]:
@@ -546,6 +604,7 @@ class LLMRouter:
         """Send a cached-form Anthropic request through the anthropic SDK, preserving
         cache_control (which litellm drops). Retries transient failures; returns a
         litellm-shaped adapter so _log_call reads real cache usage."""
+        messages, _ = _fold_system_into_user(messages)
         client = _get_anthropic_client(api_base, _ANTHROPIC_PROXY_KEY)
         bare_model = model.split("/")[-1]
         last_exc: Exception | None = None
@@ -588,11 +647,20 @@ class LLMRouter:
             self.config.primary_provider, self.config.primary_model
         )
         max_tokens = kwargs.pop("max_tokens", self.config.max_tokens)
+        reasoning = kwargs.pop("reasoning", True)
         api_base = self._get_api_base(self.config.primary_provider)
         call_kwargs = {**kwargs}
+        call_kwargs.update(_reasoning_kwargs(self.config.primary_provider, reasoning))
         if self.config.primary_provider == LLMProvider.ANTHROPIC:
             messages = self._sanitize_messages_for_anthropic(messages)
         messages = self._prepare_cached_messages(messages, call_kwargs)
+        if api_base and self.config.primary_provider == LLMProvider.ANTHROPIC:
+            messages, folded_cached = _fold_system_into_user(messages)
+            if folded_cached:
+                call_kwargs["extra_headers"] = {
+                    **_CACHE_HEADERS,
+                    **call_kwargs.get("extra_headers", {}),
+                }
         if api_base:
             call_kwargs["api_base"] = api_base
             call_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
@@ -624,6 +692,7 @@ class LLMRouter:
                 )
                 fb_api_base = self._get_api_base(self.config.fallback_provider)
                 fb_kwargs = {**kwargs}
+                fb_kwargs.update(_reasoning_kwargs(self.config.fallback_provider, reasoning))
                 if fb_api_base:
                     fb_kwargs["api_base"] = fb_api_base
                     fb_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
@@ -644,11 +713,20 @@ class LLMRouter:
             self.config.primary_provider, self.config.primary_model
         )
         max_tokens = kwargs.pop("max_tokens", self.config.max_tokens)
+        reasoning = kwargs.pop("reasoning", True)
         api_base = self._get_api_base(self.config.primary_provider)
         call_kwargs = {**kwargs}
+        call_kwargs.update(_reasoning_kwargs(self.config.primary_provider, reasoning))
         if self.config.primary_provider == LLMProvider.ANTHROPIC:
             messages = self._sanitize_messages_for_anthropic(messages)
         messages = self._prepare_cached_messages(messages, call_kwargs)
+        if api_base and self.config.primary_provider == LLMProvider.ANTHROPIC:
+            messages, folded_cached = _fold_system_into_user(messages)
+            if folded_cached:
+                call_kwargs["extra_headers"] = {
+                    **_CACHE_HEADERS,
+                    **call_kwargs.get("extra_headers", {}),
+                }
         if api_base:
             call_kwargs["api_base"] = api_base
             call_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
@@ -747,6 +825,12 @@ class LLMRouter:
             entry["caller"], entry["input_tokens"], entry["output_tokens"],
             max_tokens, entry["elapsed_s"], len(messages), system_chars,
         )
+        if not accumulated.strip():
+            logger.error(
+                "🚨 LLM EMPTY OUTPUT [%s] model=%s max_tokens=%d finish_reason=%s "
+                "output_tokens=%d reasoning_tokens=%d — model spent the budget before writing an answer",
+                entry["caller"], model, max_tokens, "", entry["output_tokens"], 0,
+            )
         _dump_call(
             caller=caller + "(stream)",
             model=model,

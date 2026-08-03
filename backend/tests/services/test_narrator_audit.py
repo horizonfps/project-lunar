@@ -33,9 +33,9 @@ def test_flag_off_values(monkeypatch, val):
 
 @pytest.mark.parametrize("bad", ["", "abc", "90s", "inf", "nan", "-5", "0"])
 def test_audit_timeout_bad_values_degrade_to_default(monkeypatch, bad):
-    # A misconfigured timeout must never crash import; it degrades to 90.0.
+    # A misconfigured timeout must never crash import; it degrades to the default.
     monkeypatch.setenv("LUNAR_AUDIT_TIMEOUT_S", bad)
-    assert _audit_timeout_s() == 90.0
+    assert _audit_timeout_s() == 210.0
 
 
 def test_audit_timeout_valid_value(monkeypatch):

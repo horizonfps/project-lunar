@@ -50,7 +50,7 @@ class ScenarioService:
             },
             {"role": "user", "content": lore_text},
         ]
-        raw = await self._llm.complete(messages=messages, max_tokens=2048)
+        raw = await self._llm.complete(messages=messages, max_tokens=2048, reasoning=False)
         entities = parse_json_list(raw)
         if entities is None:
             return []

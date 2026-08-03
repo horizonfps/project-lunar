@@ -1,10 +1,24 @@
 from __future__ import annotations
 import logging
+import os
 import re
 
 from app.utils.json_parsing import parse_json_dict
 
 logger = logging.getLogger(__name__)
+
+
+def _reasoning_headroom() -> int:
+    """Extra output budget for models that spend max_tokens on reasoning."""
+    raw = os.environ.get("LUNAR_AUDIT_REASONING_HEADROOM", "8000") or "8000"
+    try:
+        v = int(raw)
+    except ValueError:
+        return 8000
+    return v if v > 0 else 8000
+
+
+_REASONING_HEADROOM = _reasoning_headroom()
 
 # Inline control markers the engine parses AFTER the audit. A rewrite that drops,
 # adds, or alters any [ITEM_*] tag is rejected (they are load-bearing side effects).
@@ -297,15 +311,31 @@ class AuditorEngine:
         ]
 
         try:
-            api_max_tokens = max_tokens + 2000  # prose rewrite + corrections + gate headroom
-            raw = await self._llm.complete(messages=messages, max_tokens=api_max_tokens)
+            # prose rewrite + corrections + gate headroom + reasoning budget
+            api_max_tokens = max_tokens + 2000 + _REASONING_HEADROOM
+            # Reasoning off: the rubric already forces step-by-step checking in the
+            # answer itself, and free reasoning drains the whole budget before any
+            # text is written, which returns empty and silently skips the audit.
+            raw = await self._llm.complete(
+                messages=messages, max_tokens=api_max_tokens, reasoning=False
+            )
         except Exception:
-            logger.warning("Auditor LLM call failed; releasing original prose", exc_info=True)
+            logger.error("Auditor LLM call failed; releasing original prose", exc_info=True)
             return prose, {"verdict": "clean", "error": "llm_call_failed"}
+
+        if not raw or not raw.strip():
+            logger.error(
+                "Auditor returned EMPTY output (max_tokens=%d); releasing original prose",
+                api_max_tokens,
+            )
+            return prose, {"verdict": "clean", "error": "empty_output"}
 
         parsed = parse_json_dict(raw)
         if not parsed:
-            logger.warning("Auditor returned unparseable output; releasing original prose")
+            logger.error(
+                "Auditor returned unparseable output (len=%d); releasing original prose. First 300 chars: %r",
+                len(raw), raw[:300],
+            )
             return prose, {"verdict": "clean", "error": "parse_failed"}
 
         # Discard the reflexive gate: it only forces the model to re-assert the

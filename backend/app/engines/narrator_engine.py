@@ -65,7 +65,7 @@ class NarratorEngine:
             {"role": "user", "content": player_input},
         ]
         try:
-            raw = await self._llm.complete(messages=messages, max_tokens=256)
+            raw = await self._llm.complete(messages=messages, max_tokens=256, reasoning=False)
         except Exception:
             return self._heuristic_detect_mode(player_input)
 

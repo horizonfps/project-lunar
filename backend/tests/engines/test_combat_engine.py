@@ -103,3 +103,19 @@ def test_all_outcomes_exist():
     # With mid-level quality and difficulty, all outcomes should be possible over many rolls
     outcomes = {engine.roll_outcome(5.0, 5) for _ in range(500)}
     assert len(outcomes) >= 3  # At least 3 of the 4 outcomes should appear
+
+
+@pytest.mark.asyncio
+async def test_anti_griefing_disables_reasoning():
+    """This mechanical check must run without the reasoning budget eating the token cap."""
+    calls = []
+
+    class RecordingLLM:
+        async def complete(self, messages, max_tokens=None, **kwargs):
+            calls.append(kwargs)
+            return '{"is_meta": false, "is_physically_impossible": false}'
+
+    engine = CombatEngine(llm=RecordingLLM())
+    await engine.anti_griefing_check("I grab a handful of dirt and throw it in his eyes")
+    assert calls
+    assert calls[0].get("reasoning") is False
