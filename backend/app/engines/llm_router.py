@@ -511,6 +511,10 @@ def _get_anthropic_client(base_url: str, api_key: str):
 class LLMConfig:
     primary_provider: LLMProvider = LLMProvider.DEEPSEEK
     primary_model: str = "deepseek-v4-flash"
+    # Model used for the narrative call when a caller opts in via orchestrator=True.
+    # T-010 shim: T-008 (which wires this into the actual completion calls) has not
+    # landed in this worktree yet, so this field only stores the value for now.
+    orchestrator_model: str = "deepseek-v4-flash"
     fallback_provider: LLMProvider | None = None
     fallback_model: str | None = None
     temperature: float = 0.85
