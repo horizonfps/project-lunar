@@ -1,4 +1,5 @@
 import json
+import logging
 
 import pytest
 
@@ -161,7 +162,42 @@ async def test_max_tokens_headroom_scales_with_turn_budget():
     llm = _FakeLLM(_reply(verdict="clean"))
     a = AuditorEngine(llm)
     await a.audit("The gate opens.", "x", language="en", max_tokens=3000)
-    assert llm.last_max_tokens == 3000 + 2000
+    assert llm.last_max_tokens == 3000 + 2000 + 8000
+
+
+@pytest.mark.asyncio
+async def test_default_reasoning_headroom_gives_12000_for_default_turn_budget():
+    llm = _FakeLLM(_reply(verdict="clean"))
+    a = AuditorEngine(llm)
+    await a.audit("The gate opens.", "x", language="en", max_tokens=2000)
+    assert llm.last_max_tokens == 12000
+
+
+@pytest.mark.asyncio
+async def test_empty_output_releases_original_and_logs_error(caplog):
+    llm = _FakeLLM("")
+    a = AuditorEngine(llm)
+    prose = "The gate opens."
+    with caplog.at_level(logging.ERROR):
+        out, report = await a.audit(prose, "x", language="en")
+    assert out == prose
+    assert report["error"] == "empty_output"
+    assert any(
+        record.levelno == logging.ERROR and "EMPTY output" in record.getMessage()
+        for record in caplog.records
+    )
+
+
+@pytest.mark.asyncio
+async def test_non_json_output_releases_original_and_logs_error(caplog):
+    llm = _FakeLLM("bla bla")
+    a = AuditorEngine(llm)
+    prose = "The gate opens."
+    with caplog.at_level(logging.ERROR):
+        out, report = await a.audit(prose, "x", language="en")
+    assert out == prose
+    assert report["error"] == "parse_failed"
+    assert any(record.levelno == logging.ERROR for record in caplog.records)
 
 
 @pytest.mark.asyncio
