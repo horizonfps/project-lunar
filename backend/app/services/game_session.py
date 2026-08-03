@@ -61,12 +61,12 @@ def _narrator_audit_enabled() -> bool:
 def _audit_timeout_s() -> float:
     """Post-hoc auditor timeout (best-effort). A bad/empty value degrades to the
     default instead of crashing import; must be positive and finite."""
-    raw = os.environ.get("LUNAR_AUDIT_TIMEOUT_S", "90") or "90"
+    raw = os.environ.get("LUNAR_AUDIT_TIMEOUT_S", "210") or "210"
     try:
         v = float(raw)
     except ValueError:
-        return 90.0
-    return v if (v > 0 and v != float("inf") and v == v) else 90.0
+        return 210.0
+    return v if (v > 0 and v != float("inf") and v == v) else 210.0
 
 
 _AUDIT_TIMEOUT_S = _audit_timeout_s()

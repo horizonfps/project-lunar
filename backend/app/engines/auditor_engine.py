@@ -313,7 +313,12 @@ class AuditorEngine:
         try:
             # prose rewrite + corrections + gate headroom + reasoning budget
             api_max_tokens = max_tokens + 2000 + _REASONING_HEADROOM
-            raw = await self._llm.complete(messages=messages, max_tokens=api_max_tokens)
+            # Reasoning off: the rubric already forces step-by-step checking in the
+            # answer itself, and free reasoning drains the whole budget before any
+            # text is written, which returns empty and silently skips the audit.
+            raw = await self._llm.complete(
+                messages=messages, max_tokens=api_max_tokens, reasoning=False
+            )
         except Exception:
             logger.error("Auditor LLM call failed; releasing original prose", exc_info=True)
             return prose, {"verdict": "clean", "error": "llm_call_failed"}
