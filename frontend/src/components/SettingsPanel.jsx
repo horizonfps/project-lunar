@@ -6,7 +6,7 @@ import { Settings, X } from 'lucide-react'
 const PROVIDERS = [
   { id: 'deepseek', label: 'DeepSeek', models: ['deepseek-v4-flash'] },
   { id: 'anthropic', label: 'Anthropic', models: ['claude-opus-5', 'claude-sonnet-5'] },
-  { id: 'openai', label: 'OpenAI', models: ['gpt-4o', 'gpt-4o-mini'] },
+  { id: 'openai', label: 'OpenAI', models: ['gpt-5.6-sol'] },
 ]
 
 export default function SettingsPanel({ open, onClose }) {

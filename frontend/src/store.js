@@ -1,5 +1,13 @@
 import { create } from 'zustand'
 
+const OPENAI_MODEL = 'gpt-5.6-sol'
+
+const normalizeSettings = (settings) => (
+  settings?.llmProvider === 'openai'
+    ? { ...settings, llmModel: OPENAI_MODEL }
+    : settings
+)
+
 export const useGameStore = create((set) => ({
   // Scenario state
   scenarios: [],
@@ -123,12 +131,13 @@ export const useGameStore = create((set) => ({
     })),
 
   updateSettings: (settings) => {
+    const normalized = normalizeSettings(settings)
     try {
       const current = JSON.parse(localStorage.getItem('lunar_settings') || '{}')
-      const merged = { ...current, ...settings }
+      const merged = normalizeSettings({ ...current, ...normalized })
       localStorage.setItem('lunar_settings', JSON.stringify(merged))
     } catch {}
-    return set(settings)
+    return set(normalized)
   },
 
   // Session persistence
@@ -143,7 +152,8 @@ export const useGameStore = create((set) => ({
       if (campaignId) restored.activeCampaignId = campaignId
       if (messagesJson) restored.messages = JSON.parse(messagesJson)
       if (settingsJson) {
-        const s = JSON.parse(settingsJson)
+        const s = normalizeSettings(JSON.parse(settingsJson))
+        localStorage.setItem('lunar_settings', JSON.stringify(s))
         if (s.llmProvider) restored.llmProvider = s.llmProvider
         if (s.llmModel) restored.llmModel = s.llmModel
         if (s.temperature != null) restored.temperature = s.temperature
@@ -171,7 +181,8 @@ export const useGameStore = create((set) => ({
     try {
       const settingsJson = localStorage.getItem('lunar_settings')
       if (settingsJson) {
-        const s = JSON.parse(settingsJson)
+        const s = normalizeSettings(JSON.parse(settingsJson))
+        localStorage.setItem('lunar_settings', JSON.stringify(s))
         const restored = {}
         if (s.llmProvider) restored.llmProvider = s.llmProvider
         if (s.llmModel) restored.llmModel = s.llmModel
