@@ -152,7 +152,7 @@ O resultado será um único arquivo JSON importável com:
 8. Nenhuma campanha predefinida.
 9. Uma pergunta obrigatória para o primeiro nome do personagem, com sobrenome Halbrecht fixo. Nenhuma pergunta de personalidade limita a interpretação do jogador.
 
-A abertura começa no primeiro dia dos seis meses restantes. O personagem desperta, reconhece a condição do corpo pela interface e identifica a data. Uma convocação do duque impede que a cena permaneça parada no quarto.
+A abertura começa no primeiro dia dos seis meses restantes. O personagem desperta, reconhece a condição do corpo pela interface e identifica a data. Não existe convocação, avaliação familiar ou ordem imediata. O jogador decide sozinho o primeiro passo.
 
 ## Regras obrigatórias de estilo
 
