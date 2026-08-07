@@ -46,17 +46,20 @@ _llm = LLMRouter(LLMConfig())
 
 # Secondary calls (audit, memory, journal, combat, NPCs, plot, opening) run on a
 # cheaper model than the narrative call.
+_OPENAI_MODEL = "gpt-5.6-sol"
 _AUXILIARY_MODELS = {
     LLMProvider.ANTHROPIC: "claude-sonnet-5",
     LLMProvider.DEEPSEEK: "deepseek-v4-flash",
+    LLMProvider.OPENAI: _OPENAI_MODEL,
 }
 
 
 def apply_model_policy(provider: LLMProvider, model: str) -> None:
     """Narrative runs on `model`; everything else on the provider's auxiliary model."""
+    narrative_model = _OPENAI_MODEL if provider == LLMProvider.OPENAI else model
     _llm.config.primary_provider = provider
-    _llm.config.primary_model = _AUXILIARY_MODELS.get(provider, model)
-    _llm.config.orchestrator_model = model
+    _llm.config.primary_model = _AUXILIARY_MODELS.get(provider, narrative_model)
+    _llm.config.orchestrator_model = narrative_model
 
 
 _narrator = NarratorEngine(llm=_llm)

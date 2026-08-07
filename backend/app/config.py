@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     neo4j_password: str = ""
     anthropic_proxy_url: str = ""
     anthropic_proxy_key: str = "proxy"
+    openai_proxy_url: str = ""
+    openai_proxy_key: str = "proxy"
     debug: bool = False
 
     model_config = {"env_file": [".env", "../.env"]}

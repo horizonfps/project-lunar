@@ -359,14 +359,8 @@ _CONTEXT_WINDOWS: dict[str, int] = {
     "anthropic/claude-sonnet-4-0": 200_000,
     "anthropic/claude-opus-4-20250514": 200_000,
     "anthropic/claude-opus-4-0": 200_000,
-    # OpenAI — GPT-5.4 (1M context)
-    "gpt-5.4": 1_000_000,
-    "gpt-5.4-mini": 400_000,
-    "gpt-5.4-nano": 400_000,
-    # OpenAI — legacy
-    "gpt-4o": 128_000,
-    "gpt-4o-mini": 128_000,
-    "gpt-4-turbo": 128_000,
+    # OpenAI GPT-5.6 Sol
+    "openai/gpt-5.6-sol": 372_000,
 }
 _DEFAULT_CONTEXT_WINDOW = 200_000  # reasonable fallback
 
@@ -387,6 +381,7 @@ _NO_SAMPLING_MODELS = (
     "claude-sonnet-5",
     "claude-fable-5",
     "claude-mythos-5",
+    "gpt-5.6-sol",
 )
 
 
@@ -524,11 +519,7 @@ class LLMConfig:
     def get_context_window(self) -> int:
         """Return the context window size (tokens) for the orchestrator model."""
         model = self.orchestrator_model or self.primary_model
-        model_key = (
-            model
-            if self.primary_provider == LLMProvider.OPENAI
-            else f"{self.primary_provider.value}/{model}"
-        )
+        model_key = f"{self.primary_provider.value}/{model}"
         return _CONTEXT_WINDOWS.get(model_key, _DEFAULT_CONTEXT_WINDOW)
 
 
@@ -541,6 +532,8 @@ from app.config import settings as _settings
 
 _ANTHROPIC_PROXY_URL = _settings.anthropic_proxy_url or os.environ.get("ANTHROPIC_PROXY_URL", "")
 _ANTHROPIC_PROXY_KEY = _settings.anthropic_proxy_key or os.environ.get("ANTHROPIC_PROXY_KEY", "proxy")
+_OPENAI_PROXY_URL = _settings.openai_proxy_url or os.environ.get("OPENAI_PROXY_URL", "")
+_OPENAI_PROXY_KEY = _settings.openai_proxy_key or os.environ.get("OPENAI_PROXY_KEY", "proxy")
 
 
 class LLMRouter:
@@ -548,8 +541,6 @@ class LLMRouter:
         self.config = config
 
     def _build_model_string(self, provider: LLMProvider, model: str) -> str:
-        if provider == LLMProvider.OPENAI:
-            return model
         return f"{provider.value}/{model}"
 
     def _active_model(self, orchestrator: bool) -> str:
@@ -562,6 +553,15 @@ class LLMRouter:
         """Return custom api_base for providers that use a local proxy."""
         if provider == LLMProvider.ANTHROPIC and _ANTHROPIC_PROXY_URL:
             return _ANTHROPIC_PROXY_URL
+        if provider == LLMProvider.OPENAI and _OPENAI_PROXY_URL:
+            return _OPENAI_PROXY_URL
+        return None
+
+    def _get_api_key(self, provider: LLMProvider) -> str | None:
+        if provider == LLMProvider.ANTHROPIC and _ANTHROPIC_PROXY_URL:
+            return _ANTHROPIC_PROXY_KEY
+        if provider == LLMProvider.OPENAI and _OPENAI_PROXY_URL:
+            return _OPENAI_PROXY_KEY
         return None
 
     @staticmethod
@@ -676,7 +676,7 @@ class LLMRouter:
                 }
         if api_base:
             call_kwargs["api_base"] = api_base
-            call_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
+            call_kwargs["api_key"] = self._get_api_key(self.config.primary_provider)
         if (api_base and self.config.primary_provider == LLMProvider.ANTHROPIC
                 and _has_cache_control(messages)):
             t0 = time.monotonic()
@@ -708,7 +708,7 @@ class LLMRouter:
                 fb_kwargs.update(_reasoning_kwargs(self.config.fallback_provider, reasoning))
                 if fb_api_base:
                     fb_kwargs["api_base"] = fb_api_base
-                    fb_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
+                    fb_kwargs["api_key"] = self._get_api_key(self.config.fallback_provider)
                 response = await litellm.acompletion(
                     model=fallback_model,
                     messages=messages,
@@ -743,7 +743,7 @@ class LLMRouter:
                 }
         if api_base:
             call_kwargs["api_base"] = api_base
-            call_kwargs["api_key"] = _ANTHROPIC_PROXY_KEY
+            call_kwargs["api_key"] = self._get_api_key(self.config.primary_provider)
             # FASE 2: cached-form Anthropic requests go through the anthropic SDK
             # directly. litellm strips content-block cache_control, killing the cache.
             if (self.config.primary_provider == LLMProvider.ANTHROPIC

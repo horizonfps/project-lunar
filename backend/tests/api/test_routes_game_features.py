@@ -31,12 +31,14 @@ def test_update_settings(client):
     })
     assert r.status_code == 200
     assert r.json()["provider"] == "openai"
-    assert r.json()["model"] == "gpt-4o"
+    assert r.json()["model"] == "gpt-5.6-sol"
 
-    # Verify it persisted
     r2 = client.get("/api/settings")
-    assert r2.json()["provider"] == "openai"
-    assert r2.json()["temperature"] == 0.5
+    data = r2.json()
+    assert data["provider"] == "openai"
+    assert data["model"] == "gpt-5.6-sol"
+    assert data["auxiliary_model"] == "gpt-5.6-sol"
+    assert data["temperature"] == 0.5
 
 
 def test_update_settings_invalid_provider_falls_back(client):

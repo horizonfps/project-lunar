@@ -26,8 +26,8 @@ def test_build_deepseek_model_string(router):
 
 
 def test_build_openai_model_string(router):
-    model = router._build_model_string(LLMProvider.OPENAI, "gpt-4o")
-    assert model == "gpt-4o"
+    model = router._build_model_string(LLMProvider.OPENAI, "gpt-5.6-sol")
+    assert model == "openai/gpt-5.6-sol"
 
 
 def test_build_anthropic_model_string(router):
@@ -47,7 +47,7 @@ async def test_complete_returns_text(router):
 @pytest.mark.asyncio
 async def test_complete_uses_fallback_on_error(router):
     router.config.fallback_provider = LLMProvider.OPENAI
-    router.config.fallback_model = "gpt-4o"
+    router.config.fallback_model = "gpt-5.6-sol"
     mock_response = MagicMock()
     mock_response.choices = [MagicMock(message=MagicMock(content="Fallback response"))]
     call_count = 0
@@ -317,3 +317,85 @@ def test_get_context_window_claude_5_with_orchestrator_model():
 
 def test_accepts_temperature_false_for_claude_opus_5():
     assert _accepts_temperature("anthropic/claude-opus-5") is False
+
+
+def test_get_context_window_gpt_5_6_sol():
+    config = LLMConfig(
+        primary_provider=LLMProvider.OPENAI,
+        primary_model="gpt-5.6-sol",
+    )
+    assert config.get_context_window() == 372_000
+
+
+def test_accepts_temperature_false_for_gpt_5_6_sol():
+    assert _accepts_temperature("openai/gpt-5.6-sol") is False
+
+
+@pytest.mark.asyncio
+async def test_openai_proxy_uses_provider_specific_base_and_key():
+    config = LLMConfig(
+        primary_provider=LLMProvider.OPENAI,
+        primary_model="gpt-5.6-sol",
+        temperature=0.85,
+        max_tokens=2000,
+    )
+    router = LLMRouter(config)
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="ok"))]
+    mock_acompletion = AsyncMock(return_value=mock_response)
+    with patch("app.engines.llm_router._OPENAI_PROXY_URL", "http://127.0.0.1:48319/v1"), \
+            patch("app.engines.llm_router._OPENAI_PROXY_KEY", "openai-proxy-key"), \
+            patch("app.engines.llm_router.litellm.acompletion", new=mock_acompletion):
+        result = await router.complete(messages=[
+            {"role": "user", "content": "test"},
+        ])
+    assert result == "ok"
+    call_kwargs = mock_acompletion.call_args.kwargs
+    assert call_kwargs["model"] == "openai/gpt-5.6-sol"
+    assert call_kwargs["api_base"] == "http://127.0.0.1:48319/v1"
+    assert call_kwargs["api_key"] == "openai-proxy-key"
+    assert "temperature" not in call_kwargs
+
+
+@pytest.mark.asyncio
+async def test_openai_without_proxy_uses_direct_provider_configuration():
+    config = LLMConfig(
+        primary_provider=LLMProvider.OPENAI,
+        primary_model="gpt-5.6-sol",
+    )
+    router = LLMRouter(config)
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="ok"))]
+    mock_acompletion = AsyncMock(return_value=mock_response)
+    with patch("app.engines.llm_router._OPENAI_PROXY_URL", ""), \
+            patch("app.engines.llm_router.litellm.acompletion", new=mock_acompletion):
+        await router.complete(messages=[{"role": "user", "content": "test"}])
+    call_kwargs = mock_acompletion.call_args.kwargs
+    assert "api_base" not in call_kwargs
+    assert "api_key" not in call_kwargs
+
+
+@pytest.mark.asyncio
+async def test_openai_cached_system_is_flattened_for_proxy():
+    config = LLMConfig(
+        primary_provider=LLMProvider.OPENAI,
+        primary_model="gpt-5.6-sol",
+    )
+    router = LLMRouter(config)
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock(message=MagicMock(content="ok"))]
+    mock_acompletion = AsyncMock(return_value=mock_response)
+    with patch("app.engines.llm_router._OPENAI_PROXY_URL", "http://127.0.0.1:48319/v1"), \
+            patch("app.engines.llm_router.litellm.acompletion", new=mock_acompletion):
+        await router.complete(messages=[
+            {"role": "system", "content": [
+                {"type": "text", "text": "part one"},
+                {"type": "text", "text": "part two"},
+            ]},
+            {"role": "user", "content": "test"},
+        ])
+    sent_messages = mock_acompletion.call_args.kwargs["messages"]
+    assert sent_messages[0] == {
+        "role": "system",
+        "content": "part one\npart two",
+    }

@@ -68,7 +68,8 @@ def update_settings(req: SettingsUpdateRequest):
     _llm.config.temperature = req.temperature
     _llm.config.max_tokens = req.max_tokens
     apply_model_policy(provider, req.model)
-    return {"status": "ok", "provider": provider.value, "model": req.model}
+    model = _llm.config.orchestrator_model or _llm.config.primary_model
+    return {"status": "ok", "provider": provider.value, "model": model}
 
 
 @app.get("/api/settings")
