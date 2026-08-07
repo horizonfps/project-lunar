@@ -1,6 +1,6 @@
 """
 Translates a Project Lunar scenario JSON from English to Brazilian Portuguese
-using OpenAI GPT-4o.
+using OpenAI GPT-5.6 Sol.
 
 Usage:
     OPENAI_API_KEY=... python translate_scenario.py \
@@ -19,7 +19,7 @@ from pathlib import Path
 
 from openai import OpenAI
 
-MODEL = "gpt-4o"
+MODEL = "gpt-5.6-sol"
 TARGET_LANGUAGE = "Brazilian Portuguese (pt-BR)"
 CARDS_PER_BATCH = 5
 MAX_WORKERS = 1  # 30k TPM org limit — keep serial; bump if your tier is higher
@@ -97,7 +97,6 @@ def call_chat(system: str, user: str, json_mode: bool) -> str:
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},
                 ],
-                "temperature": 0.2,
             }
             if json_mode:
                 kwargs["response_format"] = {"type": "json_object"}
@@ -231,17 +230,25 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", required=True)
     parser.add_argument("--output", required=True)
-    parser.add_argument("--api-key", default=os.environ.get("OPENAI_API_KEY"))
+    parser.add_argument("--base-url", default=os.environ.get("OPENAI_PROXY_URL"))
+    parser.add_argument("--api-key")
     parser.add_argument("--limit-cards", type=int, default=0,
                         help="If > 0, only translate the first N cards (for testing).")
     args = parser.parse_args()
 
-    if not args.api_key:
-        print("ERROR: no OPENAI_API_KEY provided", file=sys.stderr)
+    api_key = args.api_key or (
+        os.environ.get("OPENAI_PROXY_KEY") if args.base_url
+        else os.environ.get("OPENAI_API_KEY")
+    )
+    if not api_key:
+        print("ERROR: no OpenAI API or proxy key provided", file=sys.stderr)
         return 2
 
     global client
-    client = OpenAI(api_key=args.api_key)
+    client_kwargs = {"api_key": api_key}
+    if args.base_url:
+        client_kwargs["base_url"] = args.base_url
+    client = OpenAI(**client_kwargs)
 
     src = json.loads(Path(args.input).read_text(encoding="utf-8"))
     scen = src["scenario"]
