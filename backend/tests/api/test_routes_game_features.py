@@ -25,7 +25,7 @@ def test_get_settings(client):
 def test_update_settings(client):
     r = client.post("/api/settings", json={
         "provider": "openai",
-        "model": "gpt-4o",
+        "model": "legacy-openai-model",
         "temperature": 0.5,
         "max_tokens": 4096,
     })

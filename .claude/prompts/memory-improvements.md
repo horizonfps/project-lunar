@@ -22,7 +22,7 @@ Arquivos principais:
    [
      { id: 'deepseek', label: 'DeepSeek', models: ['deepseek-chat', 'deepseek-reasoner'] },
      { id: 'anthropic', label: 'Anthropic', models: ['claude-sonnet-4-6', 'claude-haiku-4-5-20251001'] },
-     { id: 'openai', label: 'OpenAI', models: ['gpt-4o', 'gpt-4o-mini'] },
+     { id: 'openai', label: 'OpenAI', models: ['gpt-5.6-sol'] },
    ]
    ```
 

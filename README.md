@@ -47,7 +47,7 @@ No HP bars. No mana pools. No grinding. Just **storytelling** — in English or 
 | **Rewind** | Undo System | Rewind last action to explore different story branches |
 | **Bilingual** | en + pt-br | Every system prompt, crystal, journal entry and tag is language-aware |
 | **RAG** | Dynamic Story Cards | Story cards selected by keyword overlap with recent context instead of dumping everything |
-| **Multi-LLM** | Runtime Switching | DeepSeek V4 (1M ctx), Anthropic Sonnet/Opus 4.6 (1M ctx), OpenAI GPT-5.4 — switch in Settings, no restart |
+| **Multi-LLM** | Runtime Switching | DeepSeek V4 (1M ctx), Anthropic Sonnet/Opus 4.6 (1M ctx), OpenAI GPT-5.6 Sol — switch in Settings, no restart |
 | **Persistence** | Survives Restarts | All in-memory state (NPC minds, plot seeds, crystals, inventory) is rebuilt from the event store on every GET |
 
 ---
@@ -102,9 +102,11 @@ NEO4J_URI=bolt://localhost:7687
 NEO4J_USER=neo4j
 NEO4J_PASSWORD=lunar_password
 
-# Optional: Claude Max Proxy (see Proxy section)
+# Optional: CLIProxyAPI (see Proxy section)
 ANTHROPIC_PROXY_URL=http://127.0.0.1:8318
 ANTHROPIC_PROXY_KEY=lunar-proxy-key
+OPENAI_PROXY_URL=http://127.0.0.1:8318/v1
+OPENAI_PROXY_KEY=lunar-proxy-key
 
 # Optional: debug logging
 DEBUG=false
@@ -150,7 +152,7 @@ Switch providers at runtime in the **Settings** panel — no restart needed. Set
 │       │     │     │     │     │      │     │     │     │        │
 │  ┌────▼─────▼─────▼─────▼─────▼──────▼─────▼─────▼─────▼───┐    │
 │  │       LLM Router (litellm) + token forensic dump        │    │
-│  │  DeepSeek V4 · Anthropic Claude 4.6 · OpenAI GPT-5.4    │    │
+│  │  DeepSeek V4 · Anthropic Claude 4.6 · OpenAI GPT-5.6 Sol    │    │
 │  └─────────────────────────────────────────────────────────┘    │
 │  ┌──────────────────┐  ┌──────────────────┐                     │
 │  │ EventStore (SQL) │  │ ScenarioStore    │                     │
@@ -306,8 +308,7 @@ Project Lunar supports multiple LLM providers via [litellm](https://github.com/B
 | **DeepSeek** | deepseek-v4-flash, deepseek-v4-pro | 1M | Streaming, lowest cost/quality ratio |
 | **Anthropic** | claude-sonnet-4-6, claude-opus-4-6 | 1M | Single-call mode + prompt caching |
 | **Anthropic** | claude-haiku-4-5, claude-sonnet-4-5, claude-opus-4-5 | 200K | Via API key or Max proxy |
-| **OpenAI** | gpt-5.4, gpt-5.4-mini, gpt-5.4-nano | 1M / 400K | Streaming |
-| **OpenAI (legacy)** | gpt-4o, gpt-4o-mini, gpt-4-turbo | 128K | Not recommended |
+| **OpenAI** | gpt-5.6-sol | 372K | CLIProxyAPI, single-chunk streaming |
 
 The **context window is detected automatically** per model and used to size the history slice, RAG selection, and crystal injection budget. There are no hardcoded character caps — the project targets full utilization of the model's context.
 
@@ -324,7 +325,7 @@ Looks good in short sessions but degrades over time, falling into repetitive nar
 
 ### Temperature
 
-Default is **1.5** — empirically the sweet spot for DeepSeek narrative work. Anthropic tolerates 0.9–1.0 well; OpenAI degrades above 0.9. Tunable per session in Settings.
+Default is **1.5** — empirically the sweet spot for DeepSeek narrative work. Anthropic tolerates 0.9–1.0 well. The router omits temperature for `gpt-5.6-sol`. Tunable per session in Settings.
 
 ---
 
@@ -465,13 +466,13 @@ All endpoints are versioned under `/api/`. Game endpoints are scoped to a campai
 
 ---
 
-## Claude Max Proxy (Optional)
+## CLIProxyAPI Subscription Proxy (Optional)
 
-If you have a Claude Pro/Max subscription, you can route Anthropic API calls through your subscription instead of paying per-token. This gives access to **all Claude models** (Sonnet 4.6, Opus 4.6, Haiku 4.5, etc.) at no extra API cost.
+CLIProxyAPI can route Anthropic and OpenAI calls through authenticated subscriptions. Project Lunar supports the Anthropic `/v1/messages` endpoint and the OpenAI-compatible `/v1/chat/completions` endpoint.
 
 ### How it works
 
-The proxy uses [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI), a Go binary that wraps the Claude Code OAuth flow into an Anthropic-compatible API server. It authenticates with your Claude subscription and exposes a local `/v1/messages` endpoint. The backend's `LLMRouter` detects `ANTHROPIC_PROXY_URL` in `.env` and routes all Anthropic calls through it automatically — including the streaming-disabled fallback path required because CLIProxyAPI's SSE format isn't compatible with litellm's parser.
+The proxy uses [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI), a Go binary that handles OAuth, token refresh, and provider protocol translation. The backend reads `ANTHROPIC_PROXY_URL` and `OPENAI_PROXY_URL` independently and routes each provider through its configured local endpoint. Proxy calls use the non-streaming compatibility path and are delivered to the frontend as a single chunk.
 
 > CLIProxyAPI is a pre-compiled Go binary (not built from source here) because it handles the OAuth flow, token refresh, and Claude Code protocol translation. The binary is `.gitignore`d; you download it during setup.
 
@@ -483,8 +484,9 @@ cd proxy/cliproxyapi
 # Download from: https://github.com/router-for-me/CLIProxyAPI/releases/latest
 # Extract cli-proxy-api.exe (Windows) or cli-proxy-api (Linux/macOS) into this folder
 
-# 2. Authenticate (opens browser → Claude login)
+# 2. Authenticate providers that are not already configured
 ./cli-proxy-api.exe -claude-login -config config.yaml
+./cli-proxy-api.exe -codex-login -config config.yaml
 
 # 3. Start the proxy
 ./cli-proxy-api.exe -config config.yaml
@@ -498,9 +500,11 @@ On Windows, `start.bat` will auto-start the proxy if `cli-proxy-api.exe` is pres
 ```env
 ANTHROPIC_PROXY_URL=http://127.0.0.1:8318
 ANTHROPIC_PROXY_KEY=lunar-proxy-key
+OPENAI_PROXY_URL=http://127.0.0.1:8318/v1
+OPENAI_PROXY_KEY=lunar-proxy-key
 ```
 
-Then select any Anthropic model in the Settings panel and play.
+An already-running CLIProxyAPI can use a different port and key in the local `.env`. Then select Anthropic or OpenAI in the Settings panel and play.
 
 ### Reliability
 
@@ -537,7 +541,7 @@ Contributions are welcome! This is an open-source project built for the communit
 - **AI Dungeon** — Pioneering AI-driven interactive fiction and story cards
 - **Graphiti** — Temporal knowledge graph concepts
 - **litellm** — Multi-provider LLM abstraction
-- **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — Claude Max subscription proxy enabling API access to all Claude models without per-token billing
+- **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — Subscription proxy for Anthropic and OpenAI-compatible model access
 
 ---
 

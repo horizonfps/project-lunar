@@ -27,7 +27,7 @@ modelos por:
 const PROVIDERS = [
   { id: 'deepseek', label: 'DeepSeek', models: ['deepseek-v4-flash'] },
   { id: 'anthropic', label: 'Anthropic', models: ['claude-opus-5', 'claude-sonnet-5'] },
-  { id: 'openai', label: 'OpenAI', models: ['gpt-4o', 'gpt-4o-mini'] },
+  { id: 'openai', label: 'OpenAI', models: ['gpt-5.6-sol'] },
 ]
 ```
 
@@ -41,10 +41,9 @@ Nenhum outro arquivo do frontend precisa mudar: `frontend/src/store.js` já tem
 `frontend/src/api.js` já usa esses mesmos valores como fallback ao montar a
 requisição — ambos continuam corretos.
 
-Armadilha: as configurações do jogador ficam salvas no navegador. Quem já tinha
-escolhido um modelo que sumiu da lista (por exemplo `deepseek-v4-pro`) vai abrir
-o painel com o seletor sem opção correspondente selecionada; basta escolher um
-modelo da lista nova e salvar. Não é preciso escrever código de migração.
+As configurações do jogador ficam salvas no navegador. `frontend/src/store.js`
+normaliza qualquer configuração OpenAI restaurada para `gpt-5.6-sol` e regrava
+o `localStorage`, evitando que modelos removidos continuem sendo enviados.
 
 ## Fora do escopo
 
@@ -52,7 +51,6 @@ modelo da lista nova e salvar. Não é preciso escrever código de migração.
 - Mexer no proxy.
 - Criar um segundo seletor para escolher o modelo das tarefas de bastidor: essa
   escolha é decidida automaticamente pelo backend.
-- Migrar automaticamente a configuração salva no navegador.
 
 ## Pronto quando
 
@@ -60,6 +58,7 @@ modelo da lista nova e salvar. Não é preciso escrever código de migração.
       `claude-opus-5` e `claude-sonnet-5`, nessa ordem.
 - [ ] Com o provedor DeepSeek selecionado, a lista de modelos tem exatamente
       `deepseek-v4-flash`.
+- [ ] Com o provedor OpenAI selecionado, a lista tem exatamente `gpt-5.6-sol`.
 - [ ] `deepseek-v4-pro` e os modelos `claude-*-4-*` não aparecem mais no painel.
 - [ ] `cd frontend && npx eslint src/components/SettingsPanel.jsx` não acusa erro.
 
