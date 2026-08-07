@@ -14,7 +14,7 @@ IF %ERRORLEVEL% NEQ 0 (
 REM Start CLIProxyAPI if binary exists
 set "PROXY_DIR=%~dp0proxy\cliproxyapi"
 IF EXIST "%PROXY_DIR%\cli-proxy-api.exe" (
-    echo [2/4] Starting CLIProxyAPI on http://localhost:8317 ...
+    echo [2/4] Starting CLIProxyAPI on http://localhost:8318 ...
     start "Project Lunar - CLIProxyAPI" /D "%PROXY_DIR%" cmd /c "cd /d ""%PROXY_DIR%"" && cli-proxy-api.exe -config config.yaml && pause"
     timeout /t 3 /nobreak >/dev/null
 ) ELSE (
@@ -41,7 +41,7 @@ echo ========================================
 echo  Project Lunar is starting (DEBUG MODE)
 echo  App:    http://localhost:5173
 echo  API:    http://localhost:8000
-echo  Proxy:  http://localhost:8317
+echo  Proxy:  http://localhost:8318
 echo  Neo4j:  http://localhost:7474
 echo.
 echo  LLM call dumps -^> backend\logs\llm_calls\
