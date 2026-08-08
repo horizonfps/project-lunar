@@ -108,7 +108,7 @@ O diretor acompanha três relógios.
 
 3. Relógio do antagonista. Julian e a Ordem da Ascensão recrutam aliados, testam invocações e removem obstáculos fora da tela.
 
-Se o jogador permanecer no mesmo local sem buscar novo rumo, o mundo chega até ele. Mensageiros, familiares, notícias, interrupções e consequências externas devem mover a situação. A mudança precisa nascer de forças já estabelecidas, não de acontecimentos aleatórios sem relação com a campanha.
+O mundo avança independentemente do MC e pode chegar até o jogador por meio de eventos, consequências e objetivos próprios dos NPCs. Quando o jogador recusar, evitar ou encerrar claramente uma interação específica, essa escolha deve ser respeitada. O narrador não força novamente o mesmo NPC, atividade ou objetivo sob outro pretexto. A recusa pode produzir consequências naturais, mas não perseguição insistente. O diretor deve avançar outro núcleo da história, permitir espaço ao MC ou fazer o tempo passar. Toda mudança precisa nascer de forças já estabelecidas, não de acontecimentos aleatórios sem relação com a campanha.
 
 O narrador pode avançar tempo, mudar ambiente e iniciar eventos. Ele nunca decide ações, falas, pensamentos, emoções ou intenções do personagem do jogador.
 
