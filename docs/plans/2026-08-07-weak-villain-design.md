@@ -2,7 +2,7 @@
 
 Data: 2026-08-07
 
-Status: aprovado pelo usuário
+Status: revisado após teste de campanha em 2026-08-10
 
 ## Objetivo
 
@@ -44,9 +44,11 @@ O Império de Elaris apresenta uma fantasia vibrante, com cidades prósperas, pa
 
 O cenário pode conter perigo, violência, conspiração e demônios. Sua identidade visual e emocional não pode se tornar dark fantasy, noir, gótica ou permanentemente miserável.
 
-O poder sobrenatural é marcial. Aura fortalece o corpo, os sentidos e as armas. Afinidades naturais como relâmpago, fogo, vento e gelo aparecem por meio de estilos de combate. Nos níveis elevados surgem Intenção, Domínio e conceitos ligados ao caminho individual do guerreiro.
+Aura e magia coexistem. Aura fortalece o corpo, os sentidos e as armas. Mana alimenta feitiços diretos de fogo, gelo, vento, terra, luz, barreira e cura. A Academia reúne espadachins, lanceiros, arqueiros, magos, curandeiros e combatentes híbridos.
 
-O cenário não utiliza grimórios, pergaminhos, feitiços arcanos, torres de magos ou ocultismo como base do sistema de poder.
+O sistema de poder deve permanecer simples. Afinidades indicam facilidade e estilo. Poderes são explicados por efeitos observáveis e regras já estabelecidas, sem mecanismos adicionais criados apenas para tornar a cena mais complexa. Armas comuns continuam sendo armas comuns. Propriedades sobrenaturais existem somente quando um card ou acontecimento as estabelecer.
+
+Jovens nobres em idade adequada seguem automaticamente para a Academia Imperial, sem inscrição individual. A admissão funciona como cerimônia e avaliação de nível. Candidatos comuns chegam por bolsas e seletivas regionais.
 
 ## Política e antagonismo
 
@@ -54,9 +56,9 @@ A Casa Halbrecht vive próxima da família imperial e funciona como um segundo c
 
 O Primeiro Príncipe Julian Aurelian já controla grande parte do império. Seu objetivo não é apenas herdar o trono. Ele deseja conquistar territórios de outras nações e transformar Elaris na potência dominante do continente.
 
-Julian lidera a Ordem da Ascensão, uma facção expansionista que invoca demônios por meio de Aura corrompida e artefatos demoníacos. Seus integrantes acreditam que os demônios podem servir como forças descartáveis durante futuras campanhas militares.
+Julian lidera a Ordem da Ascensão, uma facção expansionista cujo núcleo secreto utiliza magia proibida para invocar demônios. Seus integrantes acreditam que os demônios podem servir como forças descartáveis durante futuras campanhas militares.
 
-A Casa Halbrecht se recusa a apoiar uma guerra expansionista. Julian não pode destruí-la diretamente sem enfraquecer o próprio império. Por isso, seus agentes tentam comprometer, controlar e fragmentar a casa enquanto testam invocações em incidentes aparentemente isolados.
+A Casa Halbrecht se recusa a apoiar uma guerra expansionista. Julian não pode destruí-la diretamente sem enfraquecer o próprio império. A facção avança primeiro por decisões públicas, orçamento militar, alianças e pressão política. O núcleo demoníaco aparece em arcos próprios e não explica todo crime, acidente ou rivalidade.
 
 ## Geração de Ouro
 
@@ -78,7 +80,7 @@ O cenário começa com apenas cinco NPCs fixos.
 
 4. Leon Arwell. Protagonista original do jogo e membro central da Geração de Ouro. Começa como rival e pode se tornar aliado. Ele conserva objetivos, decisões e desenvolvimento próprios, mesmo quando a nova rota altera sua história.
 
-5. Primeiro Príncipe Julian Aurelian. Antagonista central e líder da Ordem da Ascensão. Sua presença inicial é indireta. Decisões políticas, agentes e incidentes revelam sua influência antes de um confronto aberto.
+5. Primeiro Príncipe Julian Aurelian. Antagonista central e líder da Ordem da Ascensão. Sua ambição expansionista pode ser percebida por decisões políticas abertas. A ligação com invocações permanece restrita ao núcleo secreto até o arco adequado.
 
 ## Romance
 
@@ -88,25 +90,35 @@ As possíveis heroínas possuem objetivos, relações e participação narrativa
 
 Sentimentos não surgem apenas porque o jogador ficou forte ou mudou de aparência. Confiança e atração dependem de convivência, escolhas observadas e tempo. Noivados, alianças e expectativas políticas podem iniciar aproximações, mas não substituem o desenvolvimento emocional.
 
+## Simplicidade narrativa
+
+A campanha deve ser lida com facilidade. Causa, ação e consequência permanecem visíveis. Cada cena desenvolve um objetivo imediato compreensível, e a narrativa mantém no máximo uma questão sem resposta ativa.
+
+Atividades comuns não escondem obrigatoriamente conspirações. Treino, compra, refeição, aula, conversa e passeio podem cumprir apenas sua função cotidiana. Mistério e investigação aparecem somente quando uma trama já estabelecida exigir ou quando o jogador escolher investigá-la.
+
+NPCs usam linguagem adequada à conversa, à personalidade e à posição social. Retórica artificial não substitui respostas comuns. Status é demonstrado por comportamento, recursos e reação social.
+
+Cada NPC conhece somente informações públicas, fatos do próprio ofício, o que presenciou e o que lhe contaram em cena. Uma dedução precisa de evidência visível e permanece incerta quando ultrapassa a observação direta. Segredos disponíveis ao narrador não são conhecimento universal.
+
 ## Estrutura narrativa híbrida
 
 A campanha combina marcos da cronologia original com um diretor narrativo ativo. A história conhecida oferece direção. As escolhas do jogador alteram causas, participantes, consequências e ordem dos acontecimentos.
 
-Cada cena possui cinco elementos:
+Cada cena possui três elementos:
 
 1. Um objetivo imediato.
-2. Pelo menos um NPC com iniciativa própria.
-3. Uma tensão ou mudança em andamento.
-4. Uma condição clara de encerramento.
-5. Um gancho relacionado à próxima situação.
+2. Uma consequência ou resposta coerente com as ações presentes.
+3. Uma condição clara de encerramento.
+
+Tensão, NPC com iniciativa e ligação futura são usados quando a situação pedir. Eles não são obrigações de toda cena, pois essa exigência transforma momentos comuns em ganchos artificiais.
 
 O diretor acompanha três relógios.
 
 1. Relógio da cena. Depois de 3 a 5 interações significativas, a situação precisa evoluir. Uma conversa produz decisão, alguém chega, uma ameaça aparece, uma informação altera o objetivo ou a cena termina naturalmente.
 
-2. Relógio canônico. A admissão acontece em seis meses mesmo que o jogador não treine. Torneios, crises políticas e incidentes demoníacos também se aproximam sem depender da iniciativa do jogador.
+2. Relógio canônico. A admissão acontece em seis meses mesmo que o jogador não treine. Torneios, eventos sociais e decisões políticas também se aproximam sem depender da iniciativa do jogador.
 
-3. Relógio do antagonista. Julian e a Ordem da Ascensão recrutam aliados, testam invocações e removem obstáculos fora da tela.
+3. Relógio do antagonista. Julian e a Ordem da Ascensão ampliam apoio político e preparação militar em intervalos de arco. Invocações avançam somente quando o núcleo demoníaco estiver em foco.
 
 O mundo avança independentemente do MC e pode chegar até o jogador por meio de eventos, consequências e objetivos próprios dos NPCs. Quando o jogador recusar, evitar ou encerrar claramente uma interação específica, essa escolha deve ser respeitada. O narrador não força novamente o mesmo NPC, atividade ou objetivo sob outro pretexto. A recusa pode produzir consequências naturais, mas não perseguição insistente. O diretor deve avançar outro núcleo da história, permitir espaço ao MC ou fazer o tempo passar. Toda mudança precisa nascer de forças já estabelecidas, não de acontecimentos aleatórios sem relação com a campanha.
 
@@ -120,7 +132,7 @@ O narrador pode avançar tempo, mudar ambiente e iniciar eventos. Ele nunca deci
 
 3. A Geração de Ouro. Academia, rivalidades, alianças, relações, novas técnicas e divergências crescentes.
 
-4. O primeiro incidente demoníaco. Uma crise aparentemente isolada revela sinais da facção expansionista.
+4. O primeiro confronto demoníaco. Uma crise direta apresenta esse núcleo da facção sem transformar o arco inteiro em coleta de pistas.
 
 5. O continente se abre. Torneios, intercâmbios e missões apresentam outras nações, estilos e membros da Geração de Ouro.
 
@@ -132,11 +144,11 @@ Esses marcos fornecem direção, não uma sequência imutável. Arcos podem se d
 
 Instrutores, empregados, estudantes, cavaleiros e nobres secundários devem ser criados conforme a cena precisar. O gerador introduz no máximo um NPC relevante por vez e considera local, acontecimento, papéis já ocupados e elenco existente.
 
-Cada NPC nomeado precisa de função imediata, personalidade, objetivo e motivo plausível para estar naquele local. Figurantes sem relevância permanecem sem nome.
+Cada NPC nomeado precisa de função imediata, personalidade, objetivo e motivo plausível para estar naquele local. Segredo é opcional e desnecessário para a maioria dos coadjuvantes. Figurantes sem relevância permanecem sem nome.
 
 O gerador automático é destinado principalmente a coadjuvantes. Novos membros centrais da Geração de Ouro são introduzidos pelo narrador quando o arco adequado começa e depois preservados pela memória da campanha.
 
-As regras mais importantes do gerador devem aparecer no começo de `tone_instructions`, pois o gerador de NPCs recebe somente a parte inicial desse campo.
+As regras gerais da engine e as instruções do cenário trabalham juntas. O gerador deve preferir coadjuvantes úteis e cotidianos, aceitar uma resposta sem geração quando a entrada seria forçada e evitar novos segredos ou conspirações por padrão.
 
 ## Estrutura do artefato
 
@@ -163,7 +175,7 @@ A abertura começa no primeiro dia dos seis meses restantes. O personagem desper
 5. Não substituir ameaças existentes por antagonistas aleatórios.
 6. Não impor morte, captura, humilhação ou derrota definitiva ao jogador.
 7. Não conceder técnicas, armas, perdão ou confiança sem desenvolvimento.
-8. Não transformar o mundo em dark fantasy, noir ou fantasia arcana.
+8. Não transformar o mundo em dark fantasy, noir ou exposição pseudotécnica de magia.
 9. Não acelerar romance ou perdão.
 10. Não quebrar a escala de poder para favorecer ou prejudicar arbitrariamente o jogador.
 11. Não preencher o cenário com personagens sem função.
@@ -177,7 +189,7 @@ Depois da implementação, o arquivo deve passar por estas verificações:
 3. Tipos e campos obrigatórios corretos em todos os cards.
 4. Exatamente cinco NPCs iniciais.
 5. Ausência de travessões na prosa.
-6. Ausência de termos e elementos arcanos proibidos.
+6. Presença de Aura e magia como caminhos distintos, ambos descritos com regras simples.
 7. Abertura encerrada com acontecimento ativo.
 8. Regras explícitas de agência do jogador, movimento de cena e power fantasy.
-9. Simulação narrativa capaz de demonstrar iniciativa dos NPCs, avanço dos relógios e transição entre cenas.
+9. Simulação narrativa capaz de demonstrar iniciativa dos NPCs, respeito a recusas, avanço dos relógios e transição entre cenas sem criar mistério obrigatório.
