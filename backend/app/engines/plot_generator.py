@@ -25,6 +25,10 @@ _CONTEXT_RULES = (
     "(e.g., don't introduce academy characters during the family arc, don't introduce "
     "dragons or world-level threats in the early story).\n"
     "- The content should ADD to the current moment, not derail it.\n"
+    "- Prefer direct, visible goals and consequences over mysteries, sabotage, "
+    "coded clues, secret investigations, or hidden conspiracies.\n"
+    "- Keep only one main complication active. Develop or resolve it before adding another.\n"
+    "- Ordinary scenes may remain ordinary. Not every detail needs a deeper explanation.\n"
     "- If the current scene is tense/dramatic (combat, confrontation, ceremony), "
     "do NOT interrupt it with unrelated content.\n"
     "\nCRITICAL: If generating something right now would feel forced, unnatural, "
@@ -70,29 +74,29 @@ AUTO_PLOT_RULES: dict[str, AutoPlotRule] = {
     # Micro-hooks: small scene details woven into narrator responses.
     "micro_hook": AutoPlotRule(
         kind="micro_hook",
-        min_turns=3,
-        min_narrative_seconds=15 * 60,
-        cooldown_turns=4,
-        cooldown_narrative_seconds=20 * 60,
-        max_triggers=12,
+        min_turns=5,
+        min_narrative_seconds=30 * 60,
+        cooldown_turns=6,
+        cooldown_narrative_seconds=2 * 60 * 60,
+        max_triggers=8,
     ),
     # Periodic introduction of new social vectors.
     "npc": AutoPlotRule(
         kind="npc",
-        min_turns=5,
-        min_narrative_seconds=30 * 60,
-        cooldown_turns=6,
-        cooldown_narrative_seconds=45 * 60,
-        max_triggers=8,
+        min_turns=8,
+        min_narrative_seconds=2 * 60 * 60,
+        cooldown_turns=10,
+        cooldown_narrative_seconds=24 * 60 * 60,
+        max_triggers=6,
     ),
     # Macro-level narrative arcs — future story branches.
     "plot_arc": AutoPlotRule(
         kind="plot_arc",
-        min_turns=8,
-        min_narrative_seconds=2 * 60 * 60,
-        cooldown_turns=9,
-        cooldown_narrative_seconds=3 * 60 * 60,
-        max_triggers=6,
+        min_turns=12,
+        min_narrative_seconds=24 * 60 * 60,
+        cooldown_turns=14,
+        cooldown_narrative_seconds=3 * 24 * 60 * 60,
+        max_triggers=4,
     ),
 }
 
@@ -145,11 +149,14 @@ class PlotGenerator:
             {
                 "role": "system",
                 "content": (
-                    "Generate a compelling NPC for this RPG world. "
+                    "Generate a useful supporting NPC for this RPG world. "
                     "The NPC should be relevant to the current scene and recent events. "
                     "The NPC should be someone the player could realistically encounter "
                     "in their current location and situation — a merchant, a guard, a traveler, "
                     "a rival, a servant, etc. NOT a major plot character or world-shaking figure. "
+                    "Most supporting NPCs do not need a secret. Use an empty string unless "
+                    "the established scene already requires relevant private information. "
+                    "Do not use the NPC to begin a new conspiracy or investigation. "
                     "Return ONLY valid JSON (no markdown): "
                     '{"name": str, "personality": str, "power_level": int (1-10), '
                     f'"secret": str, "goal": str, "appearance": str}}.{lang_hint}'
@@ -259,17 +266,15 @@ class PlotGenerator:
             {
                 "role": "system",
                 "content": (
-                    "You are a story architect for an RPG campaign. Generate a MACRO-LEVEL "
-                    "plot arc — a future story branch that will unfold over multiple sessions. "
+                    "You are a story architect for an RPG campaign. Generate one direct, visible development "
+                    "that can unfold over multiple sessions. "
                     "This is NOT a scene action or something happening right now. "
-                    "It is a high-level narrative hook like:\n"
-                    "- A villain making moves behind the scenes\n"
-                    "- An ally facing a personal crisis\n"
-                    "- A political shift in the world\n"
-                    "- A new threat emerging far away\n"
-                    "- A betrayal being planned\n"
+                    "Prefer open goals and conflicts such as a tournament, a training milestone, "
+                    "a public rivalry, a journey, a relationship change, or a visible political move. "
+                    "Use mystery, sabotage, betrayal, or a hidden conspiracy only when one is already "
+                    "an established unresolved thread in the supplied context. "
                     "Write 2-3 sentences describing WHAT will happen in the future, "
-                    "not what is happening now. Think of it as a TV show's next-episode teaser. "
+                    "not what is happening now. Keep the development easy to understand and act on. "
                     f"No lists or headers.{lang_hint}"
                     f"{_CONTEXT_RULES}"
                 ),
@@ -295,9 +300,8 @@ class PlotGenerator:
     ) -> MicroHook | None:
         """Generate a small narrative detail for the narrator to weave into the next response.
 
-        Unlike plot arcs, micro-hooks are scene-level details: a mysterious object,
-        an NPC behaving oddly, an environmental clue, a sensory detail that hints
-        at something deeper. The narrator integrates these naturally into its text.
+        Unlike plot arcs, micro-hooks are concrete scene-level details that add
+        texture, opportunity, or a visible complication without opening another plot.
         """
         lang_hint = f" Write in {language}." if language and language != "en" else ""
         tone_hint = f"\nScenario tone and setting:\n{tone_instructions[:2000]}" if tone_instructions else ""
@@ -305,17 +309,16 @@ class PlotGenerator:
             {
                 "role": "system",
                 "content": (
-                    "Generate a small, intriguing narrative detail that the narrator "
+                    "Generate one concrete narrative detail that the narrator "
                     "should weave into the next response. This is NOT a plot arc or "
-                    "a separate event — it is a detail the narrator will incorporate "
-                    "naturally into the prose. Examples:\n"
-                    "- A strange object is found during the current scene\n"
-                    "- An NPC reacts oddly to something\n"
-                    "- The environment shows an unusual sign\n"
-                    "- A sensory detail hints at a hidden presence\n"
-                    "- A character notices something no one else does\n"
+                    "a separate event. It must not create a new mystery, conspiracy, "
+                    "investigation, hidden presence, secret mechanism, or unexplained clue. "
+                    "Useful examples include a mundane interruption, a public announcement, "
+                    "a visible training opportunity, a direct social reaction, or a change "
+                    "in weather that affects the current action. "
                     "Write ONE sentence describing the detail. Be specific to the "
-                    f"current scene.{lang_hint}"
+                    "current scene. If the detail would need a hidden explanation or a second "
+                    f"plot thread, return NONE.{lang_hint}"
                     f"{_CONTEXT_RULES}"
                 ),
             },

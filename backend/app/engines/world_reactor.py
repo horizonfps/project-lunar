@@ -20,11 +20,11 @@ _THRESHOLDS = [
 
 _TICK_PROMPTS = {
     TickType.MINOR: (
-        "Briefly describe NPC movements and minor news spreading through the region. "
+        "Briefly describe routine NPC movements or one minor public development. "
         "Keep it to 2-3 sentences of narrative prose."
     ),
     TickType.MODERATE: (
-        "Describe faction decisions, spreading rumors, and moderate world shifts. "
+        "Describe one established faction decision or moderate public world shift. "
         "3-4 sentences of narrative prose."
     ),
     TickType.MAJOR: (
@@ -36,6 +36,13 @@ _TICK_PROMPTS = {
         "and sweeping changes to the political landscape. 5-6 sentences of narrative prose."
     ),
 }
+
+_WORLD_CHANGE_RULES = (
+    "Prefer direct, observable changes that follow established schedules, goals, and consequences. "
+    "Keep one primary development. A quiet interval may advance routine activity without escalation. "
+    "Do not create a new mystery, secret investigation, conspiracy, or hidden threat unless the world "
+    "context already makes it active."
+)
 
 
 class WorldReactor:
@@ -76,6 +83,7 @@ class WorldReactor:
                 "role": "system",
                 "content": (
                     f"You are a world simulation engine for an AI RPG. {prompt_instruction} "
+                    f"{_WORLD_CHANGE_RULES} "
                     "Write only world changes as narrative facts. No player perspective. "
                     f"No dialogue. Present tense.{lang_hint}"
                 ),

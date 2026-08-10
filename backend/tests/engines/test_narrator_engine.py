@@ -145,6 +145,29 @@ def test_build_system_prompt_language_portuguese(engine):
     assert "pt-br" in prompt or "português" in prompt.lower() or "portuguese" in prompt.lower()
 
 
+def test_narrator_rules_limit_complexity_and_stylized_dialogue(engine):
+    prompt = engine.build_system_prompt(
+        tone_instructions="",
+        memory_context="",
+        language="pt-br",
+    )
+
+    assert "uma nova questão narrativa sem resposta por vez" in prompt
+    assert "Falas naturais e conversacionais são o padrão" in prompt
+    assert "não transforme uma atividade comum em conspiração" in prompt
+
+
+def test_narrator_rules_bound_new_npc_knowledge(engine):
+    prompt = engine.build_system_prompt(
+        tone_instructions="",
+        memory_context="",
+        language="en",
+    )
+
+    assert "A newly introduced NPC begins with no private campaign knowledge" in prompt
+    assert "state the inference with uncertainty" in prompt
+
+
 def test_build_meta_prompt_is_out_of_character(engine):
     prompt = engine.build_meta_prompt(
         language="en",

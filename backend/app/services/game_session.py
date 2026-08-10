@@ -70,6 +70,7 @@ def _audit_timeout_s() -> float:
 
 
 _AUDIT_TIMEOUT_S = _audit_timeout_s()
+_JOURNAL_CONTEXT_LIMIT = 16
 
 
 class GameSession:
@@ -240,6 +241,17 @@ class GameSession:
     def _rebuild_plot_lock_from_events(self) -> None:
         """Rebuild plot seeds, NPC seeds, micro-hooks, auto-plot counters,
         and lock from persisted PLOT_GENERATION events."""
+        self._active_plot_seeds.clear()
+        self._pending_micro_hook = ""
+        self._pending_npc_seed = None
+        self._pending_npc_introduced = False
+        self._plot_pending = False
+        self._plot_pending_since_turn = 0
+        for state in self._auto_plot_state.values():
+            state["last_turn"] = 0
+            state["last_narrative_time"] = 0
+            state["trigger_count"] = 0
+
         plot_events = self._event_store.get_by_type(
             self.campaign_id, EventType.PLOT_GENERATION,
         )
@@ -250,14 +262,10 @@ class GameSession:
             self.campaign_id, EventType.PLAYER_ACTION,
         )
 
-        # Rebuild active plot seeds, micro-hooks, and auto_plot_state counters
+        # Rebuild pending details and auto-plot counters.
         for ev in plot_events:
             kind = ev.payload.get("kind", "")
-            if kind == "plot_arc":
-                text = ev.payload.get("data", {}).get("text", "")
-                if text:
-                    self._active_plot_seeds.append(text)
-            elif kind == "micro_hook":
+            if kind == "micro_hook":
                 text = ev.payload.get("data", {}).get("text", "")
                 if text:
                     # Check if any narrator response after this event consumed it
@@ -313,6 +321,14 @@ class GameSession:
         if turns_after_plot < self._PLOT_CONSUME_TURNS:
             self._plot_pending = True
             self._plot_pending_since_turn = self._turn_count - turns_after_plot
+            if last_kind == "plot_arc":
+                text = last_plot.payload.get("data", {}).get("text", "")
+                if text:
+                    self._active_plot_seeds[:] = [text]
+        else:
+            self._pending_micro_hook = ""
+            self._pending_npc_seed = None
+            self._pending_npc_introduced = False
 
     def rewind(self) -> None:
         """Fully rewind the last action: rebuild all in-memory state from events.
@@ -1320,7 +1336,7 @@ class GameSession:
                 entries = self._journal.get_journal(self.campaign_id)
                 if entries:
                     lines = ["STORY LOG (key events so far):"]
-                    for e in entries[-40:]:
+                    for e in entries[-_JOURNAL_CONTEXT_LIMIT:]:
                         lines.append(f"- {e.summary}")
                     journal_ctx = "\n".join(lines)
             except Exception:
@@ -1348,8 +1364,11 @@ class GameSession:
             # Build narrator hints from active plot seeds, micro-hooks, and NPC seeds
             narrator_hints = ""
             if self._active_plot_seeds:
-                seeds = "\n".join(f"- {s}" for s in self._active_plot_seeds[-3:])
-                narrator_hints += f"\nFUTURE PLOT SEEDS (foreshadow subtly, do NOT resolve yet):\n{seeds}"
+                seeds = "\n".join(f"- {s}" for s in self._active_plot_seeds[-1:])
+                narrator_hints += (
+                    "\nACTIVE NARRATIVE DEVELOPMENT "
+                    f"(show directly; do not add hidden clues or a second plot):\n{seeds}"
+                )
             if self._pending_micro_hook:
                 narrator_hints += f"\nMICRO-HOOK (weave this detail naturally into your response):\n{self._pending_micro_hook}"
                 self._pending_micro_hook = ""  # consumed
@@ -1366,7 +1385,9 @@ class GameSession:
                     f"Appearance: {npc.get('appearance', '')}\n"
                     f"Personality: {npc.get('personality', '')}\n"
                     f"Goal: {npc.get('goal', '')}\n"
-                    f"Power Level: {npc.get('power_level', 5)}/10"
+                    f"Power Level: {npc.get('power_level', 5)}/10\n"
+                    "Knowledge boundary: public lore, role expertise, visible facts, and "
+                    "information learned on-screen only. Treat any further inference as uncertain."
                 )
                 # Do NOT mark as introduced yet — we verify after the narrative response
 
@@ -1638,8 +1659,11 @@ class GameSession:
 
         narrator_hints = ""
         if self._active_plot_seeds:
-            seeds = "\n".join(f"- {s}" for s in self._active_plot_seeds[-3:])
-            narrator_hints += f"\nFUTURE PLOT SEEDS (foreshadow subtly, do NOT resolve yet):\n{seeds}"
+            seeds = "\n".join(f"- {s}" for s in self._active_plot_seeds[-1:])
+            narrator_hints += (
+                "\nACTIVE NARRATIVE DEVELOPMENT "
+                f"(show directly; do not add hidden clues or a second plot):\n{seeds}"
+            )
         if self._pending_micro_hook:
             narrator_hints += f"\nMICRO-HOOK (weave this detail naturally into your response):\n{self._pending_micro_hook}"
             self._pending_micro_hook = ""
@@ -1656,7 +1680,9 @@ class GameSession:
                 f"Appearance: {npc.get('appearance', '')}\n"
                 f"Personality: {npc.get('personality', '')}\n"
                 f"Goal: {npc.get('goal', '')}\n"
-                f"Power Level: {npc.get('power_level', 5)}/10"
+                f"Power Level: {npc.get('power_level', 5)}/10\n"
+                "Knowledge boundary: public lore, role expertise, visible facts, and "
+                "information learned on-screen only. Treat any further inference as uncertain."
             )
             # Do NOT mark as introduced yet — we verify after the narrative response
 
@@ -1683,7 +1709,7 @@ class GameSession:
                 entries = self._journal.get_journal(self.campaign_id)
                 if entries:
                     lines = ["STORY LOG (key events so far):"]
-                    for e in entries[-40:]:
+                    for e in entries[-_JOURNAL_CONTEXT_LIMIT:]:
                         lines.append(f"- {e.summary}")
                     journal_ctx = "\n".join(lines)
             except Exception:
@@ -2513,6 +2539,7 @@ class GameSession:
 
             if consumed:
                 self._plot_pending = False
+                self._active_plot_seeds.clear()
                 logger.info("Plot lock released after %d turns for campaign %s",
                             turns_since_plot, self.campaign_id)
             else:
@@ -2601,7 +2628,7 @@ class GameSession:
                 if arc is None:
                     logger.info("Auto-plot plot_arc skipped (NONE) for campaign %s", self.campaign_id)
                     continue
-                self._active_plot_seeds.append(arc)
+                self._active_plot_seeds[:] = [arc]
                 payload = {"kind": kind, "source": "auto", "data": {"text": arc}}
                 # Plot arcs are NOT shown to the player — they are fed to
                 # the narrator as "future plot seeds" for subtle foreshadowing

@@ -1,5 +1,6 @@
 import json
 import pytest
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 from app.engines.journal_engine import JournalEntry, JournalCategory
@@ -378,6 +379,79 @@ async def test_auto_plot_respects_cooldown_between_actions():
         pass
 
     assert plot_generator.generate_npc.await_count == 1
+
+
+@pytest.mark.asyncio
+async def test_plot_arc_expires_when_plot_lock_is_consumed():
+    narrator = MagicMock()
+    memory = MagicMock()
+    world_reactor = MagicMock()
+    journal = MagicMock()
+    event_store = MagicMock()
+    event_store.get_by_type = MagicMock(return_value=[])
+    event_store.get_total_narrative_time = MagicMock(return_value=100000)
+    event_store.append = MagicMock()
+
+    plot_generator = MagicMock()
+    plot_generator.should_trigger_auto = MagicMock(side_effect=[True, False])
+    plot_generator.generate_plot_arc = AsyncMock(return_value="A public tournament begins next month.")
+
+    from app.services.game_session import GameSession
+    session = GameSession(
+        campaign_id="test-campaign",
+        scenario_tone="Bright adventure.",
+        language="en",
+        narrator=narrator,
+        memory=memory,
+        world_reactor=world_reactor,
+        journal=journal,
+        event_store=event_store,
+        plot_generator=plot_generator,
+        auto_plot_rules={
+            "plot_arc": AutoPlotRule(
+                kind="plot_arc",
+                min_turns=0,
+                min_narrative_seconds=0,
+                cooldown_turns=99,
+                cooldown_narrative_seconds=999999,
+            )
+        },
+    )
+
+    async for _ in session._maybe_trigger_auto_plot("A calm academy"):
+        pass
+    assert session._active_plot_seeds == ["A public tournament begins next month."]
+
+    session._turn_count = session._PLOT_CONSUME_TURNS
+    async for _ in session._maybe_trigger_auto_plot("A calm academy"):
+        pass
+
+    assert session._active_plot_seeds == []
+
+
+def test_rebuild_only_restores_unconsumed_plot_arc(session):
+    plot_event = SimpleNamespace(
+        payload={"kind": "plot_arc", "data": {"text": "An open tournament approaches."}},
+        created_at="2026-01-01T00:00:00",
+    )
+    player_events = [
+        SimpleNamespace(created_at=f"2026-01-01T00:00:0{i}")
+        for i in range(1, session._PLOT_CONSUME_TURNS + 1)
+    ]
+
+    def get_by_type(_campaign_id, event_type):
+        if event_type == EventType.PLOT_GENERATION:
+            return [plot_event]
+        if event_type == EventType.PLAYER_ACTION:
+            return player_events
+        return []
+
+    session._event_store.get_by_type = MagicMock(side_effect=get_by_type)
+    session._active_plot_seeds = ["stale seed"]
+    session._rebuild_plot_lock_from_events()
+
+    assert session._active_plot_seeds == []
+    assert session._plot_pending is False
 
 
 @pytest.mark.asyncio

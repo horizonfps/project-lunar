@@ -209,3 +209,25 @@ async def test_ptbr_language_selects_ptbr_system_and_passes_language_context():
     user = llm.last_messages[1]["content"]
     assert llm.last_messages[0]["role"] == "system"
     assert "Brazilian Portuguese" in user  # language name surfaced to the model
+    assert "CONHECIMENTO DE NPC" in system
+    assert "disponíveis apenas ao narrador" in system
+
+
+@pytest.mark.asyncio
+async def test_auditor_checks_npc_knowledge_provenance():
+    llm = _FakeLLM(_reply(verdict="clean"))
+    a = AuditorEngine(llm)
+
+    await a.audit(
+        "The smith identifies the player's private sword history.",
+        "show him the broken blade",
+        language="en",
+        recent_scene="The smith has never met the player.",
+        world_context="The sword broke during a private academy test.",
+    )
+
+    system = llm.last_messages[0]["content"]
+    user = llm.last_messages[1]["content"]
+    assert "NPC KNOWLEDGE" in system
+    assert "narrator-only facts" in system
+    assert "what NPCs witnessed or were told" in user
