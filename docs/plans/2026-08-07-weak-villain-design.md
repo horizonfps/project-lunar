@@ -24,9 +24,13 @@ O antigo dono desapareceu completamente. Não existe outra consciência, voz ou 
 
 O personagem pode sofrer, sangrar, ficar exausto, ser surpreendido e precisar improvisar. Ele não morre, não recebe uma derrota humilhante e não perde o confronto principal.
 
+O perigo deve ser real e recorrente. Inimigos podem atacar, perseguir, cercar, ferir ou tentar matar o personagem quando possuírem motivo para isso. A garantia de sobrevivência pertence ao contrato narrativo e não ao conhecimento do mundo. Ela impede o encerramento prematuro da campanha, mas não reduz a intenção, a competência ou a agressividade dos adversários.
+
 A dificuldade deve aparecer por meio de esforço, custo, pressão e complicações. Uma vitória pode expor uma técnica, consumir recursos ou permitir que outro antagonista alcance um objetivo secundário. O narrador não pode usar fracasso arbitrário para criar tensão.
 
 Ações razoáveis e compatíveis com as capacidades do personagem devem funcionar. O narrador descreve resistência e consequências, mas não invalida competência apenas para prolongar uma cena.
+
+Quando uma ação, revelação ou consequência elevar as apostas, a cena precisa abandonar o ritmo cotidiano e responder ao novo risco. A proteção do jogador nunca serve para neutralizar uma tensão que ele próprio decidiu provocar. Procedimentos administrativos são adequados para assuntos comuns. Diante de perigo imediato ou quebra grave de segurança, os personagens primeiro contêm, confrontam, fogem, pedem ajuda ou atacam conforme sua função e personalidade. Protocolos aparecem somente depois que o risco estiver controlado.
 
 ## Interface e progressão
 
@@ -110,7 +114,7 @@ Cada cena possui três elementos:
 2. Uma consequência ou resposta coerente com as ações presentes.
 3. Uma condição clara de encerramento.
 
-Tensão, NPC com iniciativa e ligação futura são usados quando a situação pedir. Eles não são obrigações de toda cena, pois essa exigência transforma momentos comuns em ganchos artificiais.
+Tensão, NPC com iniciativa e ligação futura são usados quando a situação pedir. Eles não são obrigações de toda cena, pois essa exigência transforma momentos comuns em ganchos artificiais. Quando o jogador transformar voluntariamente uma situação comum em uma situação perigosa, a reação proporcional passa a ser obrigatória.
 
 O diretor acompanha três relógios.
 
@@ -179,6 +183,8 @@ A abertura começa no primeiro dia dos seis meses restantes. O personagem desper
 9. Não acelerar romance ou perdão.
 10. Não quebrar a escala de poder para favorecer ou prejudicar arbitrariamente o jogador.
 11. Não preencher o cenário com personagens sem função.
+12. Não proteger o jogador de ataques, ferimentos, pressão ou consequências compatíveis com o risco que assumiu.
+13. Não substituir perigo imediato por formulários, taxas, reuniões ou testes administrativos.
 
 ## Validação
 
