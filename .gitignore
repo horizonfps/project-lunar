@@ -55,3 +55,6 @@ proxy/cliproxyapi/static/
 backend/logs/
 logs/
 .tmp/
+
+# Local user data (scenarios, scraped assets)
+local/
