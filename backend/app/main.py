@@ -1,4 +1,5 @@
 import logging
+import mimetypes
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -31,6 +32,10 @@ app.add_middleware(
 
 app.include_router(scenarios_router, prefix="/api/scenarios", tags=["scenarios"])
 app.include_router(game_router, prefix="/api/game", tags=["game"])
+
+# Windows registry often lacks these; StaticFiles would fall back to text/plain.
+mimetypes.add_type("image/webp", ".webp")
+mimetypes.add_type("image/avif", ".avif")
 
 _media_root = Path(settings.media_dir).expanduser()
 if _media_root.is_dir():
