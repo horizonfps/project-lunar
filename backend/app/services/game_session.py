@@ -878,13 +878,16 @@ class GameSession:
         if not narrative_text.strip():
             return []
         lang = "Brazilian Portuguese" if self.language == "pt-br" else "English"
+        setup = (self._character_setup_block or "").strip()
+        who = f"{setup}\n\n" if setup else ""
         prompt = (
             "You are helping a player decide what to do next in an interactive story.\n"
             f"Write EXACTLY 3 options in {lang}, in the player's own voice, as a JSON array of\n"
             '{"action": "<short third-person action>", "speech": "<what the player says, or empty string>"}.\n'
             "They must respond concretely to the scene below and differ in intent. Never resolve their outcome.\n"
+            "Use only facts present below. Never invent a name, a backstory or an event.\n"
             "Return ONLY the JSON array.\n\n"
-            f"SCENE:\n{narrative_text[-2000:]}"
+            f"{who}SCENE:\n{narrative_text[-2000:]}"
         )
         try:
             raw = await self._narrator._llm.complete(
