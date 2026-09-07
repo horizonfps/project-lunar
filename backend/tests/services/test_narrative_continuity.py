@@ -45,6 +45,31 @@ def test_continuation_without_a_header_is_appended_verbatim():
     )
 
 
+def test_continuation_restores_the_space_lost_at_the_cut():
+    original = f"{HEADER}\n\nEle podia sair dali sem preparo"
+    assert GameSession._splice_continuation(original, "nenhum.") == (
+        f"{HEADER}\n\nEle podia sair dali sem preparo nenhum."
+    )
+
+
+def test_continuation_restores_the_space_after_a_comma():
+    assert GameSession._splice_continuation("varreu a ala esquerda,", "depois a direita.") == (
+        "varreu a ala esquerda, depois a direita."
+    )
+
+
+def test_continuation_starting_on_punctuation_is_not_spaced():
+    assert GameSession._splice_continuation("Ela parou", '." O salão calou.') == (
+        'Ela parou." O salão calou.'
+    )
+
+
+def test_continuation_after_a_hyphen_is_not_spaced():
+    assert GameSession._splice_continuation("os estandartes azul-", "escuros pendiam.") == (
+        "os estandartes azul-escuros pendiam."
+    )
+
+
 def test_header_only_continuation_leaves_the_prose_untouched():
     original = f"{HEADER}\n\nEle parou."
     assert GameSession._splice_continuation(original, f"{LATER}\n\n") == original

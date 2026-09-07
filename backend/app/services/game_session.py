@@ -1542,6 +1542,7 @@ class GameSession:
             continuation_prompt = (
                 "Continue the narrative EXACTLY where you stopped. "
                 "Do NOT repeat any text and do NOT restate the scene header. "
+                "Resume on a whole word; never finish a word left half-written. "
                 "Complete the current sentence and paragraph, "
                 "then end at a natural pause point. Keep the same tone and language. "
                 "STRICT: do NOT take any new actions, decisions, dialogue or "
@@ -1862,6 +1863,7 @@ class GameSession:
             continuation_prompt = (
                 "Continue the narrative EXACTLY where you stopped. "
                 "Do NOT repeat any text and do NOT restate the scene header. "
+                "Resume on a whole word; never finish a word left half-written. "
                 "Complete the current sentence and paragraph, "
                 "then end at a natural pause point. Keep the same tone and language. "
                 "STRICT: do NOT take any new actions, decisions, dialogue or "
@@ -3045,24 +3047,36 @@ class GameSession:
             return True
         return stripped[-1] in '.!?…"\u201d»)'
 
+    _CONTINUATION_ATTACHES = ",;:.!?…\"”»)"
+
+    @staticmethod
+    def _join_continuation(original: str, continuation: str) -> str:
+        """Join two halves of a truncated response, restoring the separating space.
+
+        The token limit cuts the first half mid-phrase and the continuation resumes
+        on the next whole word, so the space between them belongs to neither half.
+        """
+        if not original or not continuation:
+            return original + continuation
+        left, right = original[-1], continuation[0]
+        if not right.isalnum():
+            return original + continuation
+        if left.isalnum() or left in GameSession._CONTINUATION_ATTACHES:
+            return f"{original} {continuation}"
+        return original + continuation
+
     @staticmethod
     def _splice_continuation(original: str, continuation: str) -> str:
-        """Append a continuation pass, dropping a scene header the model re-emitted.
-
-        A re-emitted header means the model resumed at paragraph level, so the two
-        halves are joined with a separator.
-        """
+        """Append a continuation pass, dropping a scene header the model re-emitted."""
         text = continuation.lstrip("\n")
         first, sep, rest = text.partition("\n")
         opening = original.lstrip("\n").partition("\n")[0]
         if not (sep and "|" in first and first.count("|") == opening.count("|")):
-            return original + continuation
+            return GameSession._join_continuation(original, continuation)
         text = rest.lstrip("\n")
         if not text:
             return original
-        if original[-1:].strip() and text[:1].strip():
-            return f"{original} {text}"
-        return original + text
+        return GameSession._join_continuation(original, text)
 
     @staticmethod
     def _fix_number_spacing(text: str) -> str:
