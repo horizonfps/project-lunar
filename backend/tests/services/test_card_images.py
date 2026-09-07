@@ -63,3 +63,21 @@ def test_picks_from_available_variants():
 def test_empty_inputs_return_none():
     assert select_card_image([], "Emily arrived.", 1, {}) is None
     assert select_card_image([npc("Emily", ["/media/Emily/1.webp"])], "", 1, {}) is None
+
+
+def test_prefers_the_npc_carrying_the_scene():
+    cards = [npc("Elise", ["/media/Elise/1.webp"]), npc("Lilia", ["/media/Lilia/1.webp"])]
+    text = "Elise passed by. Lilia laughed. Lilia leaned in. Lilia asked again."
+    assert select_card_image(cards, text, 1, {}).name == "Lilia"
+
+
+def test_first_appearance_outranks_a_returning_npc():
+    cards = [npc("Elise", ["/media/Elise/1.webp"]), npc("Lilia", ["/media/Lilia/1.webp"])]
+    text = "Elise passed by. Lilia laughed. Lilia leaned in. Lilia asked again."
+    seen = {"Lilia": 1}
+    assert select_card_image(cards, text, 2, seen).name == "Elise"
+
+
+def test_earliest_mention_breaks_a_tie():
+    cards = [npc("Elise", ["/media/Elise/1.webp"]), npc("Lilia", ["/media/Lilia/1.webp"])]
+    assert select_card_image(cards, "Lilia nodded. Elise nodded.", 1, {}).name == "Lilia"

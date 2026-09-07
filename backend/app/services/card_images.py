@@ -11,7 +11,7 @@ import random
 import re
 from dataclasses import dataclass
 
-COOLDOWN_TURNS = 8
+COOLDOWN_TURNS = 5
 
 
 @dataclass
@@ -38,8 +38,12 @@ def _images_of(card) -> list[str]:
     return [u for u in images if isinstance(u, str) and u.strip()]
 
 
+def _mentions(name: str, text: str) -> list:
+    return list(re.finditer(rf"\b{re.escape(name)}\b", text, re.IGNORECASE))
+
+
 def _appears_in(name: str, text: str) -> bool:
-    return re.search(rf"\b{re.escape(name)}\b", text, re.IGNORECASE) is not None
+    return bool(_mentions(name, text))
 
 
 def select_card_image(
@@ -49,14 +53,18 @@ def select_card_image(
     last_shown: dict[str, int],
     rng: random.Random | None = None,
 ) -> CardImage | None:
-    """Return art for the first eligible NPC appearing in the narrative.
+    """Return art for the NPC carrying the scene.
 
+    Among the eligible NPCs, one making their first appearance wins over a
+    returning one, then the NPC named most often, then the one named earliest.
     `last_shown` maps NPC name to the turn its art was last displayed and is
     updated in place when an image is selected.
     """
     if not narrative_text or not story_cards:
         return None
 
+    best = None
+    best_key = None
     for card in story_cards:
         if _card_type(card) != "NPC":
             continue
@@ -64,18 +72,28 @@ def select_card_image(
         if not images:
             continue
         name = (getattr(card, "name", "") or "").strip()
-        if not name or not _appears_in(name, narrative_text):
+        if not name:
+            continue
+        hits = _mentions(name, narrative_text)
+        if not hits:
             continue
         previous = last_shown.get(name)
         if previous is not None and turn_count - previous < COOLDOWN_TURNS:
             continue
 
-        content = card.content if isinstance(card.content, dict) else {}
-        picked = (rng or random).choice(images)
-        last_shown[name] = turn_count
-        return CardImage(
-            name=name,
-            url=picked,
-            caption=str(content.get("title") or content.get("role") or "").strip(),
-        )
-    return None
+        key = (previous is not None, -len(hits), hits[0].start())
+        if best_key is None or key < best_key:
+            best_key, best = key, (name, card, images)
+
+    if best is None:
+        return None
+
+    name, card, images = best
+    content = card.content if isinstance(card.content, dict) else {}
+    picked = (rng or random).choice(images)
+    last_shown[name] = turn_count
+    return CardImage(
+        name=name,
+        url=picked,
+        caption=str(content.get("title") or content.get("role") or "").strip(),
+    )
