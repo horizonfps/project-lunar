@@ -5,6 +5,12 @@
 @tailwind utilities;
 
 @layer base {
+  /* App-wide scale. Tailwind sizes and spacing are in rem, so this is the
+     single knob for how large the interface renders. */
+  html {
+    font-size: 80%;
+  }
+
   body {
       @apply bg-black text-[#d1d1d1] antialiased selection:bg-white/20 selection:text-white;
   }}
