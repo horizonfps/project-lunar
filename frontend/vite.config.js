@@ -13,6 +13,10 @@ export default defineConfig(({ mode }) => {
           target: env.LUNAR_API_TARGET || 'http://localhost:8000',
           changeOrigin: true,
         },
+        '/media': {
+          target: env.LUNAR_API_TARGET || 'http://localhost:8000',
+          changeOrigin: true,
+        },
       },
     },
   }
