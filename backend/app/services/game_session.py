@@ -72,6 +72,8 @@ def _audit_timeout_s() -> float:
 
 _AUDIT_TIMEOUT_S = _audit_timeout_s()
 _JOURNAL_CONTEXT_LIMIT = 16
+# Story card fields consumed by the UI, not by the narrator; keep them out of the prompt.
+_NON_NARRATIVE_CARD_KEYS = {"images"}
 
 
 class GameSession:
@@ -1010,7 +1012,7 @@ class GameSession:
                 card_type = card_type.value
             parts = [f"[{card_type}] {card.name}"]
             for k, v in content.items():
-                if v:
+                if v and k not in _NON_NARRATIVE_CARD_KEYS:
                     parts.append(f"  {k}: {v}")
             card_text = "\n".join(parts)
             card_tokens = estimate_tokens(card_text)
@@ -1060,7 +1062,7 @@ class GameSession:
             content = card.content if isinstance(card.content, dict) else {}
             block = [f"[LORE] {card.name}"]
             for k, v in content.items():
-                if v:
+                if v and k not in _NON_NARRATIVE_CARD_KEYS:
                     block.append(f"  {k}: {v}")
             block_text = "\n".join(block)
             cost = estimate_tokens(block_text)
