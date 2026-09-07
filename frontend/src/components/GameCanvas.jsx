@@ -64,6 +64,18 @@ function processChildren(children) {
   return children
 }
 
+/** Split narrative at the paragraph where a character first appears, so their
+ *  art sits right above that beat instead of on top of the whole message. */
+function splitAtCharacter(text, name) {
+  if (!text || !name) return ['', text]
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = new RegExp(`\\b${escaped}\\b`).exec(text)
+  if (!match) return ['', text]
+  const breakAt = text.lastIndexOf('\n\n', match.index)
+  if (breakAt <= 0) return ['', text]
+  return [text.slice(0, breakAt), text.slice(breakAt + 2)]
+}
+
 /** Character art shown when an NPC enters the scene */
 function CharacterCard({ image }) {
   const [failed, setFailed] = useState(false)
@@ -388,6 +400,8 @@ export default function GameCanvas() {
     try {
       await rewindLastAction(activeCampaignId)
       popLastPair()
+      setSuggestions([])
+      setDraft(null)
     } catch (err) {
       console.error('Rewind failed:', err)
     } finally {
@@ -583,9 +597,20 @@ export default function GameCanvas() {
                              {combatMode ? 'Combat Narrator' : 'Narrator Core'}
                            </span>
                         </div>
-                        {msg.image?.url && <CharacterCard image={msg.image} />}
                         <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:font-light prose-p:text-white prose-headings:text-white prose-a:text-white font-serif">
-                          <ReactMarkdown components={mentionComponents}>{displayContent}</ReactMarkdown>
+                          {(() => {
+                            if (!msg.image?.url) {
+                              return <ReactMarkdown components={mentionComponents}>{displayContent}</ReactMarkdown>
+                            }
+                            const [before, after] = splitAtCharacter(displayContent, msg.image.name)
+                            return (
+                              <>
+                                {before && <ReactMarkdown components={mentionComponents}>{before}</ReactMarkdown>}
+                                <CharacterCard image={msg.image} />
+                                {after && <ReactMarkdown components={mentionComponents}>{after}</ReactMarkdown>}
+                              </>
+                            )
+                          })()}
                           {isStreaming && i === messages.length - 1 && (
                             <span className={`inline-block w-2 h-4 animate-pulse ml-2 align-middle ${combatMode ? 'bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.8)]' : 'bg-white/10 shadow-[0_0_8px_rgba(99,102,241,0.8)]'}`} />
                           )}
