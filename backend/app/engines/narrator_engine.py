@@ -117,15 +117,20 @@ class NarratorEngine:
         gets filled with ambient description, leaving nothing for the beat that
         carries the scene, and the response then runs past the output limit.
         """
-        paragraphs = NarratorEngine._paragraph_budget(max_tokens)
-        if not paragraphs:
+        if max_tokens <= 0:
             return ""
+        paragraphs = NarratorEngine._paragraph_budget(max_tokens)
         if language == "pt-br":
-            return (
+            head = (
                 f"EXTENSÃO (vinculante): a resposta precisa estar COMPLETA dentro de no máximo "
                 f"{paragraphs} parágrafos de narração no campo 'narrative_text'. Linhas de diálogo "
                 "não entram nessa conta.\n"
-                f"  O limite duro de saída é de {max_tokens} tokens e o bloco de status conta nele. "
+            ) if paragraphs else (
+                "EXTENSÃO (vinculante): a resposta precisa estar COMPLETA dentro do limite de saída.\n"
+            )
+            return (
+                head
+                + f"  O limite duro de saída é de {max_tokens} tokens e o bloco de status conta nele. "
                 "Decida a batida final antes de começar a escrever e conduza a resposta até ela. "
                 "Resposta que fica sem espaço no meio é resposta falhada.\n"
                 "  Gaste o orçamento nesta ordem: primeiro renderize a fala ou ação do jogador, "
@@ -133,11 +138,16 @@ class NarratorEngine:
                 "Descrição de ambiente fica com o que sobrar, que em geral é nada.\n"
                 "  Esse teto não é meta. Use menos parágrafos quando a batida for pequena."
             )
-        return (
+        head = (
             f"LENGTH (binding): the response must be COMPLETE within at most {paragraphs} narration "
             "paragraphs in the 'narrative_text' field. Dialogue lines do not count toward that "
             "budget.\n"
-            f"  The hard output limit is {max_tokens} tokens and the status block counts against it. "
+        ) if paragraphs else (
+            "LENGTH (binding): the response must be COMPLETE within the output limit.\n"
+        )
+        return (
+            head
+            + f"  The hard output limit is {max_tokens} tokens and the status block counts against it. "
             "Decide the closing beat before you start writing and steer the response to it. A "
             "response that runs out of room partway is a failed response.\n"
             "  Spend the budget in this order: first render the player's line or action, then what "

@@ -1,3 +1,5 @@
+import pytest
+
 from app.engines.narrator_engine import NarratorEngine
 
 
@@ -9,9 +11,16 @@ def test_paragraph_budget_tightens_with_the_token_budget():
     assert NarratorEngine._paragraph_budget(4000) == 0
 
 
-def test_generous_budget_drops_the_constraint():
-    assert NarratorEngine._length_instruction(4000) == ""
-    assert NarratorEngine._length_instruction(4000, "pt-br") == ""
+def test_generous_budget_drops_only_the_paragraph_count():
+    for language, count in (("en", "narration paragraphs"), ("pt-br", "parágrafos de narração")):
+        text = NarratorEngine._length_instruction(4000, language)
+        assert count not in text
+        assert "COMPLETE" in text or "COMPLETA" in text
+
+
+def test_unknown_budget_emits_nothing():
+    assert NarratorEngine._length_instruction(0) == ""
+    assert NarratorEngine._length_instruction(0, "pt-br") == ""
 
 
 def test_instruction_names_the_paragraph_budget_and_spending_order():
@@ -21,14 +30,15 @@ def test_instruction_names_the_paragraph_budget_and_spending_order():
     assert "Ambient description gets what is left over" in text
 
 
-def test_instruction_names_the_hard_output_limit():
-    assert "768 tokens" in NarratorEngine._length_instruction(768)
-    assert "768 tokens" in NarratorEngine._length_instruction(768, "pt-br")
-
-
-def test_instruction_frames_the_budget_as_a_ceiling_not_a_target():
-    assert "not a target" in NarratorEngine._length_instruction(768)
-    assert "não é meta" in NarratorEngine._length_instruction(768, "pt-br")
+# The slider spans 256-8192, so the rules that do not depend on a paragraph
+# count have to hold across the whole range rather than at one setting.
+@pytest.mark.parametrize("max_tokens", [256, 400, 768, 1000, 1200, 2000, 3000, 3001, 4000, 8192])
+@pytest.mark.parametrize("language", ["en", "pt-br"])
+def test_spending_order_and_hard_limit_hold_at_every_size(max_tokens, language):
+    text = NarratorEngine._length_instruction(max_tokens, language)
+    assert f"{max_tokens} tokens" in text
+    assert ("Spend the budget in this order" in text) or ("Gaste o orçamento nesta ordem" in text)
+    assert ("not a target" in text) or ("não é meta" in text)
 
 
 def test_instruction_follows_the_campaign_language():
