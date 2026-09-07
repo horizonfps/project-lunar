@@ -325,9 +325,17 @@ class LLMProvider(str, Enum):
 
 
 def _reasoning_kwargs(provider: LLMProvider, reasoning: bool) -> dict:
-    """DeepSeek V4 counts reasoning against max_tokens; disable it for mechanical calls."""
-    if reasoning or provider != LLMProvider.DEEPSEEK:
+    """Turn reasoning off per provider.
+
+    Every current provider bills reasoning against max_tokens and leaves it on when
+    unset, so a narrative budget can be spent thinking and stream back empty.
+    Anthropic needs an explicit disable because Opus 5 and Sonnet 5 default to
+    adaptive thinking; earlier Claude models ignore the flag harmlessly.
+    """
+    if reasoning:
         return {}
+    if provider == LLMProvider.ANTHROPIC:
+        return {"thinking": {"type": "disabled"}}
     return {"reasoning_effort": "none"}
 
 

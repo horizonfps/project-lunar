@@ -501,7 +501,7 @@ class NpcMindEngine:
             {"role": "system", "content": prompt_text},
             {"role": "user", "content": user_content},
         ]
-        raw = await self._llm.complete(messages=messages, max_tokens=4096)
+        raw = await self._llm.complete(messages=messages, max_tokens=4096, reasoning=False)
         updated = []
         data = parse_json_dict(raw) or {}
         for npc_data in data.get("npcs", []):
