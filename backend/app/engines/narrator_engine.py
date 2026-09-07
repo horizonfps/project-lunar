@@ -503,7 +503,7 @@ class NarratorEngine:
 
         full_response = ""
         try:
-            async for chunk in self._llm.stream(messages=messages, orchestrator=True):
+            async for chunk in self._llm.stream(messages=messages, orchestrator=True, reasoning=False):
                 full_response += chunk
                 yield chunk
         except Exception:
@@ -562,7 +562,7 @@ class NarratorEngine:
 
         full_response = ""
         try:
-            async for chunk in self._llm.stream(messages=messages, orchestrator=True):
+            async for chunk in self._llm.stream(messages=messages, orchestrator=True, reasoning=False):
                 full_response += chunk
                 yield chunk
         except Exception:
@@ -685,7 +685,9 @@ class NarratorEngine:
         try:
             # User's narrative budget + 1500 tokens overhead for JSON metadata
             api_max_tokens = max_tokens + 1500
-            raw = await self._llm.complete(messages=messages, max_tokens=api_max_tokens, orchestrator=True)
+            raw = await self._llm.complete(
+                messages=messages, max_tokens=api_max_tokens, orchestrator=True, reasoning=False
+            )
 
             # Debug logging: log full response
             logger.debug(
