@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     openai_proxy_url: str = ""
     openai_proxy_key: str = "proxy"
     debug: bool = False
+    # Root directory for scenario assets (character cards, art). Served at /media.
+    media_dir: str = "../local/media"
 
     model_config = {"env_file": [".env", "../.env"]}
 

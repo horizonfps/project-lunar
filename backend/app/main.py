@@ -1,7 +1,9 @@
 import logging
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app.config import settings
@@ -29,6 +31,12 @@ app.add_middleware(
 
 app.include_router(scenarios_router, prefix="/api/scenarios", tags=["scenarios"])
 app.include_router(game_router, prefix="/api/game", tags=["game"])
+
+_media_root = Path(settings.media_dir).expanduser()
+if _media_root.is_dir():
+    app.mount("/media", StaticFiles(directory=str(_media_root)), name="media")
+else:
+    logging.getLogger(__name__).info("Media dir %s not found; /media disabled", _media_root)
 
 
 @app.get("/api/health")
