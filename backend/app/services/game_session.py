@@ -1493,7 +1493,9 @@ class GameSession:
                     opening_narrative=self._opening_narrative,
                 )
                 zone1 = self._build_zone1_catalog(permanent_ctx)
-                length_directive = self._narrator.length_directive(getattr(self, '_max_tokens', 2000))
+                length_directive = self._narrator.length_directive(
+                    getattr(self, '_max_tokens', 2000), self.language,
+                )
                 zone2 = self._build_zone2_volatile(
                     memory_ctx, inventory_ctx, npc_ctx, journal_ctx,
                     narrator_hints, graph_ctx, story_cards_ctx,

@@ -98,43 +98,47 @@ class NarratorEngine:
             "opponent_power": opponent_power,
         }
 
-    @staticmethod
-    def _length_instruction(max_tokens: int) -> str:
-        """Return a length constraint instruction scaled to the token budget.
+    # Narration paragraphs allowed per response, by token budget. Dialogue lines
+    # are excluded from the count so trimming falls on description.
+    _PARAGRAPH_BUDGET = ((512, 2), (1000, 3), (1500, 5), (3000, 7))
 
-        Uses approximate word counts (1 token ≈ 0.6 words for Portuguese) to give the model
-        a concrete, hard-to-ignore limit for the narrative_text field only.
+    @staticmethod
+    def _paragraph_budget(max_tokens: int) -> int:
+        for ceiling, paragraphs in NarratorEngine._PARAGRAPH_BUDGET:
+            if max_tokens <= ceiling:
+                return paragraphs
+        return 0
+
+    @staticmethod
+    def _length_instruction(max_tokens: int, language: str = "en") -> str:
+        """Return the length constraint for narrative_text, scaled to the token budget.
+
+        States a paragraph budget and a cut order. A word count alone loses to the
+        prose-texture rules, which the model reads as a standing demand for detail.
         """
-        # Approximate word budget for narrative (tokens * 0.75 words/token)
-        word_budget = int(max_tokens * 0.6)
-        if max_tokens <= 512:
+        paragraphs = NarratorEngine._paragraph_budget(max_tokens)
+        if not paragraphs:
+            return ""
+        if language == "pt-br":
             return (
-                f"HARD LENGTH LIMIT: The 'narrative_text' field MUST be under {word_budget} words "
-                f"(~{max_tokens} tokens). This is 1-2 short paragraphs. "
-                "Be concise but complete. Always end at a natural stopping point. "
-                "Going over this limit is a FAILURE — trim ruthlessly."
+                f"EXTENSÃO (vinculante): no máximo {paragraphs} parágrafos de narração no campo "
+                "'narrative_text'. Linhas de diálogo não entram nessa conta.\n"
+                "  Quando faltar espaço, corte nesta ordem: descrição de ambiente primeiro, "
+                "depois figurantes que não agem na cena, depois recapitulação do que o jogador "
+                "acabou de fazer.\n"
+                "  No máximo uma imagem sensorial na resposta inteira, e só se ela mudar o que o "
+                "jogador entende da cena. Cenário já descrito antes não se reestabelece.\n"
+                "  Avance a cena. Termine em frase completa e em pausa natural."
             )
-        if max_tokens <= 1000:
-            return (
-                f"HARD LENGTH LIMIT: The 'narrative_text' field MUST be under {word_budget} words "
-                f"(~{max_tokens} tokens). This is 2-4 paragraphs. "
-                "Focus on the most important narrative beats. Always end at a natural stopping point. "
-                "Going over this limit is a FAILURE — trim ruthlessly."
-            )
-        if max_tokens <= 1500:
-            return (
-                f"HARD LENGTH LIMIT: The 'narrative_text' field MUST be under {word_budget} words "
-                f"(~{max_tokens} tokens). This is 4-6 paragraphs. "
-                "Always end at a natural stopping point with a clear prompt for the player. "
-                "Going over this limit is a FAILURE — trim ruthlessly."
-            )
-        if max_tokens <= 3000:
-            return (
-                f"LENGTH GUIDELINE: Aim for under {word_budget} words (~{max_tokens} tokens) "
-                "in the 'narrative_text' field. Write rich prose but don't ramble. "
-                "Always end at a natural stopping point."
-            )
-        return ""
+        return (
+            f"LENGTH (binding): at most {paragraphs} narration paragraphs in the 'narrative_text' "
+            "field. Dialogue lines do not count toward that budget.\n"
+            "  When space runs short, cut in this order: ambient description first, then walk-on "
+            "figures who take no part in the scene, then any recap of what the player just did.\n"
+            "  At most one sensory image in the whole response, and only when it changes what the "
+            "player understands about the scene. Settings already described stay described.\n"
+            "  Move the scene forward. End on a complete sentence at a natural pause."
+        )
 
     _NARRATOR_RULES = {
         "en": (
@@ -153,7 +157,7 @@ class NarratorEngine:
             "\nPROSE TEXTURE:\n"
             "- NPCs respond according to their immediate goals, personality, and social role. Their reaction may be simple. Not every line needs a challenge, lesson, slogan, or dramatic statement.\n"
             "- Let sentence rhythm follow the meaning of each moment so the cadence shifts naturally within a response, some lines clipped and taut where tension lands while others run long and flowing where the scene breathes.\n"
-            "- Ground sensation in qualitative perception: the feel, weight, and texture of a thing, the sense of how a beat lingers. Describe what the body actually notices.\n"
+            "- When a physical sensation matters to the scene, ground it in concrete perception: the feel, weight, and texture of a thing. A sensation that changes neither what the player understands nor what they can decide stays out.\n"
             "\nCHARACTER FIDELITY (binding):\n"
             "- The traits listed on an NPC's story card govern how that NPC behaves on screen: their register, their vocabulary, how much they volunteer unasked, and how they hold themselves toward others. Read the traits before writing the line.\n"
             "- Standing and role decide who gives instructions in a scene. An NPC issues orders, corrects, or takes charge only when their listed traits and their position support it. Everyone else asks, offers, hedges, or stays quiet.\n"
@@ -204,7 +208,7 @@ class NarratorEngine:
             "\nTEXTURA DA PROSA:\n"
             "- NPCs respondem conforme seus objetivos imediatos, personalidade e posição social. A reação pode ser simples. Nem toda fala precisa conter desafio, lição, lema ou declaração dramática.\n"
             "- Deixe o ritmo das frases seguir o sentido de cada momento para a cadência mudar com naturalidade dentro de uma resposta, algumas linhas curtas e tensas onde a tensão pesa enquanto outras se estendem longas e fluidas onde a cena respira.\n"
-            "- Ancore a sensação na percepção qualitativa: o toque, o peso e a textura de algo, a noção de como um instante se demora. Descreva o que o corpo de fato percebe.\n"
+            "- Quando uma sensação física importar para a cena, ancore-a na percepção concreta: o toque, o peso, a textura. Sensação que não muda o que o jogador entende nem o que ele pode decidir fica de fora.\n"
             "\nFIDELIDADE DE PERSONAGEM (vinculante):\n"
             "- Os traços listados no story card de um NPC governam como ele age em cena: o registro de fala, o vocabulário, o quanto ele oferece sem ser perguntado e a postura que assume diante dos outros. Leia os traços antes de escrever a fala.\n"
             "- Posição e função decidem quem dá instrução numa cena. Um NPC manda, corrige ou assume o comando apenas quando os traços listados e o cargo dele sustentam isso. Os demais perguntam, oferecem, ponderam ou ficam calados.\n"
@@ -248,14 +252,14 @@ class NarratorEngine:
         stays byte-stable for the cached zone; the length directive is emitted
         separately into the volatile zone via length_directive().
         """
-        length_instruction = self._length_instruction(max_tokens) if include_length else ""
+        length_instruction = self._length_instruction(max_tokens, language) if include_length else ""
         length_line = f"- {length_instruction}\n" if length_instruction else ""
         template = self._NARRATOR_RULES.get(language, self._NARRATOR_RULES["en"])
         return template.format(length_instruction=length_line)
 
-    def length_directive(self, max_tokens: int) -> str:
+    def length_directive(self, max_tokens: int, language: str = "en") -> str:
         """Per-request length instruction (volatile). Belongs in zone 2, not cached zone 0."""
-        instruction = self._length_instruction(max_tokens)
+        instruction = self._length_instruction(max_tokens, language)
         return f"- {instruction}" if instruction else ""
 
     _OPENING_CANON_HEADER = (
