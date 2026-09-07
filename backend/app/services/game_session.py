@@ -1539,7 +1539,8 @@ class GameSession:
         if full_response and not self._is_response_complete(full_response):
             continuation_prompt = (
                 "Continue the narrative EXACTLY where you stopped. "
-                "Do NOT repeat any text. Complete the current sentence and paragraph, "
+                "Do NOT repeat any text and do NOT restate the scene header. "
+                "Complete the current sentence and paragraph, "
                 "then end at a natural pause point. Keep the same tone and language. "
                 "STRICT: do NOT take any new actions, decisions, dialogue or "
                 "internal thoughts on the player's behalf. If the previous text "
@@ -1552,8 +1553,10 @@ class GameSession:
                 {"role": "user", "content": player_input},
                 {"role": "assistant", "content": full_response},
             ]
+            continuation = ""
             async for chunk in _run(continuation_prompt, continuation_history):
-                full_response += chunk
+                continuation += chunk
+            full_response = self._splice_continuation(full_response, continuation)
 
         # Final cleanup: trim truncation and fix number spacing
         cleaned = self._clean_truncated_response(full_response)
@@ -1856,7 +1859,8 @@ class GameSession:
             already_emitted = True
             continuation_prompt = (
                 "Continue the narrative EXACTLY where you stopped. "
-                "Do NOT repeat any text. Complete the current sentence and paragraph, "
+                "Do NOT repeat any text and do NOT restate the scene header. "
+                "Complete the current sentence and paragraph, "
                 "then end at a natural pause point. Keep the same tone and language. "
                 "STRICT: do NOT take any new actions, decisions, dialogue or "
                 "internal thoughts on the player's behalf. If the previous text "
@@ -1870,12 +1874,17 @@ class GameSession:
                 {"role": "assistant", "content": full_response},
             ]
             system_prompt = static_prompt + "\n" + dynamic_prompt
+            continuation = ""
             async for chunk in self._narrator.stream_narrative(
                 continuation_prompt, system_prompt, continuation_history,
                 context_window=context_window,
             ):
-                full_response += chunk
-                yield chunk
+                continuation += chunk
+            spliced = self._splice_continuation(full_response, continuation)
+            tail = spliced[len(full_response):]
+            if tail:
+                yield tail
+            full_response = spliced
 
         cleaned = self._clean_truncated_response(full_response)
         # Fix numbers glued to words (common LLM output artifact)
@@ -3021,13 +3030,37 @@ class GameSession:
         response and triggers an unnecessary continuation pass — during
         which the LLM tends to ignore the just-asked question and narrate
         further actions on the player's behalf.
+
+        An odd number of quotes on the last line means a speech line was cut open,
+        which the trailing-punctuation test would otherwise read as complete.
         """
         if not text:
             return True
+        if text.rstrip().rsplit("\n", 1)[-1].count('"') % 2:
+            return False
         stripped = text.rstrip(" \t\r\n*_`")
         if not stripped:
             return True
         return stripped[-1] in '.!?…"\u201d»)'
+
+    @staticmethod
+    def _splice_continuation(original: str, continuation: str) -> str:
+        """Append a continuation pass, dropping a scene header the model re-emitted.
+
+        A re-emitted header means the model resumed at paragraph level, so the two
+        halves are joined with a separator.
+        """
+        text = continuation.lstrip("\n")
+        first, sep, rest = text.partition("\n")
+        opening = original.lstrip("\n").partition("\n")[0]
+        if not (sep and "|" in first and first.count("|") == opening.count("|")):
+            return original + continuation
+        text = rest.lstrip("\n")
+        if not text:
+            return original
+        if original[-1:].strip() and text[:1].strip():
+            return f"{original} {text}"
+        return original + text
 
     @staticmethod
     def _fix_number_spacing(text: str) -> str:

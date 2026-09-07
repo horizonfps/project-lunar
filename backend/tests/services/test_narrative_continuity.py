@@ -3,6 +3,10 @@ from unittest.mock import MagicMock
 from app.services.game_session import GameSession
 
 
+HEADER = "D+0 | Ano Imperial 1285/3/1 | Segunda-feira | 09:14 | 🌤️ | Praça do Grande Salão"
+LATER = "D+0 | Ano Imperial 1285/3/1 | Segunda-feira | 09:16 | 🌤️ | Praça do Grande Salão"
+
+
 def test_open_scene_overlap_widens_with_the_provider_window():
     assert GameSession._open_scene_overlap_batches(64_000) == 1
     assert GameSession._open_scene_overlap_batches(200_000) == 8
@@ -16,3 +20,31 @@ def test_context_window_falls_back_when_provider_returns_no_int():
         journal=MagicMock(), event_store=MagicMock(),
     )
     assert s._get_context_window() == 64_000
+
+
+def test_unclosed_speech_line_counts_as_truncated():
+    assert not GameSession._is_response_complete('Ela virou.\n\n💬 @Lilia | "')
+
+
+def test_closed_speech_line_counts_as_complete():
+    assert GameSession._is_response_complete('💬 @Lilia | "Cinco em ponto."')
+
+
+def test_continuation_drops_a_re_emitted_header():
+    original = f"{HEADER}\n\nAdiante, o bloco"
+    continuation = f"{LATER}\n\nda trilha da espada terminou de se alinhar."
+    assert GameSession._splice_continuation(original, continuation) == (
+        f"{HEADER}\n\nAdiante, o bloco da trilha da espada terminou de se alinhar."
+    )
+
+
+def test_continuation_without_a_header_is_appended_verbatim():
+    original = f"{HEADER}\n\nEle abriu a"
+    assert GameSession._splice_continuation(original, " porta.") == (
+        f"{HEADER}\n\nEle abriu a porta."
+    )
+
+
+def test_header_only_continuation_leaves_the_prose_untouched():
+    original = f"{HEADER}\n\nEle parou."
+    assert GameSession._splice_continuation(original, f"{LATER}\n\n") == original
