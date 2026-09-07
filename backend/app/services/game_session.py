@@ -756,13 +756,26 @@ class GameSession:
     def _get_context_window(self) -> int:
         """Return the context window size (tokens) for the current LLM provider."""
         try:
-            return self._narrator._llm.config.get_context_window()
+            window = self._narrator._llm.config.get_context_window()
         except AttributeError:
             return 64_000
+        return window if isinstance(window, int) else 64_000
 
-    _OPEN_SCENE_OVERLAP_BATCHES = 1   # crystallized batches kept as continuity bridge
     _OPEN_SCENE_MIN_MESSAGES = 4      # short-term coherence floor
     _OPEN_SCENE_MAX_EVENTS = 4000     # safety bound above which we keep full history
+
+    @staticmethod
+    def _open_scene_overlap_batches(context_window: int) -> int:
+        """Crystallized batches replayed as raw prose, scaled to the provider window.
+
+        Crystal summaries drop the concrete beats continuity depends on, so a wide
+        window buys back verbatim turns the summaries cannot carry.
+        """
+        if context_window >= 1_000_000:
+            return 20
+        if context_window >= 200_000:
+            return 8
+        return 1
 
     def _open_scene_history(self) -> list[dict]:
         """Narrator's raw-prose window: open scene plus one batch of overlap; crystals cover the rest."""
@@ -774,7 +787,7 @@ class GameSession:
                 c for c in self._memory.get_crystals(self.campaign_id)
                 if getattr(c, "tier", None) == CrystalTier.SHORT
             ]
-            idx = self._OPEN_SCENE_OVERLAP_BATCHES + 1
+            idx = self._open_scene_overlap_batches(self._get_context_window()) + 1
             if len(short) < idx:
                 return self._history
             overlap_cursor = short[-idx].source_end_created_at
