@@ -10,7 +10,7 @@ const ACTION_TYPES = [
   { id: 'META', label: 'Meta', description: 'Talk to the AI narrator' },
 ]
 
-export default function ActionInput({ onSubmit, disabled }) {
+export default function ActionInput({ onSubmit, disabled, draft }) {
   const [text, setText] = useState('')
   const [type, setType] = useState('DO')
   const [mentionState, setMentionState] = useState(null) // { startIndex, query }
@@ -19,6 +19,15 @@ export default function ActionInput({ onSubmit, disabled }) {
   const textareaRef = useRef(null)
   const dropdownRef = useRef(null)
   const campaignId = useGameStore((s) => s.activeCampaignId)
+
+  // Load an externally supplied "[TYPE] text" draft into the field for editing
+  useEffect(() => {
+    if (!draft?.text) return
+    const match = draft.text.match(/^\[(DO|SAY|CONTINUE|META)\]\s*/i)
+    setType(match ? match[1].toUpperCase() : 'DO')
+    setText(match ? draft.text.slice(match[0].length) : draft.text)
+    textareaRef.current?.focus()
+  }, [draft])
 
   // Listen to keyboard shortcut for continue
   useEffect(() => {

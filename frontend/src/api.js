@@ -89,6 +89,8 @@ export function streamAction({
   onCrystal,
   onPlotAuto,
   onInventory,
+  onImage,
+  onSuggestions,
   onTruncateClean,
   onUsage,
   onTrace,
@@ -152,6 +154,18 @@ export function streamAction({
           try {
             const item = JSON.parse(control.slice(11))
             onInventory?.(item)
+          } catch {}
+          return false
+        }
+        if (control.startsWith('[IMAGE]')) {
+          try {
+            onImage?.(JSON.parse(control.slice(7)))
+          } catch {}
+          return false
+        }
+        if (control.startsWith('[SUGGESTIONS]')) {
+          try {
+            onSuggestions?.(JSON.parse(control.slice(13)))
           } catch {}
           return false
         }

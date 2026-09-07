@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 from dataclasses import asdict
 from typing import AsyncIterator
 
@@ -112,6 +113,7 @@ class GameSession:
         self._auditor = AuditorEngine(llm=narrator._llm)
         self._memory = memory
         self._story_cards = story_cards or []
+        self._card_image_last_shown: dict[str, int] = {}
         self._world_reactor = world_reactor
         self._journal = journal
         self._event_store = event_store
@@ -870,6 +872,65 @@ class GameSession:
 
         return score
 
+    async def _generate_suggestions(self, narrative_text: str) -> list:
+        """Ask the model for three next-action options. Used by the streaming path,
+        where the narrator call returns prose only."""
+        if not narrative_text.strip():
+            return []
+        lang = "Brazilian Portuguese" if self.language == "pt-br" else "English"
+        prompt = (
+            "You are helping a player decide what to do next in an interactive story.\n"
+            f"Write EXACTLY 3 options in {lang}, in the player's own voice, as a JSON array of\n"
+            '{"action": "<short third-person action>", "speech": "<what the player says, or empty string>"}.\n'
+            "They must respond concretely to the scene below and differ in intent. Never resolve their outcome.\n"
+            "Return ONLY the JSON array.\n\n"
+            f"SCENE:\n{narrative_text[-2000:]}"
+        )
+        try:
+            raw = await self._narrator._llm.complete(
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=400,
+                reasoning=False,
+            )
+            match = re.search(r"\[.*\]", raw, re.DOTALL)
+            return json.loads(match.group(0)) if match else []
+        except Exception:
+            return []
+
+    @staticmethod
+    def _suggestions_event(raw) -> str:
+        """Control-tag payload for the next-action suggestions shown to the player."""
+        if not isinstance(raw, list):
+            return ""
+        out = []
+        for item in raw[:3]:
+            if not isinstance(item, dict):
+                continue
+            action = str(item.get("action") or "").strip()
+            speech = str(item.get("speech") or "").strip()
+            if action or speech:
+                out.append({"action": action, "speech": speech})
+        if not out:
+            return ""
+        return f"[SUGGESTIONS]{json.dumps(out)}"
+
+    def _card_image_event(self, narrative_text: str) -> str:
+        """Control-tag payload for the character art of an NPC entering the scene."""
+        from app.services.card_images import select_card_image
+
+        try:
+            image = select_card_image(
+                self._story_cards,
+                narrative_text,
+                self._turn_count,
+                self._card_image_last_shown,
+            )
+        except Exception:
+            return ""
+        if not image:
+            return ""
+        return f"[IMAGE]{json.dumps({'name': image.name, 'url': image.url, 'caption': image.caption})}"
+
     @staticmethod
     def _card_type_value(card) -> str:
         card_type = getattr(card, "card_type", "UNKNOWN")
@@ -1506,6 +1567,14 @@ class GameSession:
                 self._apply_inventory_event(inv_event)
                 yield f"[INVENTORY]{json.dumps(inv_event)}"
 
+        card_image = self._card_image_event(clean_response)
+        if card_image:
+            yield card_image
+
+        suggestions = self._suggestions_event(await self._generate_suggestions(clean_response))
+        if suggestions:
+            yield suggestions
+
         # Verify NPC seed introduction: check if the NPC name appeared in the response
         self._verify_npc_seed_in_response(clean_response)
 
@@ -1808,6 +1877,14 @@ class GameSession:
         if not already_emitted:
             yield clean_response
 
+        card_image = self._card_image_event(clean_response)
+        if card_image:
+            yield card_image
+
+        suggestions = self._suggestions_event(result.get("suggestions"))
+        if suggestions:
+            yield suggestions
+
         # Verify NPC seed introduction: check if the NPC name appeared in the response
         self._verify_npc_seed_in_response(clean_response)
 
@@ -1824,9 +1901,8 @@ class GameSession:
         )
         self._last_narrator_event_id = narrator_event.id
 
-        # Camada 3 — extract witnesses synchronously here so the journal
-        # evaluation (which runs immediately below) and the auto-crystallize
-        # below pick up the perspective-stamped events.
+        # Extract witnesses synchronously so the journal evaluation and the
+        # auto-crystallize below pick up the perspective-stamped events.
         witnesses = await self._extract_witnesses(clean_response)
         self._apply_witnesses_to_recent_turn(witnesses)
 

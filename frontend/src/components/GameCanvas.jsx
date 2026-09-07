@@ -14,6 +14,7 @@ import {
   deleteTraces,
 } from '../api'
 import ActionInput from './ActionInput'
+import SuggestionList from './SuggestionList'
 import JournalPanel from './JournalPanel'
 import CombatOverlay from './CombatOverlay'
 import SettingsPanel from './SettingsPanel'
@@ -61,6 +62,28 @@ function processChildren(children) {
     })
   }
   return children
+}
+
+/** Character art shown when an NPC enters the scene */
+function CharacterCard({ image }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) return null
+  return (
+    <figure className="mb-4 overflow-hidden rounded-xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
+      <img
+        src={image.url}
+        alt={image.name}
+        loading="lazy"
+        onError={() => setFailed(true)}
+        className="w-full block"
+      />
+      {(image.caption || image.name) && (
+        <figcaption className="px-4 py-2 bg-black/40 text-[10px] font-bold uppercase tracking-widest font-mono text-white/50">
+          {image.caption ? `${image.caption} · ${image.name}` : image.name}
+        </figcaption>
+      )}
+    </figure>
+  )
 }
 
 function NarratorSkeleton() {
@@ -111,6 +134,7 @@ export default function GameCanvas() {
     combatMode,
     appendMessage,
     appendToLastMessage,
+    setLastMessageImage,
     setStreaming,
     setCombatMode,
     activeCampaignId,
@@ -152,6 +176,8 @@ export default function GameCanvas() {
   const [rewinding, setRewinding] = useState(false)
   const [scenarioView, setScenarioView] = useState(null)
   const [regenerating, setRegenerating] = useState(false)
+  const [suggestions, setSuggestions] = useState([])
+  const [draft, setDraft] = useState(null)
 
   // Restore session on mount if state is missing
   useEffect(() => {
@@ -310,6 +336,7 @@ export default function GameCanvas() {
   }
 
   const handleAction = (action) => {
+    setSuggestions([])
     appendMessage({ role: 'user', content: action })
     setStreaming(true)
     streamAction({
@@ -337,6 +364,8 @@ export default function GameCanvas() {
       onPlotAuto: (plot) => {
         appendMessage({ role: 'assistant', content: formatAutoPlotMessage(plot) })
       },
+      onImage: setLastMessageImage,
+      onSuggestions: setSuggestions,
       onTruncateClean: (cleanText) => {
         replaceLastAssistantMessage(cleanText)
       },
@@ -554,6 +583,7 @@ export default function GameCanvas() {
                              {combatMode ? 'Combat Narrator' : 'Narrator Core'}
                            </span>
                         </div>
+                        {msg.image?.url && <CharacterCard image={msg.image} />}
                         <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:font-light prose-p:text-white prose-headings:text-white prose-a:text-white font-serif">
                           <ReactMarkdown components={mentionComponents}>{displayContent}</ReactMarkdown>
                           {isStreaming && i === messages.length - 1 && (
@@ -577,9 +607,17 @@ export default function GameCanvas() {
 
         {/* Input Area */}
         <div className="flex-none bg-black/80 backdrop-blur-2xl border-t border-white/5 relative z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+          <div className="max-w-4xl mx-auto w-full px-4 md:px-6 pt-3">
+            <SuggestionList
+              suggestions={suggestions}
+              disabled={isStreaming}
+              onSend={(input) => { setSuggestions([]); handleAction(input) }}
+              onEdit={(input) => { setSuggestions([]); setDraft({ text: input, at: Date.now() }) }}
+            />
+          </div>
           <div className="flex items-end max-w-4xl mx-auto w-full">
             <div className="flex-1">
-              <ActionInput onSubmit={handleAction} disabled={isStreaming} />
+              <ActionInput onSubmit={handleAction} disabled={isStreaming} draft={draft} />
             </div>
             <div className="pb-4 pr-4 md:pr-6">
               <button

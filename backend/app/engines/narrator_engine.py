@@ -587,7 +587,8 @@ class NarratorEngine:
         '  "npc_thoughts": [{"name": "<full NPC name>", "thoughts": {"feeling": "...", "goal": "...", "opinion_of_player": "...", "secret_plan": "..."}}],\n'
         '  "entities": [{"name": "<full name>", "type": "NPC|LOCATION|FACTION|ITEM|EVENT", "attributes": {}}],\n'
         '  "relationships": [{"source": "<full name>", "target": "<full name>", "rel_type": "KNOWS|MET|ALLIED_WITH|GUARDS|LOCATED_IN|etc"}],\n'
-        '  "world_changes": "<brief description of background world changes, or empty string if none>"\n'
+        '  "world_changes": "<brief description of background world changes, or empty string if none>",\n'
+        '  "suggestions": [{"action": "<short third-person action the player could take>", "speech": "<what the player says, or empty string>"}]\n'
         "}\n\n"
         "IMPORTANT RULES FOR THIS FORMAT:\n"
         "- narrative_text: Write your full immersive narrative here. All narrator rules still apply.\n"
@@ -595,6 +596,10 @@ class NarratorEngine:
         "- npc_thoughts: Only include NPCs that APPEAR or are MENTIONED in this scene.\n"
         "- entities/relationships: Extract named entities from your narrative. Use FULL canonical names.\n"
         "- world_changes: Only if significant time passes or major events affect the wider world. Empty string otherwise.\n"
+        "- suggestions: EXACTLY 3 options for what the player does next, in the player's own voice and in the "
+        "narrative's language. Each is one short action plus optional speech, and they must differ in intent "
+        "(not three phrasings of the same move). Write them as concrete responses to the scene you just wrote; "
+        "never resolve their outcome. Leave the list empty only in META mode.\n"
         "- The narrative_text must be complete, immersive prose — not a summary.\n"
         "- CRITICAL: The narrative_text MUST stay within the word/token limit specified in the LENGTH instructions above. "
         "The other JSON fields (npc_thoughts, entities, etc.) do NOT count toward that limit — only narrative_text does."
