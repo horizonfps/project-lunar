@@ -113,31 +113,37 @@ class NarratorEngine:
     def _length_instruction(max_tokens: int, language: str = "en") -> str:
         """Return the length constraint for narrative_text, scaled to the token budget.
 
-        States a paragraph budget and a cut order. A word count alone loses to the
-        prose-texture rules, which the model reads as a standing demand for detail.
+        States the budget as a spending order rather than a ceiling. A ceiling alone
+        gets filled with ambient description, leaving nothing for the beat that
+        carries the scene, and the response then runs past the output limit.
         """
         paragraphs = NarratorEngine._paragraph_budget(max_tokens)
         if not paragraphs:
             return ""
         if language == "pt-br":
             return (
-                f"EXTENSÃO (vinculante): no máximo {paragraphs} parágrafos de narração no campo "
-                "'narrative_text'. Linhas de diálogo não entram nessa conta.\n"
-                "  Quando faltar espaço, corte nesta ordem: descrição de ambiente primeiro, "
-                "depois figurantes que não agem na cena, depois recapitulação do que o jogador "
-                "acabou de fazer.\n"
-                "  No máximo uma imagem sensorial na resposta inteira, e só se ela mudar o que o "
-                "jogador entende da cena. Cenário já descrito antes não se reestabelece.\n"
-                "  Avance a cena. Termine em frase completa e em pausa natural."
+                f"EXTENSÃO (vinculante): a resposta precisa estar COMPLETA dentro de no máximo "
+                f"{paragraphs} parágrafos de narração no campo 'narrative_text'. Linhas de diálogo "
+                "não entram nessa conta.\n"
+                f"  O limite duro de saída é de {max_tokens} tokens e o bloco de status conta nele. "
+                "Decida a batida final antes de começar a escrever e conduza a resposta até ela. "
+                "Resposta que fica sem espaço no meio é resposta falhada.\n"
+                "  Gaste o orçamento nesta ordem: primeiro renderize a fala ou ação do jogador, "
+                "depois o que muda por causa dela, depois a batida em que a resposta termina. "
+                "Descrição de ambiente fica com o que sobrar, que em geral é nada.\n"
+                "  Esse teto não é meta. Use menos parágrafos quando a batida for pequena."
             )
         return (
-            f"LENGTH (binding): at most {paragraphs} narration paragraphs in the 'narrative_text' "
-            "field. Dialogue lines do not count toward that budget.\n"
-            "  When space runs short, cut in this order: ambient description first, then walk-on "
-            "figures who take no part in the scene, then any recap of what the player just did.\n"
-            "  At most one sensory image in the whole response, and only when it changes what the "
-            "player understands about the scene. Settings already described stay described.\n"
-            "  Move the scene forward. End on a complete sentence at a natural pause."
+            f"LENGTH (binding): the response must be COMPLETE within at most {paragraphs} narration "
+            "paragraphs in the 'narrative_text' field. Dialogue lines do not count toward that "
+            "budget.\n"
+            f"  The hard output limit is {max_tokens} tokens and the status block counts against it. "
+            "Decide the closing beat before you start writing and steer the response to it. A "
+            "response that runs out of room partway is a failed response.\n"
+            "  Spend the budget in this order: first render the player's line or action, then what "
+            "changes because of it, then the beat the response ends on. Ambient description gets "
+            "what is left over, which is usually nothing.\n"
+            "  That ceiling is not a target. Use fewer paragraphs when the beat is small."
         )
 
     _NARRATOR_RULES = {
